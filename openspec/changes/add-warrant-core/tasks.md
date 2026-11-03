@@ -71,6 +71,6 @@ Files this change creates: `pyproject.toml`, `LICENSE`, `README.md`, `AGENTS.md`
 
 ## Workflow follow-up
 
-- Switch this repository to `schema: warrant` by running its own `warrant-setup`, then add `openspec schema validate warrant` to the contract's Verification list.
+- Switch this repository to `schema: warrant` by running its own `warrant-setup`, then add `openspec schema validate warrant` to the contract's Verification list. Done in this change: new changes use `warrant`; this change stays on `spec-driven`.
 - Create the GitHub repository `imtpot/openspec-warrant` and push (requires explicit authorization).
 - Archive the change.

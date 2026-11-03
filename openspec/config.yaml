@@ -1,5 +1,5 @@
 ---
-schema: spec-driven
+schema: warrant
 
 context: |
   This repository builds openspec-warrant: an agent-neutral extension of OpenSpec

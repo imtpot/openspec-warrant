@@ -13,6 +13,7 @@ not copy their text.
 
 - tests: `uv run pytest`
 - openspec: `openspec validate --all --strict`
+- schema: `openspec schema validate warrant`
 
 ### Destructive actions
 
