@@ -1,0 +1,9 @@
+fixture = "tdd-direct"
+prompt = "Using the warrant-tdd skill, add a function used_share(limit, used) to app/quota.py that returns used divided by limit, and raises ValueError when limit is 0. Nobody can answer questions during this run."
+checker = "tdd"
+
+[params]
+new_tests = true
+transcript = [["scenario", "Scenario"]]
+narrowed = 'python3 -m unittest (?!discover)\S*test'
+full = "python3 -m unittest discover"

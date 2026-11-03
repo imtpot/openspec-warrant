@@ -261,6 +261,61 @@ def design_record_check(params: dict):
     return check
 
 
+def _normalized(text: str) -> str:
+    return re.sub(r'[\s_-]+', ' ', text.lower())
+
+
+FAILED = re.compile(r'\b(fail(ed|s|ure)?|red|\w*error)\b', re.I)
+PASSED = re.compile(r'\b(pass(ed|es)?|ok)\b', re.I)
+
+
+def tdd_check(params: dict):
+    """Tests name their scenarios, the report shows red before green, and tasks stay untouched."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        _git(workspace, 'add', '-A')
+        added = _normalized('\n'.join(
+            line[1:] for line in _git(workspace, 'diff', '--cached', '--', 'tests').splitlines()
+            if line.startswith('+') and not line.startswith('+++')
+        ))
+        findings = [
+            Finding('tests', f'no added test names scenario: {s}')
+            for s in params.get('scenarios', []) if _normalized(s) not in added
+        ]
+        if params.get('new_tests') and not added.strip():
+            findings.append(Finding('tests', 'no test added'))
+        report = _normalized(transcript)
+        for scenario in params.get('red_green', []):
+            after = report[report.find(_normalized(scenario)):] if _normalized(scenario) in report else ''
+            failed = FAILED.search(after)
+            if not (failed and PASSED.search(after[failed.end():])):
+                findings.append(Finding('report', f'no failing result before the passing one for: {scenario}'))
+        findings += [
+            Finding('report', f'no "already" report for: {s}')
+            for s in params.get('already', []) if 'already' not in report
+        ]
+        for name, counts in params.get('count', {}).items():
+            text = (workspace / name).read_text()
+            findings += [
+                Finding('code', f'{name} has {text.count(s)} x "{s}", expected {n}')
+                for s, n in counts.items() if text.count(s) != n
+            ]
+        if 'narrowed' in params and not re.search(params['narrowed'], transcript):
+            findings.append(Finding('report', 'no narrowed test command'))
+        findings += [
+            Finding('transcript', f'transcript lacks: {term}')
+            for term in _missing(transcript, params.get('transcript', []))
+        ]
+        if 'full' in params and params['full'] not in transcript:
+            findings.append(Finding('transcript', f'transcript lacks: {params["full"]}'))
+        findings += [
+            Finding('tasks', f'tasks.md changed: {path}')
+            for path in _git(workspace, 'diff', '--cached', '--name-only').splitlines()
+            if path.endswith('/tasks.md')
+        ]
+        return findings
+    return check
+
+
 CHECKERS: dict[str, CheckerFactory] = {
     'setup': setup_check,
     'minimal-change': minimal_change_check,
@@ -270,6 +325,7 @@ CHECKERS: dict[str, CheckerFactory] = {
     'review': review_check,
     'first-question': first_question_check,
     'design-record': design_record_check,
+    'tdd': tdd_check,
     # Transcript phrases and an unchanged workspace, without review axes.
     'transcript': review_check,
     'receive': receive_check,

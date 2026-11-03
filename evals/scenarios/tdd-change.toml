@@ -1,0 +1,11 @@
+fixture = "tdd-project"
+prompt = "Implement the requirements of the OpenSpec change add-quota-verdicts with the warrant-tdd skill. Nobody can answer questions during this run."
+checker = "tdd"
+
+[params]
+scenarios = ["Not enough free"]
+red_green = ["Not enough free"]
+already = ["Negative request"]
+narrowed = 'python3 -m unittest (?!discover)\S*test'
+full = "python3 -m unittest discover"
+count = { "app/quota.py" = { "must not be negative" = 1 } }

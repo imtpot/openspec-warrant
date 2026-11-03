@@ -1,0 +1,6 @@
+fixture = "tdd-no-tests"
+prompt = "Make check() in app/quota.py return 'short' when free is less than needed, using the warrant-tdd skill. Nobody can answer questions during this run."
+checker = "transcript"
+
+[params]
+transcript = [["warrant-setup"]]

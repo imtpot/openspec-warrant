@@ -47,6 +47,7 @@ coverage or change how `warrant-verify` runs the full suite.
 Features and options deliberately left out:
 
 - A refactoring step inside the loop; structure changes go through `warrant-review`.
+- Selecting or checking off tasks in `tasks.md`; that is `openspec-apply-change`'s job.
 - Coverage thresholds.
 - A contract entry for a single-test command.
 - Generating tests for code that already exists without a requirement.
@@ -56,12 +57,11 @@ Features and options deliberately left out:
 Confirmed by the requester: `warrant-tdd` is the next v2 skill; red and green
 runs use the contract's tests command narrowed to one test with the tool's own
 selection; each test names its requirement and scenario in its name or a
-one-line comment.
+one-line comment; without an active OpenSpec change the skill states the
+scenarios it derives from the request before writing tests; a new test that
+passes before any code is written means the behavior exists and no code is
+written for it; a contract without a tests entry stops the skill with a pointer
+to `warrant-setup`; the skill does not select or check off tasks, which the
+OpenSpec apply workflow does.
 
-- Without an active OpenSpec change, the skill states the scenarios it derives
-  from the request before writing tests, and the user's request is their
-  source. Owner: requester.
-- A new test that passes before any code is written means the behavior already
-  exists: the skill reports it and writes no code for that scenario. Owner: requester.
-- A contract without a tests entry stops the skill with a pointer to
-  `warrant-setup`. Owner: requester.
+None.

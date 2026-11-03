@@ -30,13 +30,13 @@ class Agent:
 # Restricted modes only: agents may edit files in the workspace and run the
 # shell commands below. Flags are taken from each CLI's --help.
 CLAUDE_TOOLS = [
-    'Bash(openspec *)', 'Bash(uv run *)', 'Bash(make *)', 'Bash(diff *)',
+    'Bash(openspec *)', 'Bash(uv run *)', 'Bash(make *)', 'Bash(python3 *)', 'Bash(diff *)',
     'Bash(cp *)', 'Bash(mkdir *)', 'Bash(git status*)', 'Bash(git diff*)',
     'Bash(git grep*)', 'Bash(git log*)', 'Bash(git rev-parse*)',
     'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)',
 ]
 COPILOT_TOOLS = [
-    'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(diff:*)',
+    'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(python3:*)', 'shell(diff:*)',
     'shell(cp:*)', 'shell(mkdir:*)', 'shell(git:*)',
 ]
 AGENTS = [

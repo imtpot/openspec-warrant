@@ -15,6 +15,9 @@ It ships:
   decisions in the project's glossary and decision records;
 - `warrant-minimal-change`: the smallest complete change, `shortcut:` markers
   and a shortcut ledger;
+- `warrant-tdd`: test first, one requirement scenario at a time - each new
+  test seen failing before any code, tests named after their scenarios; task
+  selection stays with the OpenSpec apply workflow;
 - `warrant-verify`: no completion claim without running the project's
   verification commands and reading their output;
 - `warrant-review`: reviews a diff along three separate axes - Spec (the
@@ -80,14 +83,14 @@ none
 
 ## Supported agents
 
-Results of the eval scenarios (22 per agent) for openspec-warrant 0.3, run on
+Results of the eval scenarios (25 per agent) for openspec-warrant 0.4, run on
 2026-11-04 with each agent in a restricted permission mode.
 
 | Agent | Pass | Not pass | Notes |
 |---|---|---|---|
-| Claude Code 2.1 | 22 | 0 | `verify-no-contract` passed after the `warrant-verify` description began to cover any test run; it failed once before that change |
-| Codex 0.166 | 21 | 1 not run | `setup-wrong-version` is not applicable: Codex runs commands in a login shell that resets `PATH`, so the fixture's fake CLI is hidden |
-| GitHub Copilot CLI 1.0 | 21 | 1 fail | `verify-no-contract`: Copilot does not load `warrant-verify` when the project has no contract, and reports the work as complete without verification |
+| Claude Code 2.1 | 25 | 0 | `verify-no-contract` passed after the `warrant-verify` description began to cover any test run; it failed once before that change |
+| Codex 0.166 | 24 | 1 not run | `setup-wrong-version` is not applicable: Codex runs commands in a login shell that resets `PATH`, so the fixture's fake CLI is hidden |
+| GitHub Copilot CLI 1.0 | 24 | 1 fail | `verify-no-contract`: Copilot does not load `warrant-verify` when the project has no contract, and reports the work as complete without verification |
 
 All three agents discover the skills in `.agents/skills/` and read the contract
 from `AGENTS.md` (`discovery` scenario). Antigravity CLI (agy) discovers them
@@ -112,6 +115,11 @@ uv run python -m warrant_evals --scenario verify --keep  # one scenario, keep it
 ```
 
 The report is written to `evals/out/report.md`.
+
+Evals see an agent's final report, not the commands it ran. TDD scenarios
+therefore check the report (a failing result before a passing one, the
+narrowed and full test commands) together with the tests and code in the
+workspace; they cannot prove that each run happened.
 
 ## Inspired by
 

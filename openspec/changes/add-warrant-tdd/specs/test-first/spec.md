@@ -116,3 +116,12 @@ add one with warrant-setup and change no file.
 #### Scenario: Contract without tests
 - **WHEN** the Verification subsection has no tests entry
 - **THEN** the skill names warrant-setup and the workspace is unchanged
+
+### Requirement: No task management
+
+The TDD skill SHALL neither select tasks from `tasks.md` nor mark them complete;
+the OpenSpec apply workflow does both.
+
+#### Scenario: Implementing inside apply
+- **WHEN** the apply workflow hands the TDD skill a requirement to implement
+- **THEN** `tasks.md` is unchanged when the TDD skill finishes
