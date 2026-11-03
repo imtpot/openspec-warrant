@@ -1,0 +1,13 @@
+[tools]
+node = "24.22.2"
+uv = "0.12.6"
+# OpenSpec CLI. Its workflow skills are installed with skills from the same
+# release tag; keep both on one version.
+"npm:@fission-ai/openspec" = "1.16.0"
+# Agent skills manager.
+"npm:skills" = "1.7.4"
+
+[env]
+# Disable telemetry of the skills CLI.
+DO_NOT_TRACK = "1"
+DISABLE_TELEMETRY = "1"

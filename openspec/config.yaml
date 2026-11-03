@@ -1,0 +1,71 @@
+---
+schema: spec-driven
+
+context: |
+  This repository builds openspec-warrant: an agent-neutral extension of OpenSpec
+  1.16, published on GitHub under MIT. It ships an OpenSpec schema and agent
+  skills, installed into other projects with the `skills` CLI. Its idea: every
+  requirement is unambiguous (EARS), every changed line is warranted by a
+  requirement, and every completion claim is warranted by verification evidence.
+  Skills must not assume any project, language or agent. Project specifics come
+  from a project contract that the target project declares.
+  Supported agents: Claude Code, Codex, GitHub Copilot CLI, Antigravity CLI (agy).
+  Skills are written from scratch; upstream skill sets (mattpocock/skills,
+  obra/superpowers, DietrichGebert/ponytail) are inspiration only, never copied.
+  Write all artifacts in English.
+
+rules:
+  proposal:
+  - State what is out of scope in one sentence
+  - >-
+    Before proposing new code, state why configuration, an existing tool or a
+    documentation change cannot meet the need
+  - List the features and options deliberately left out
+  - >-
+    List every decision that the requester has not confirmed as an assumption
+    under Open questions; never write that none remain while such decisions exist
+  specs:
+  - >-
+    Write each requirement in one EARS pattern: ubiquitous ("The <subject>
+    SHALL <response>"), event ("WHEN <trigger>, the <subject> SHALL"),
+    state ("WHILE <state>, the <subject> SHALL"), unwanted behaviour
+    ("IF <condition>, THEN the <subject> SHALL") or optional feature
+    ("WHERE <feature>, the <subject> SHALL"). Combine at most two clauses in
+    the order WHERE, WHILE, WHEN/IF
+  - Give each requirement exactly one observable response; write one requirement per outcome
+  - Name a concrete subject (setup skill, schema, eval runner), never "the system"
+  - >-
+    Add an IF/THEN requirement for every failure that an event or state
+    requirement can actually meet; do not invent failure modes
+  - Use WHERE only for an optional feature or option; use WHILE for a state of the environment
+  - Trace every requirement to the request or to a listed assumption
+  - Replace vague qualities ("fast", "safe", "correct") with measurable values
+  design:
+  - Record rejected alternatives and why they lost
+  - >-
+    Choose the first option that fully works, in this order: an existing
+    OpenSpec or skills CLI feature, the standard library, an installed
+    dependency, new code. State why each earlier option failed
+  - Justify every new dependency with a need that a few lines of code cannot meet
+  tasks:
+  - Map each requirement to at least one test task
+  - List every file, fixture and configuration the change must reach
+  - >-
+    Before the verification tasks, add a review task: check the diff for
+    speculative generality, unused options, unrequested features and new
+    dependencies, and remove what the specs do not require
+  - End with verification tasks and record any check that could not run as not run
+
+operations:
+  apply:
+    guidance:
+    - Write the shortest complete diff; add nothing that the specs do not require
+    - >-
+      Mark a known limitation with the comment "shortcut: <limit>, <when to
+      upgrade>"
+    - >-
+      Before you mark a task complete, run its verification and read the output;
+      claim success only with that evidence (follow verification-before-completion)
+  archive:
+    guidance:
+    - Archive only when every task records the evidence of its verification
