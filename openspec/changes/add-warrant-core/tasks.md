@@ -51,23 +51,23 @@ Files this change creates: `pyproject.toml`, `LICENSE`, `README.md`, `AGENTS.md`
 
 - [x] 7.1 Add fixtures `failing-test` (contract with a test command and one failing test) and `no-contract`; verify the fixture test fails as intended
 - [x] 7.2 Write `skills/warrant-verify/SKILL.md`: run every contract command before a claim, evidence per command, failure blocks the claim, not-run reporting, fresh evidence only, approval for destructive commands, missing contract and empty list handling (specs: verification-evidence, project-contract); verify it stays under 150 lines
-- [ ] 7.3 Add the verify scenario and the propose scenario on `fresh-project` with the warrant schema installed; verify both with `--agent claude`
+- [x] 7.3 Add the verify scenario and the propose scenario on `fresh-project` with the warrant schema installed; verify both with `--agent claude`
 
 ## 8. Discovery and documentation
 
-- [ ] 8.1 Add the discovery smoke scenario: the agent lists the warrant skills and quotes a contract line; verify with `--agent claude`
-- [ ] 8.2 Write `README.md`: purpose, install (`npx skills add imtpot/openspec-warrant`, then `warrant-setup`), contract format, supported agents with their smoke result, "Inspired by" links, "not affiliated with Fission-AI"; verify every command in it against the implementation
+- [x] 8.1 Add the discovery smoke scenario: the agent lists the warrant skills and quotes a contract line; verify with `--agent claude`. Result: pass on Claude Code, Codex, Copilot CLI and agy
+- [x] 8.2 Write `README.md`: purpose, install (`npx skills add imtpot/openspec-warrant`, then `warrant-setup`), contract format, supported agents with their smoke result, "Inspired by" links, "not affiliated with Fission-AI"; verify every command in it against the implementation
 
 ## 9. Review
 
-- [ ] 9.1 Review the diff for speculative generality, unused options, unrequested features and new dependencies; remove what the specs do not require; verify `pyproject.toml` lists only `pytest` and every skill file is under 150 lines
+- [x] 9.1 Review the diff for speculative generality, unused options, unrequested features and new dependencies; remove what the specs do not require; verify `pyproject.toml` lists only `pytest` and every skill file is under 150 lines
 
 ## 10. Verification
 
-- [ ] 10.1 Run `uv run pytest` and record the summary line
-- [ ] 10.2 Run `openspec validate --all --strict` and record the result
-- [ ] 10.3 Run `openspec schema validate warrant` in a scratch project with the schema installed and record the result
-- [ ] 10.4 Run all scenarios for each of `claude`, `codex`, `copilot` and `agy`; record pass or fail per entry, and record an agent as not run with the reason when its CLI is missing or not authenticated
+- [x] 10.1 Run `uv run pytest` and record the summary line. Result: `65 passed`
+- [x] 10.2 Run `openspec validate --all --strict` and record the result. Result: `Totals: 1 passed, 0 failed`
+- [x] 10.3 Run `openspec schema validate warrant` in a scratch project with the schema installed and record the result. Result: `Schema 'warrant' is valid`, exit code 0
+- [x] 10.4 Run all scenarios for each of `claude`, `codex`, `copilot` and `agy`; record pass or fail per entry, and record an agent as not run with the reason when its CLI is missing or not authenticated. Result (11 scenarios each): Claude 11 pass; Codex 10 pass, 1 not run (`setup-wrong-version` not applicable: login shell resets PATH); Copilot 10 pass, 1 fail (`verify-no-contract`: `warrant-verify` not loaded without a contract); agy 6 pass, 5 not run (commands denied by headless permissions). Per-agent table in README
 
 ## Workflow follow-up
 

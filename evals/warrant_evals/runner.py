@@ -1,5 +1,6 @@
 """Run eval scenarios headless against agent CLIs in isolated workspaces."""
 
+import json
 import os
 import re
 import shutil
@@ -12,6 +13,8 @@ from pathlib import Path
 from warrant_evals.requirements import Finding
 
 TIMEOUT_SECONDS = 15 * 60
+# agy prints this when a headless run needs a command its permission rules do not allow.
+COMMAND_DENIED = re.compile(r'headless mode cannot prompt for, so it was auto-denied')
 NOT_AUTHENTICATED = re.compile(r'log ?in|authenticat|sign in|api key|unauthori[sz]ed', re.I)
 
 
@@ -38,11 +41,20 @@ COPILOT_TOOLS = [
     'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(diff:*)',
     'shell(cp:*)', 'shell(mkdir:*)', 'shell(git:*)',
 ]
+# agy matches single-word command targets only; `git push` is denied explicitly.
+# The read-only commands cover how agy reads and searches files in headless mode.
+AGY_SETTINGS = json.dumps({'permissions': {
+    'allow': [f'command({c})' for c in (
+        'openspec', 'uv', 'make', 'diff', 'cp', 'mkdir', 'git',
+        'ls', 'cat', 'head', 'find', 'grep', 'rg', 'test',
+    )],
+    'deny': ['command(git push)'],
+}})
 AGENTS = [
     Agent('claude', ['claude', '-p', '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}']),
     Agent('codex', ['codex', 'exec', '-s', 'workspace-write']),
     Agent('copilot', ['copilot', '-p', '{prompt}', '-s', '--allow-tool', *COPILOT_TOOLS, '--deny-tool', 'shell(git push)']),
-    Agent('agy', ['agy', '-p', '--mode', 'accept-edits', '--sandbox']),
+    Agent('agy', ['agy', '--mode', 'accept-edits', '--sandbox', '--settings', AGY_SETTINGS, '-p', '{prompt}']),
 ]
 
 Check = Callable[[Path, str], list[Finding]]
@@ -56,6 +68,8 @@ class Scenario:
     check: Check
     # Workspace-relative directories put first on PATH, e.g. for a fake CLI.
     path: list[str] = field(default_factory=list)
+    # Agent name -> reason the scenario cannot run on that agent.
+    not_applicable: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -78,6 +92,9 @@ def _run_one(
     scenario: Scenario, agent: Agent, out_dir: Path, workspaces: Path,
     prepare: Callable[[Path], None], timeout: float,
 ) -> Result:
+    if agent.name in scenario.not_applicable:
+        reason = scenario.not_applicable[agent.name]
+        return Result(scenario.name, agent.name, 'not run', [f'not applicable: {reason}'])
     if shutil.which(agent.command[0]) is None:
         return Result(scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'])
     workspace = _workspace(workspaces, scenario, agent)
@@ -88,13 +105,16 @@ def _run_one(
     try:
         done = subprocess.run(
             agent.argv(scenario.prompt), cwd=workspace, capture_output=True,
-            text=True, timeout=timeout, check=False, env=env,
+            stdin=subprocess.DEVNULL, text=True, timeout=timeout, check=False, env=env,
         )
     except subprocess.TimeoutExpired as expired:
         transcript.write_text(f'{expired.stdout or ""}{expired.stderr or ""}')
         return Result(scenario.name, agent.name, 'fail', ['timeout'], transcript, workspace)
     output = done.stdout + done.stderr
     transcript.write_text(output)
+    if COMMAND_DENIED.search(output):
+        reason = 'command denied by headless permissions'
+        return Result(scenario.name, agent.name, 'not run', [reason], transcript, workspace)
     if done.returncode != 0 and NOT_AUTHENTICATED.search(output):
         return Result(scenario.name, agent.name, 'not run', ['not authenticated'], transcript, workspace)
     messages = [f'{f.requirement}: {f.message}' for f in scenario.check(workspace, done.stdout)]

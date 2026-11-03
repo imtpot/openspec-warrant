@@ -92,6 +92,25 @@ other agents.
 - **WHEN** `agy` is not on PATH
 - **THEN** agy entries are marked not run and the other agents still run
 
+### Requirement: Command denied in headless mode
+
+IF an agent reports that its permission rules denied a command it could not ask
+about in headless mode, THEN the eval runner SHALL mark the entry as not run
+with the reason "command denied by headless permissions".
+
+#### Scenario: agy denies a command
+- **WHEN** agy prints that a command was auto-denied in headless mode
+- **THEN** the entry reads not run with that reason, not fail
+
+### Requirement: Scenario not applicable to an agent
+
+WHERE a scenario names an agent as not applicable, the eval runner SHALL mark
+that entry as not run with the scenario's reason instead of running the agent.
+
+#### Scenario: Fake CLI hidden by a login shell
+- **WHEN** a scenario relies on a fake CLI on PATH and names Codex as not applicable
+- **THEN** the Codex entry reads not run with the stated reason
+
 ### Requirement: Time limit
 
 IF an agent run exceeds 15 minutes, THEN the eval runner SHALL stop it and mark

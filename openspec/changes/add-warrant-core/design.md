@@ -107,7 +107,9 @@ allowlist of the commands the skills and fixtures use (`openspec`, `uv run`,
 - Claude Code: `-p --permission-mode acceptEdits --allowedTools <list>`
 - Codex: `exec -s workspace-write` (sandbox: writes only inside the workspace)
 - Copilot CLI: `-p <prompt> -s --allow-tool write <shell list> --deny-tool 'shell(git push)'`
-- agy: `-p --mode accept-edits --sandbox`
+- agy: `--mode accept-edits --sandbox --settings <allow rules> -p <prompt>`; agy matches
+  single-word command targets only, so it allows `git` and denies `git push`, and it
+  also needs read-only commands (`ls`, `cat`, `head`, `find`, `grep`, `rg`, `test`)
 
 A command outside the allowlist is denied or waits for approval; a run that
 waits ends at the timeout and is reported as such. Standard library only (`tomllib`, `subprocess`, `tempfile`, `re`);

@@ -3,6 +3,9 @@ prompt = "Use the warrant-setup skill to set up openspec-warrant in this project
 checker = "setup"
 path = ["bin"]
 
+[not_applicable]
+codex = "Codex runs commands in a login shell that resets PATH, so the fake openspec 1.15 is never found"
+
 [params]
 expect = "nothing"
 transcript = ["1.15.0"]

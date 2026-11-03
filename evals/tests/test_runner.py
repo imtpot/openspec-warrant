@@ -150,3 +150,57 @@ def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, w
     assert result.workspace.exists()
     assert not result.workspace.resolve().is_relative_to((tmp_path / 'out').resolve())
     assert str(result.workspace) in write_report([result], tmp_path / 'out' / 'r.md').read_text()
+
+
+@pytest.mark.parametrize('name', ['copilot', 'agy'])
+def test_prompt_follows_the_prompt_flag(name):
+    [agent] = [a for a in AGENTS if a.name == name]
+
+    argv = agent.argv('the prompt')
+
+    assert argv[argv.index('-p') + 1] == 'the prompt'
+
+
+def test_scenario_not_applicable_to_an_agent_is_not_run(tmp_path, fixture_dir, writer):
+    scenario = Scenario(
+        name='demo', fixture=fixture_dir, prompt='x', check=_passes,
+        not_applicable={'writer': 'login shell resets PATH'},
+    )
+
+    [result] = _run(tmp_path, [scenario], [writer])
+
+    assert result.status == 'not run'
+    assert result.messages == ['not applicable: login shell resets PATH']
+
+
+def test_command_denied_by_headless_permissions_is_not_run(tmp_path, fixture_dir):
+    denied = Agent('denied', [str(_script(
+        tmp_path / 'denied',
+        'echo "no output produced - a tool required the \\"command\\" permission that headless mode cannot prompt for, so it was auto-denied."',
+    ))])
+
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [denied])
+
+    assert result.status == 'not run'
+    assert result.messages == ['command denied by headless permissions']
+
+
+
+def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
+    # codex exec reads stdin when it is open; an inherited pipe would block it.
+    import subprocess
+
+    from warrant_evals import runner
+
+    seen = {}
+    real_run = subprocess.run
+
+    def spy(*args, **kwargs):
+        seen.update(kwargs)
+        return real_run(*args, **kwargs)
+
+    monkeypatch.setattr(runner.subprocess, 'run', spy)
+
+    _run(tmp_path, [_scenario(fixture_dir)], [writer])
+
+    assert seen['stdin'] is subprocess.DEVNULL
