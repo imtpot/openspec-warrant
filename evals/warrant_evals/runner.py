@@ -118,5 +118,6 @@ def write_report(results: Sequence[Result], path: Path) -> Path:
         f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {r.transcript or ""} |'
         for r in results
     ]
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text('\n'.join(lines) + '\n')
     return path

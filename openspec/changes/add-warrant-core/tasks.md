@@ -24,9 +24,11 @@ Files this change creates: `pyproject.toml`, `LICENSE`, `README.md`, `AGENTS.md`
 - [x] 3.2 Implement `evals/warrant_evals/runner.py` and the agent command table in restricted modes, never with a permission-bypass flag (`claude -p --permission-mode acceptEdits --allowedTools`, `codex exec -s workspace-write`, `copilot -p -s --allow-tool`, `agy -p --mode accept-edits --sandbox`), taking each flag from the CLI's `--help`; verify the 3.1 tests pass
 - [x] 3.3 Add the workspace preparation step: copy fixture, `git init`, `skills add <repo> -a claude-code codex -y`, commit; verify with a test that an installed skill exists in `.agents/skills/` with its Claude link and that `git status` is clean (the test installs a demo skill, because the warrant skills are written in groups 5–7)
 
+- [x] 3.4 Add the command line `uv run python -m warrant_evals [--scenario NAME]... [--agent NAME]... [--keep]` and a loader for `evals/scenarios/*.toml` (fixture, prompt, checker name, checker parameters); it writes `evals/out/report.md` and exits non-zero when an entry fails (specs: behavioral-evals "Agent filter", "Result report"); verify with tests for the loader, an unknown checker name and the agent filter
+
 ## 4. Warrant schema
 
-- [ ] 4.1 Run `openspec schema fork spec-driven warrant` and move the result to `skills/warrant-setup/schema/warrant/`; verify the artifact graph matches `spec-driven` with `openspec status --json` in a scratch project
+- [x] 4.1 Run `openspec schema fork spec-driven warrant` and move the result to `skills/warrant-setup/schema/warrant/`; verify the artifact graph matches `spec-driven` with `openspec status --json` in a scratch project
 - [ ] 4.2 Edit the proposal template and instruction: Assumptions section with owners, statement on configuration, existing tools and documentation as alternatives; verify by reading the rendered `openspec instructions proposal --json`
 - [ ] 4.3 Edit the specs instruction and template: one EARS pattern, one outcome per requirement, WHERE only for options, trace to request or assumption; verify the requirement checker passes on the template's example requirement
 - [ ] 4.4 Edit the design instruction: option ladder with the reason each earlier option failed; verify by reading the rendered instruction
