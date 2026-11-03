@@ -93,6 +93,11 @@ writing files and tell the user to run `openspec init`.
 - **WHEN** setup runs in a repository without `openspec/`
 - **THEN** no file is created and the output names `openspec init`
 
+#### Scenario: Root of an enclosing repository
+- **WHEN** setup runs in a project without `openspec/` inside a directory tree
+  whose parent has an OpenSpec root
+- **THEN** setup treats the project as having no root and creates no file
+
 ### Requirement: Unsupported OpenSpec version
 
 IF the installed OpenSpec CLI is not version 1.16, THEN the setup skill SHALL

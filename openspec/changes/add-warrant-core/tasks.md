@@ -37,20 +37,20 @@ Files this change creates: `pyproject.toml`, `LICENSE`, `README.md`, `AGENTS.md`
 
 ## 5. warrant-setup skill
 
-- [ ] 5.1 Add fixtures `fresh-project` (OpenSpec root, `AGENTS.md` without contract, a test command in its build file), `no-agents-md`, `no-openspec`, and `existing-contract`; verify each fixture's `openspec` state by command
-- [ ] 5.2 Write `skills/warrant-setup/SKILL.md`: version check, OpenSpec root check, schema lookup in project then global skill path, copy with diff-and-confirm on differences, `schema: warrant` with other config fields unchanged, contract skeleton, confirmed verification commands, final `skills add` command for Fission-AI/OpenSpec at `v1.16.0` (specs: warrant-setup); verify it stays under 150 lines
-- [ ] 5.3 Add a setup scenario and checker: schema files present, only `schema` changed in `config.yaml`, contract headings, second run leaves `AGENTS.md` unchanged, `no-openspec` and wrong-version cases write nothing; verify with `uv run python -m warrant_evals --scenario setup --agent claude`
+- [x] 5.1 Add fixtures `fresh-project` (OpenSpec root, `AGENTS.md` without contract, a test command in its build file), `no-agents-md`, `no-openspec`, and `existing-contract`; verify each fixture's `openspec` state by command
+- [x] 5.2 Write `skills/warrant-setup/SKILL.md`: version check, OpenSpec root check, schema lookup in project then global skill path, copy with diff-and-confirm on differences, `schema: warrant` with other config fields unchanged, contract skeleton, confirmed verification commands, final `skills add` command for Fission-AI/OpenSpec at `v1.16.0` (specs: warrant-setup); verify it stays under 150 lines
+- [x] 5.3 Add a setup scenario and checker: schema files present, only `schema` changed in `config.yaml`, contract headings, second run leaves `AGENTS.md` unchanged, `no-openspec` and wrong-version cases write nothing; verify with `uv run python -m warrant_evals --scenario setup --agent claude`
 
 ## 6. warrant-minimal-change skill
 
-- [ ] 6.1 Add fixture `has-helper` with an existing helper and a task that the helper solves; verify the fixture tests pass
-- [ ] 6.2 Write `skills/warrant-minimal-change/SKILL.md`: option ladder, skipped features named, complete change, line-to-requirement trace inside an OpenSpec change, protected code, `shortcut:` marker, ledger mode with `git grep` and `no-trigger` tag (specs: minimal-change); verify it stays under 150 lines
-- [ ] 6.3 Add the minimal-change scenario and a ledger scenario (two markers, one without trigger; `git status` unchanged after the run); verify both with `--agent claude`
+- [x] 6.1 Add fixture `has-helper` with an existing helper and a task that the helper solves; verify the fixture tests pass
+- [x] 6.2 Write `skills/warrant-minimal-change/SKILL.md`: option ladder, skipped features named, complete change, line-to-requirement trace inside an OpenSpec change, protected code, `shortcut:` marker, ledger mode with `git grep` and `no-trigger` tag (specs: minimal-change); verify it stays under 150 lines
+- [x] 6.3 Add the minimal-change scenario and a ledger scenario (two markers, one without trigger; `git status` unchanged after the run); verify both with `--agent claude`
 
 ## 7. warrant-verify skill
 
-- [ ] 7.1 Add fixtures `failing-test` (contract with a test command and one failing test) and `no-contract`; verify the fixture test fails as intended
-- [ ] 7.2 Write `skills/warrant-verify/SKILL.md`: run every contract command before a claim, evidence per command, failure blocks the claim, not-run reporting, fresh evidence only, approval for destructive commands, missing contract and empty list handling (specs: verification-evidence, project-contract); verify it stays under 150 lines
+- [x] 7.1 Add fixtures `failing-test` (contract with a test command and one failing test) and `no-contract`; verify the fixture test fails as intended
+- [x] 7.2 Write `skills/warrant-verify/SKILL.md`: run every contract command before a claim, evidence per command, failure blocks the claim, not-run reporting, fresh evidence only, approval for destructive commands, missing contract and empty list handling (specs: verification-evidence, project-contract); verify it stays under 150 lines
 - [ ] 7.3 Add the verify scenario and the propose scenario on `fresh-project` with the warrant schema installed; verify both with `--agent claude`
 
 ## 8. Discovery and documentation

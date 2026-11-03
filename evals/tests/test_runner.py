@@ -120,13 +120,33 @@ def test_report_lists_every_entry_with_transcript(tmp_path, fixture_dir, writer)
 def test_prompt_is_passed_to_the_agent(tmp_path, fixture_dir):
     echo = Agent('echo', [str(_script(tmp_path / 'echo', 'echo "$@" > out.txt'))])
 
-    _run(tmp_path, [_scenario(fixture_dir)], [echo], keep=True)
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [echo], keep=True)
 
-    [workspace] = (tmp_path / 'out' / 'workspaces').iterdir()
-    assert (workspace / 'out.txt').read_text().strip() == 'do it'
+    assert (result.workspace / 'out.txt').read_text().strip() == 'do it'
 
 
 def test_no_agent_runs_with_a_permission_bypass_flag():
     flags = [part for agent in AGENTS for part in agent.command]
 
     assert not [f for f in flags if 'dangerously' in f or f.startswith('--allow-all')]
+
+
+def test_scenario_path_dirs_come_first_on_path(tmp_path, fixture_dir):
+    (fixture_dir / 'bin').mkdir()
+    _script(fixture_dir / 'bin' / 'tool', 'echo fixture-tool')
+    caller = Agent('caller', [str(_script(tmp_path / 'caller', 'tool > out.txt'))])
+    scenario = Scenario(name='demo', fixture=fixture_dir, prompt='x', check=_passes, path=['bin'])
+
+    [result] = _run(tmp_path, [scenario], [caller], keep=True)
+
+    assert (result.workspace / 'out.txt').read_text().strip() == 'fixture-tool'
+
+
+def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, writer):
+    # A workspace inside a repository would let tools find that repository's
+    # files by searching parent directories.
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], keep=True)
+
+    assert result.workspace.exists()
+    assert not result.workspace.resolve().is_relative_to((tmp_path / 'out').resolve())
+    assert str(result.workspace) in write_report([result], tmp_path / 'out' / 'r.md').read_text()

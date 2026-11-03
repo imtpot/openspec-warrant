@@ -1,0 +1,6 @@
+fixture = "warrant-project"
+prompt = "Plan this request as an OpenSpec change named add-json-report: 'CI needs the report as JSON. Add a JSON output mode to report() in app/report.py.' Run `openspec new change add-json-report`, then create each artifact in order by following `openspec instructions <artifact> --change add-json-report --json`. Plan only: do not change any code. Nobody can answer questions during this run; record unconfirmed decisions as the instructions say."
+checker = "propose"
+
+[params]
+change = "add-json-report"

@@ -101,7 +101,8 @@ The runner copies the fixture into a temporary directory, runs `git init`,
 `openspec` and `skills add <repo path> -a claude-code codex -y`, then the
 agent. Agents run in restricted modes, never with a flag that bypasses all
 permissions: file edits are accepted, and shell access is limited to an
-allowlist (`openspec`, `uv run`, read-only `git`):
+allowlist of the commands the skills and fixtures use (`openspec`, `uv run`,
+`make`, `diff`, `cp`, `mkdir`, read-only `git`):
 
 - Claude Code: `-p --permission-mode acceptEdits --allowedTools <list>`
 - Codex: `exec -s workspace-write` (sandbox: writes only inside the workspace)

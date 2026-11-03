@@ -71,8 +71,9 @@ the agent to mark it with a comment of the form
 ### Requirement: Debt ledger
 
 WHEN the user asks for the shortcut ledger, the minimal-change skill SHALL list
-every `shortcut:` comment in files tracked by git, one line per comment with
-file, line, limit and upgrade trigger.
+every `shortcut:` comment in files tracked by git outside the installed skill
+directories `.agents/` and `.claude/`, one line per comment with file, line,
+limit and upgrade trigger.
 
 #### Scenario: Two markers
 - **WHEN** two tracked files contain one `shortcut:` comment each

@@ -21,5 +21,6 @@ def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> l
             fixture=directory.parent / 'fixtures' / data['fixture'],
             prompt=data['prompt'],
             check=checkers[data['checker']](data.get('params', {})),
+            path=data.get('path', []),
         ))
     return scenarios

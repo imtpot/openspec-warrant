@@ -1,5 +1,6 @@
 """Run eval scenarios headless against agent CLIs in isolated workspaces."""
 
+import os
 import re
 import shutil
 import subprocess
@@ -29,10 +30,14 @@ class Agent:
 # Restricted modes only: agents may edit files in the workspace and run the
 # shell commands below. Flags are taken from each CLI's --help.
 CLAUDE_TOOLS = [
-    'Bash(openspec *)', 'Bash(uv run *)', 'Bash(git status*)', 'Bash(git diff*)',
-    'Bash(git grep*)', 'Bash(git log*)',
+    'Bash(openspec *)', 'Bash(uv run *)', 'Bash(make *)', 'Bash(diff *)',
+    'Bash(cp *)', 'Bash(mkdir *)', 'Bash(git status*)', 'Bash(git diff*)',
+    'Bash(git grep*)', 'Bash(git log*)', 'Bash(git rev-parse*)',
 ]
-COPILOT_TOOLS = ['write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(git:*)']
+COPILOT_TOOLS = [
+    'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(diff:*)',
+    'shell(cp:*)', 'shell(mkdir:*)', 'shell(git:*)',
+]
 AGENTS = [
     Agent('claude', ['claude', '-p', '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}']),
     Agent('codex', ['codex', 'exec', '-s', 'workspace-write']),
@@ -49,6 +54,8 @@ class Scenario:
     fixture: Path
     prompt: str
     check: Check
+    # Workspace-relative directories put first on PATH, e.g. for a fake CLI.
+    path: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -58,6 +65,7 @@ class Result:
     status: str  # pass, fail or not run
     messages: list[str] = field(default_factory=list)
     transcript: Path | None = None
+    workspace: Path | None = None
 
 
 def _workspace(root: Path, scenario: Scenario, agent: Agent) -> Path:
@@ -75,20 +83,23 @@ def _run_one(
     workspace = _workspace(workspaces, scenario, agent)
     prepare(workspace)
     transcript = out_dir / f'{scenario.name}-{agent.name}.log'
+    env = dict(os.environ)
+    env['PATH'] = os.pathsep.join([*(str(workspace / d) for d in scenario.path), env['PATH']])
     try:
         done = subprocess.run(
             agent.argv(scenario.prompt), cwd=workspace, capture_output=True,
-            text=True, timeout=timeout, check=False,
+            text=True, timeout=timeout, check=False, env=env,
         )
     except subprocess.TimeoutExpired as expired:
         transcript.write_text(f'{expired.stdout or ""}{expired.stderr or ""}')
-        return Result(scenario.name, agent.name, 'fail', ['timeout'], transcript)
+        return Result(scenario.name, agent.name, 'fail', ['timeout'], transcript, workspace)
     output = done.stdout + done.stderr
     transcript.write_text(output)
     if done.returncode != 0 and NOT_AUTHENTICATED.search(output):
-        return Result(scenario.name, agent.name, 'not run', ['not authenticated'], transcript)
+        return Result(scenario.name, agent.name, 'not run', ['not authenticated'], transcript, workspace)
     messages = [f'{f.requirement}: {f.message}' for f in scenario.check(workspace, done.stdout)]
-    return Result(scenario.name, agent.name, 'fail' if messages else 'pass', messages, transcript)
+    status = 'fail' if messages else 'pass'
+    return Result(scenario.name, agent.name, status, messages, transcript, workspace)
 
 
 def run_evals(
@@ -99,8 +110,9 @@ def run_evals(
     out_dir.mkdir(parents=True, exist_ok=True)
     selected = [agent for agent in agents if not only or agent.name in only]
     if keep:
-        workspaces = out_dir / 'workspaces'
-        workspaces.mkdir(exist_ok=True)
+        # Kept workspaces stay outside any repository, like the temporary ones,
+        # so tools that search parent directories find nothing but the fixture.
+        workspaces = Path(tempfile.mkdtemp(prefix='warrant-evals-'))
         return [
             _run_one(s, a, out_dir, workspaces, prepare, timeout)
             for s in scenarios for a in selected
@@ -113,9 +125,10 @@ def run_evals(
 
 
 def write_report(results: Sequence[Result], path: Path) -> Path:
-    lines = ['| Scenario | Agent | Status | Messages | Transcript |', '|---|---|---|---|---|']
+    lines = ['| Scenario | Agent | Status | Messages | Transcript | Workspace |', '|---|---|---|---|---|---|']
     lines += [
-        f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {r.transcript or ""} |'
+        f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {r.transcript or ""} '
+        f'| {r.workspace if r.workspace and r.workspace.exists() else ""} |'
         for r in results
     ]
     path.parent.mkdir(parents=True, exist_ok=True)

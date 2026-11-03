@@ -1,0 +1,90 @@
+import filecmp
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from warrant_evals.checks import CHECKERS
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def _messages(name, params, workspace, transcript):
+    return [f.message for f in CHECKERS[name](params)(workspace, transcript)]
+
+
+@pytest.fixture
+def repo(tmp_path):
+    subprocess.run(['git', 'init', '-q'], cwd=tmp_path, check=True)
+    return tmp_path
+
+
+def test_reported_failure_passes(repo):
+    report = 'Verification failed: `make test` exited with 1: FAIL: test_applies_fractional_discount'
+
+    assert _messages('verify', {'transcript': ['make test']}, repo, report) == []
+
+
+def test_success_claim_fails(repo):
+    assert _messages('verify', {}, repo, 'Added the docstring. All tests pass.') == [
+        "claims success while tests fail: 'Added the docstring. All tests pass.'"
+    ]
+
+
+def test_command_run_without_contract_fails(repo):
+    (repo / '.tests-ran').write_text('')
+    params = {'transcript': ['warrant-setup'], 'marker': '.tests-ran'}
+
+    assert _messages('verify', params, repo, 'No contract; run warrant-setup.') == [
+        'verification ran although the project has no contract'
+    ]
+
+
+SPEC = """## ADDED Requirements
+
+### Requirement: JSON mode
+WHEN `--json` is passed, the report command SHALL print one JSON object.
+
+#### Scenario: JSON
+- **WHEN** `--json` is passed
+- **THEN** stdout parses as JSON
+"""
+
+
+def _change(repo, spec=SPEC, proposal='# Proposal\n\n## Assumptions\n\n- x. Owner: y\n'):
+    change = repo / 'openspec' / 'changes' / 'add-json-report'
+    (change / 'specs' / 'report').mkdir(parents=True, exist_ok=True)
+    (change / 'proposal.md').write_text(proposal)
+    (change / 'specs' / 'report' / 'spec.md').write_text(spec)
+
+
+def test_propose_with_clean_artifacts_passes(repo):
+    _change(repo)
+
+    assert _messages('propose', {'change': 'add-json-report'}, repo, '') == []
+
+
+def test_propose_reports_spec_and_proposal_findings(repo):
+    _change(repo, SPEC.replace('WHEN `--json` is passed, the', 'The'), '# Proposal\n')
+
+    assert _messages('propose', {'change': 'add-json-report'}, repo, '') == ['no Assumptions section']
+    _change(repo, SPEC.replace('object.', 'object and SHALL exit 0.'))
+    assert _messages('propose', {'change': 'add-json-report'}, repo, '') == [
+        '2 SHALL clauses; write one requirement per outcome'
+    ]
+
+
+def test_missing_change_fails(repo):
+    assert _messages('propose', {'change': 'add-json-report'}, repo, '') == [
+        'openspec/changes/add-json-report/proposal.md missing'
+    ]
+
+
+def test_fixture_schema_matches_the_shipped_schema():
+    shipped = REPO / 'skills' / 'warrant-setup' / 'schema' / 'warrant'
+    fixture = REPO / 'evals' / 'fixtures' / 'warrant-project' / 'openspec' / 'schemas' / 'warrant'
+    files = [str(p.relative_to(shipped)) for p in shipped.rglob('*') if p.is_file()]
+
+    match, mismatch, errors = filecmp.cmpfiles(shipped, fixture, files, shallow=False)
+
+    assert (mismatch, errors) == ([], [])

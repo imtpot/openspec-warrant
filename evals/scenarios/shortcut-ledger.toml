@@ -1,0 +1,8 @@
+fixture = "shortcut-ledger"
+prompt = "Show me the shortcut ledger of this project, using the warrant-minimal-change skill. Nobody can answer questions during this run."
+checker = "ledger"
+
+[params]
+entries = ["app/fetch.py:2", "app/retry.py:2"]
+no_trigger = ["app/retry.py:2"]
+total = 2
