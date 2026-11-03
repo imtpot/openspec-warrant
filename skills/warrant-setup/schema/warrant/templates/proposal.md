@@ -32,3 +32,16 @@
 ## Impact
 
 <!-- Affected code, APIs, dependencies, systems -->
+
+## Why code is needed
+
+<!-- Why a configuration change, an existing tool or a documentation change cannot meet the need. -->
+
+## Out of scope
+
+<!-- One sentence on what this change does not do, then the features and options deliberately left out. -->
+
+## Assumptions
+
+<!-- Every decision the requester has not confirmed, each with an owner. Write "None" only when the requester confirmed every decision. -->
+- <decision>. Owner: <who confirms it>

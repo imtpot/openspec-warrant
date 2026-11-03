@@ -29,11 +29,11 @@ Files this change creates: `pyproject.toml`, `LICENSE`, `README.md`, `AGENTS.md`
 ## 4. Warrant schema
 
 - [x] 4.1 Run `openspec schema fork spec-driven warrant` and move the result to `skills/warrant-setup/schema/warrant/`; verify the artifact graph matches `spec-driven` with `openspec status --json` in a scratch project
-- [ ] 4.2 Edit the proposal template and instruction: Assumptions section with owners, statement on configuration, existing tools and documentation as alternatives; verify by reading the rendered `openspec instructions proposal --json`
-- [ ] 4.3 Edit the specs instruction and template: one EARS pattern, one outcome per requirement, WHERE only for options, trace to request or assumption; verify the requirement checker passes on the template's example requirement
-- [ ] 4.4 Edit the design instruction: option ladder with the reason each earlier option failed; verify by reading the rendered instruction
-- [ ] 4.5 Edit the tasks template and instruction: review group, then verification group running each contract command, not-run reporting; verify by reading the rendered template
-- [ ] 4.6 Verify `openspec schema validate warrant` exits with code 0 in a scratch project that contains the schema
+- [x] 4.2 Edit the proposal template and instruction: Assumptions section with owners, statement on configuration, existing tools and documentation as alternatives; verify by reading the rendered `openspec instructions proposal --json`
+- [x] 4.3 Edit the specs instruction and template: one EARS pattern, one outcome per requirement, WHERE only for options, trace to request or assumption; verify the requirement checker passes on the template's example requirement
+- [x] 4.4 Edit the design instruction: option ladder with the reason each earlier option failed; verify by reading the rendered instruction
+- [x] 4.5 Edit the tasks template and instruction: review group, then verification group running each contract command, not-run reporting; verify by reading the rendered template
+- [x] 4.6 Verify `openspec schema validate warrant` exits with code 0 in a scratch project that contains the schema
 
 ## 5. warrant-setup skill
 

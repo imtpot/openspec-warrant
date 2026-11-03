@@ -36,9 +36,14 @@ def _requirement_findings(name: str, text: str) -> list[Finding]:
     return findings
 
 
+def _checked_text(text: str) -> str:
+    """Drop REMOVED and RENAMED delta sections; their entries carry no requirement text."""
+    return re.sub(r'^## (REMOVED|RENAMED) Requirements\s*$.*?(?=^## |\Z)', '', text, flags=re.M | re.S)
+
+
 def check_spec(text: str) -> list[Finding]:
     findings = []
-    for match in REQUIREMENT.finditer(text):
+    for match in REQUIREMENT.finditer(_checked_text(text)):
         findings += _requirement_findings(match.group(1), match.group(2))
     return findings
 

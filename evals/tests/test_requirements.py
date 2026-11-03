@@ -144,3 +144,15 @@ def test_proposal_without_assumptions_section_is_reported():
 
     assert len(findings) == 1
     assert 'Assumptions' in findings[0].message
+
+
+def test_removed_requirements_are_not_checked():
+    text = VALID + """
+## REMOVED Requirements
+
+### Requirement: Legacy export
+**Reason**: Replaced by new export system
+**Migration**: Use new export endpoint at /api/v2/export
+"""
+
+    assert check_spec(text) == []
