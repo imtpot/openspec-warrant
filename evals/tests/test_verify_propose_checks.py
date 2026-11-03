@@ -88,3 +88,11 @@ def test_fixture_schema_matches_the_shipped_schema():
     match, mismatch, errors = filecmp.cmpfiles(shipped, fixture, files, shallow=False)
 
     assert (mismatch, errors) == ([], [])
+
+
+def test_discovery_needs_every_skill_and_the_contract_command(repo):
+    params = {'transcript': ['warrant-setup', 'warrant-minimal-change', 'warrant-verify', 'make test']}
+
+    assert _messages('discovery', params, repo, 'warrant-setup, warrant-verify; contract runs `make test`') == [
+        'transcript lacks: warrant-minimal-change'
+    ]

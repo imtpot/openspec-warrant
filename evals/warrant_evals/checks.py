@@ -131,4 +131,5 @@ CHECKERS: dict[str, CheckerFactory] = {
     'ledger': ledger_check,
     'verify': verify_check,
     'propose': propose_check,
+    'discovery': lambda params: lambda workspace, transcript: _transcript_findings(params, transcript),
 }
