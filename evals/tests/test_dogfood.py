@@ -24,4 +24,7 @@ def test_project_schema_matches_the_shipped_schema():
 
 @pytest.mark.parametrize('name', SKILLS)
 def test_installed_skill_matches_its_source(name):
+    installed = REPO / '.agents' / 'skills' / name
+    if not installed.exists():
+        pytest.skip('warrant skills are not installed; see AGENTS.md')
     assert _differences(REPO / 'skills' / name, REPO / '.agents' / 'skills' / name) == []

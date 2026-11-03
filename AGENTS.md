@@ -7,6 +7,17 @@ skills. Skills live in `skills/<name>/SKILL.md`; the behavioral evals live in
 Skills are written from scratch. Upstream skill sets are inspiration only; do
 not copy their text.
 
+## Development setup
+
+Installed skills are not tracked. Install them before working on a change:
+
+```sh
+npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills -a claude-code codex -y
+npx skills add . -s warrant-setup warrant-minimal-change warrant-verify -a claude-code codex -y
+```
+
+Run the second command again after editing anything under `skills/`.
+
 ## Warrant contract
 
 ### Verification

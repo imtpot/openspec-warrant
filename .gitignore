@@ -2,3 +2,9 @@
 __pycache__/
 .pytest_cache/
 evals/out/
+
+# Installed agent skills: OpenSpec skills are a dependency, warrant skills are
+# installed from skills/. See AGENTS.md.
+.agents/
+.claude/
+skills-lock.json
