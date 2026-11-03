@@ -1,0 +1,9 @@
+fixture = "review-branch"
+setup = "setup-feature.sh"
+prompt = "Review the current branch with the warrant-review skill. Nobody can answer questions during this run."
+checker = "review"
+
+[params]
+spec = [["--json"], ["Negative input"], ["Shortfall verdict"]]
+standards = [["formatReport"], ["retries"]]
+evidence = [["make test"]]

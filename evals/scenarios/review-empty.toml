@@ -1,0 +1,7 @@
+fixture = "review-branch"
+setup = "setup-empty.sh"
+prompt = "Review the current branch with the warrant-review skill. Nobody can answer questions during this run."
+checker = "review"
+
+[params]
+transcript = [["nothing to review", "Nothing to review"]]

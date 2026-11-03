@@ -1,0 +1,10 @@
+fixture = "receive-comments"
+prompt = "Address the review comments in REVIEW.md with the warrant-review skill. Nobody can answer questions during this run: list any question you would ask and leave that code unchanged."
+checker = "receive"
+
+[params]
+file = "app/lookup.py"
+present = ['"""']
+unchanged = ["    if name in items:\n        return 0\n    return 2\n", "def main(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n"]
+count = { "name required" = 1 }
+transcript = [["make test"], ["Unknown item", "exit with code 2"], ["reject", "Reject"]]

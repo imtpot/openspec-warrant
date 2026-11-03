@@ -13,7 +13,11 @@ It ships:
 - `warrant-minimal-change`: the smallest complete change, `shortcut:` markers
   and a shortcut ledger;
 - `warrant-verify`: no completion claim without running the project's
-  verification commands and reading their output.
+  verification commands and reading their output;
+- `warrant-review`: reviews a diff along three separate axes - Spec (the
+  OpenSpec change), Standards (the project's declared standards) and Evidence
+  (the contract's verification) - and addresses review comments by checking
+  each one before acting on it.
 
 Community extension; not affiliated with Fission-AI or the OpenSpec project.
 
@@ -37,7 +41,7 @@ npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills
 ## Project contract
 
 The skills read project facts only from this section of the root `AGENTS.md`.
-Keep the four subsections in this order.
+Keep the subsections in this order.
 
 ```markdown
 ## Warrant contract
@@ -58,11 +62,18 @@ docs/glossary.md
 ### Decision records
 
 none
+
+### Standards
+
+- `CONTRIBUTING.md`
 ```
 
 - **Verification**: `- <name>: \`<exact command>\``, one per line.
 - **Destructive actions**: commands or prefixes an agent runs only with approval.
 - **Glossary**, **Decision records**: a relative path or `none`.
+- **Standards** (optional, last): files with coding standards that
+  `warrant-review` checks, as backticked paths, or `none`. A missing
+  subsection means `none`.
 
 ## Supported agents
 

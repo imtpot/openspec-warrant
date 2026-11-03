@@ -1,0 +1,9 @@
+fixture = "review-branch"
+setup = "setup-no-change.sh"
+prompt = "Review the current branch with the warrant-review skill. Nobody can answer questions during this run."
+checker = "review"
+
+[params]
+spec = [["no OpenSpec change", "No OpenSpec change"]]
+standards = [["formatReport"]]
+evidence = [["make test"]]

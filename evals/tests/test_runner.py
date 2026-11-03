@@ -204,3 +204,15 @@ def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
     _run(tmp_path, [_scenario(fixture_dir)], [writer])
 
     assert seen['stdin'] is subprocess.DEVNULL
+
+
+def test_setup_script_runs_in_the_workspace_after_preparation(tmp_path, fixture_dir, writer):
+    (fixture_dir / 'setup.sh').write_text('cat prepared.txt > setup-saw.txt\n')
+    scenario = Scenario(name='demo', fixture=fixture_dir, prompt='x', check=_passes, setup='setup.sh')
+
+    def prepare(workspace):
+        (workspace / 'prepared.txt').write_text('prepared\n')
+
+    [result] = _run(tmp_path, [scenario], [writer], prepare=prepare, keep=True)
+
+    assert (result.workspace / 'setup-saw.txt').read_text() == 'prepared\n'

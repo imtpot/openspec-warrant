@@ -1,5 +1,6 @@
 """Checker factories that scenario files refer to by name."""
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -53,6 +54,10 @@ def _installed_findings(workspace: Path, params: dict) -> list[Finding]:
     findings += [
         Finding('contract', f'verification command not in contract: {command}')
         for command in params.get('verification', []) if command not in commands
+    ]
+    findings += [
+        Finding('contract', f'standards file not in contract: {path}')
+        for path in params.get('standards', []) if path not in contract.standards
     ]
     if params.get('contract_only') and not text.lstrip().startswith('## Warrant contract'):
         findings.append(Finding('contract', 'AGENTS.md holds more than the contract section'))
@@ -125,11 +130,73 @@ def propose_check(params: dict):
     return check
 
 
+AXES = ['Spec', 'Standards', 'Evidence']
+
+
+def _sections(transcript: str) -> dict[str, str] | None:
+    """Text under each axis heading, or None when a heading is missing or out of order."""
+    marks = [re.search(rf'^#+ {axis}\s*$', transcript, re.M) for axis in AXES]
+    if not all(marks) or [m.start() for m in marks] != sorted(m.start() for m in marks):
+        return None
+    ends = [m.start() for m in marks[1:]] + [len(transcript)]
+    return {axis: transcript[m.end():end] for axis, m, end in zip(AXES, marks, ends, strict=True)}
+
+
+def _missing(text: str, expected: list[list[str]]) -> list[str]:
+    """First term of each alternative group that has no term in the text."""
+    return [group[0] for group in expected if not any(term in text for term in group)]
+
+
+def review_check(params: dict):
+    """Each expected finding must appear under its own axis heading; no file may change."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        findings = [
+            Finding('transcript', f'transcript lacks: {term}')
+            for term in _missing(transcript, params.get('transcript', []))
+        ]
+        axes = {axis: params.get(axis.lower(), []) for axis in AXES}
+        if any(axes.values()):
+            sections = _sections(transcript)
+            if sections is None:
+                findings.append(Finding('report', 'sections Spec, Standards, Evidence missing or out of order'))
+            else:
+                findings += [
+                    Finding('report', f'{axis} section lacks: {term}')
+                    for axis in AXES for term in _missing(sections[axis], axes[axis])
+                ]
+        return findings + _status_findings(workspace)
+    return check
+
+
+def receive_check(params: dict):
+    """Accepted comments applied, rejected ones not, and the report shows verification."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        name = params['file']
+        text = (workspace / name).read_text()
+        findings = [Finding('code', f'{name} lacks: {s}') for s in params.get('present', []) if s not in text]
+        findings += [
+            Finding('code', f'{name} changed: "{s.splitlines()[0]}"')
+            for s in params.get('unchanged', []) if s not in text
+        ]
+        findings += [
+            Finding('code', f'{name} has {text.count(s)} x "{s}", expected {n}')
+            for s, n in params.get('count', {}).items() if text.count(s) != n
+        ]
+        findings += [
+            Finding('transcript', f'transcript lacks: {term}')
+            for term in _missing(transcript, params.get('transcript', []))
+        ]
+        return findings
+    return check
+
+
 CHECKERS: dict[str, CheckerFactory] = {
     'setup': setup_check,
     'minimal-change': minimal_change_check,
     'ledger': ledger_check,
     'verify': verify_check,
     'propose': propose_check,
+    'review': review_check,
+    'receive': receive_check,
     'discovery': lambda params: lambda workspace, transcript: _transcript_findings(params, transcript),
 }

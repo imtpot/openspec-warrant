@@ -68,3 +68,13 @@ def test_loader_reads_not_applicable_agents(scenario_dir):
     [scenario] = load_scenarios(scenario_dir, CHECKERS)
 
     assert scenario.not_applicable == {'codex': 'login shell resets PATH'}
+
+
+def test_loader_reads_setup_script(scenario_dir):
+    (scenario_dir / 'echo.toml').write_text(
+        'fixture = "demo"\nprompt = "x"\nchecker = "fail-when"\nsetup = "setup.sh"\n\n[params]\nword = "boom"\n'
+    )
+
+    [scenario] = load_scenarios(scenario_dir, CHECKERS)
+
+    assert scenario.setup == 'setup.sh'

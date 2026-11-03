@@ -36,6 +36,7 @@ CLAUDE_TOOLS = [
     'Bash(openspec *)', 'Bash(uv run *)', 'Bash(make *)', 'Bash(diff *)',
     'Bash(cp *)', 'Bash(mkdir *)', 'Bash(git status*)', 'Bash(git diff*)',
     'Bash(git grep*)', 'Bash(git log*)', 'Bash(git rev-parse*)',
+    'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)',
 ]
 COPILOT_TOOLS = [
     'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(diff:*)',
@@ -70,6 +71,8 @@ class Scenario:
     path: list[str] = field(default_factory=list)
     # Agent name -> reason the scenario cannot run on that agent.
     not_applicable: dict[str, str] = field(default_factory=dict)
+    # Fixture script run in the workspace after preparation, e.g. to build git history.
+    setup: str | None = None
 
 
 @dataclass
@@ -99,6 +102,8 @@ def _run_one(
         return Result(scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'])
     workspace = _workspace(workspaces, scenario, agent)
     prepare(workspace)
+    if scenario.setup:
+        subprocess.run(['sh', scenario.setup], cwd=workspace, check=True, capture_output=True)
     transcript = out_dir / f'{scenario.name}-{agent.name}.log'
     env = dict(os.environ)
     env['PATH'] = os.pathsep.join([*(str(workspace / d) for d in scenario.path), env['PATH']])

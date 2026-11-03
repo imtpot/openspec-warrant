@@ -70,14 +70,10 @@ Features and options deliberately left out:
 
 Confirmed by the requester: one change per skill, starting with
 `warrant-review`; project standards come from a new `### Standards` contract
-subsection, and a contract without it reads as `none`.
+subsection, and a contract without it reads as `none`; review mode defaults to
+the commits since the merge-base with the default branch of `origin` plus
+uncommitted changes; review mode runs the contract's verification itself;
+findings are blocking or non-blocking; a comment that conflicts with the specs
+is rejected with the requirement quoted.
 
-- Without a named base, review mode reviews the commits since the merge-base
-  with the default branch of `origin`, plus uncommitted changes. Owner: requester.
-- Review mode runs the contract's verification commands itself, following
-  `warrant-verify`, instead of trusting evidence reported earlier. Owner: requester.
-- Findings have two levels: blocking (a missing requirement, an untraced line,
-  failed verification, a violated declared standard) and non-blocking (a
-  minimal-change smell). Owner: requester.
-- In receive mode, a comment that conflicts with the specs is rejected with the
-  conflicting requirement quoted, not applied. Owner: requester.
+None.

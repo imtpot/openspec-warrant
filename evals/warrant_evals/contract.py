@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 SECTION = 'Warrant contract'
 SUBSECTIONS = ['Verification', 'Destructive actions', 'Glossary', 'Decision records']
+# Optional and last; a contract without it declares no standards.
+OPTIONAL = 'Standards'
 VERIFICATION_BULLET = re.compile(r'^- ([^:]+): `([^`]+)`$')
 COMMAND_BULLET = re.compile(r'^- `([^`]+)`$')
 
@@ -19,6 +21,7 @@ class Contract:
     destructive: list[str]
     glossary: str | None
     decision_records: str | None
+    standards: list[str]
 
 
 def _section_body(text: str) -> str | None:
@@ -32,7 +35,8 @@ def _subsections(body: str) -> dict[str, list[str]]:
     for name in SUBSECTIONS:
         if name not in names:
             raise ContractError(f'missing subsection: {name}')
-    if [name for name in names if name in SUBSECTIONS] != SUBSECTIONS:
+    known = [name for name in names if name in [*SUBSECTIONS, OPTIONAL]]
+    if known not in (SUBSECTIONS, [*SUBSECTIONS, OPTIONAL]):
         raise ContractError(f'subsections out of order: {names}')
     return {
         name: [line.strip() for line in content.splitlines() if line.strip()]
@@ -50,6 +54,11 @@ def _verification(lines: list[str]) -> list[tuple[str, str]]:
     return entries
 
 
+def _commands(lines: list[str]) -> list[str]:
+    """Backticked bullet entries; `none` or no entry gives an empty list."""
+    return [m.group(1) for line in lines if (m := COMMAND_BULLET.match(line))]
+
+
 def _location(lines: list[str]) -> str | None:
     value = lines[0] if lines else 'none'
     return None if value == 'none' else value
@@ -63,10 +72,8 @@ def parse_contract(text: str) -> Contract | None:
     parts = _subsections(body)
     return Contract(
         verification=_verification(parts['Verification']),
-        destructive=[
-            m.group(1) for line in parts['Destructive actions']
-            if (m := COMMAND_BULLET.match(line))
-        ],
+        destructive=_commands(parts['Destructive actions']),
         glossary=_location(parts['Glossary']),
         decision_records=_location(parts['Decision records']),
+        standards=_commands(parts.get(OPTIONAL, [])),
     )

@@ -85,3 +85,30 @@ def test_verification_bullet_without_backticked_command_is_rejected():
 
     with pytest.raises(ContractError, match='tests'):
         parse_contract(text)
+
+
+STANDARDS = CONTRACT.replace(
+    '### Decision records\n\nnone\n',
+    '### Decision records\n\nnone\n\n### Standards\n\n- `docs/standards.md`\n- `CONTRIBUTING.md`\n',
+)
+
+
+def test_reads_standards_paths():
+    assert parse_contract(STANDARDS).standards == ['docs/standards.md', 'CONTRIBUTING.md']
+
+
+def test_standards_none_is_empty():
+    text = STANDARDS.replace('- `docs/standards.md`\n- `CONTRIBUTING.md`\n', 'none\n')
+
+    assert parse_contract(text).standards == []
+
+
+def test_contract_without_standards_has_no_standards():
+    assert parse_contract(CONTRACT).standards == []
+
+
+def test_standards_before_decision_records_is_rejected():
+    text = CONTRACT.replace('### Decision records', '### Standards\n\nnone\n\n### Decision records')
+
+    with pytest.raises(ContractError, match='order'):
+        parse_contract(text)

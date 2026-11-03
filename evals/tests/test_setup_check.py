@@ -97,3 +97,17 @@ def test_transcript_phrase_missing(workspace):
     assert _check({'expect': 'nothing', 'transcript': ['1.15.0']}, workspace, 'done') == [
         'transcript lacks: 1.15.0'
     ]
+
+
+def test_expected_standards_path_present(workspace):
+    _install(workspace, '# Demo\n\n' + CONTRACT + '\n### Standards\n\n- `CONTRIBUTING.md`\n')
+
+    assert _check({'expect': 'installed', 'standards': ['CONTRIBUTING.md']}, workspace) == []
+
+
+def test_expected_standards_path_missing(workspace):
+    _install(workspace)
+
+    assert _check({'expect': 'installed', 'standards': ['CONTRIBUTING.md']}, workspace) == [
+        'standards file not in contract: CONTRIBUTING.md'
+    ]
