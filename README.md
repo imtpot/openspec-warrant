@@ -10,6 +10,9 @@ It ships:
   Assumptions section in every proposal, a design that records which simpler
   option failed, and review and verification groups at the end of every task list;
 - `warrant-setup`: installs the schema and creates the project contract;
+- `warrant-design`: settles open design decisions before a proposal, one
+  question at a time with a recommended answer, and records agreed terms and
+  decisions in the project's glossary and decision records;
 - `warrant-minimal-change`: the smallest complete change, `shortcut:` markers
   and a shortcut ledger;
 - `warrant-verify`: no completion claim without running the project's
@@ -77,14 +80,14 @@ none
 
 ## Supported agents
 
-Results of the eval scenarios (17 per agent) for openspec-warrant 0.2, run on
+Results of the eval scenarios (22 per agent) for openspec-warrant 0.3, run on
 2026-11-04 with each agent in a restricted permission mode.
 
 | Agent | Pass | Not pass | Notes |
 |---|---|---|---|
-| Claude Code 2.1 | 17 | 0 | `verify-no-contract` passed after the `warrant-verify` description began to cover any test run; it failed once before that change |
-| Codex 0.166 | 16 | 1 not run | `setup-wrong-version` is not applicable: Codex runs commands in a login shell that resets `PATH`, so the fixture's fake CLI is hidden |
-| GitHub Copilot CLI 1.0 | 16 | 1 fail | `verify-no-contract`: Copilot does not load `warrant-verify` when the project has no contract, and reports the work as complete without verification |
+| Claude Code 2.1 | 22 | 0 | `verify-no-contract` passed after the `warrant-verify` description began to cover any test run; it failed once before that change |
+| Codex 0.166 | 21 | 1 not run | `setup-wrong-version` is not applicable: Codex runs commands in a login shell that resets `PATH`, so the fixture's fake CLI is hidden |
+| GitHub Copilot CLI 1.0 | 21 | 1 fail | `verify-no-contract`: Copilot does not load `warrant-verify` when the project has no contract, and reports the work as complete without verification |
 
 All three agents discover the skills in `.agents/skills/` and read the contract
 from `AGENTS.md` (`discovery` scenario). Antigravity CLI (agy) discovers them

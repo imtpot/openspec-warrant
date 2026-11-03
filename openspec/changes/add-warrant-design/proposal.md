@@ -61,13 +61,10 @@ Features and options deliberately left out:
 Confirmed by the requester: `warrant-design` is the next v2 skill; it records
 agreed terms in the glossary and agreed decisions in the decision records
 during the interview; it asks one question at a time with a recommended answer;
-it suggests `openspec-propose` and does not write the proposal.
+it suggests `openspec-propose` and does not write the proposal; a decision in a
+directory location becomes `NNNN-<slug>.md` numbered after the highest existing
+one, and in a file location an appended section; a decision record has context,
+decision and consequences; decisions still open at the end are listed as
+assumptions with an owner.
 
-- When the decision-records location is a directory, each decision becomes a
-  new file `NNNN-<slug>.md` numbered after the highest existing number; when it
-  is a file, each decision is appended as a section. Owner: requester.
-- A decision record holds three parts: context, decision, consequences.
-  Owner: requester.
-- When the interview ends with decisions still open, the summary lists them as
-  assumptions with an owner, ready for the proposal's Assumptions section.
-  Owner: requester.
+None.

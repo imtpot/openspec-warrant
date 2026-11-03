@@ -190,6 +190,77 @@ def receive_check(params: dict):
     return check
 
 
+def question_sentences(text: str) -> list[str]:
+    """Sentences ending in '?' outside code, list items and table rows."""
+    text = re.sub(r'```.*?```', '', text, flags=re.S)
+    text = re.sub(r'`[^`]*`', '', text)
+    prose = [
+        line for line in text.splitlines()
+        if not re.match(r'\s*([-*+|]|\d+[.)])\s', line) and not line.lstrip().startswith('|')
+    ]
+    return [s.strip() for s in re.findall(r'[^.!?\n]*\?', '\n'.join(prose)) if s.strip() != '?']
+
+
+CHOICE_PROMPT = re.compile(r'^(which|what)\b[\w\s]{0,30}\b(want|prefer|choose|pick)\?$', re.I)
+
+
+def first_question_check(params: dict):
+    """The interview opens with exactly one question and a recommended option."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        # Identical sentences are one question; some agents repeat their final message.
+        questions = list(dict.fromkeys(question_sentences(transcript)))
+        # A short closing "Which one do you want?" repeats the question it follows.
+        choice = [q for q in questions if CHOICE_PROMPT.match(q)]
+        if len(questions) > 1 and choice:
+            questions = [q for q in questions if q not in choice]
+        findings = []
+        if len(questions) != 1:
+            findings.append(Finding('question', f'{len(questions)} questions asked, expected 1'))
+        if not re.search(r'recommend', transcript, re.I):
+            findings.append(Finding('question', 'no recommended option'))
+        findings += [
+            Finding('question', f'asked about a known fact: {fact}')
+            for fact in params.get('not_asked', []) if any(fact in q for q in questions)
+        ]
+        return findings + _status_findings(workspace)
+    return check
+
+
+def design_record_check(params: dict):
+    """Agreed terms and decisions are recorded; existing records and changes stay as they were."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        glossary = (workspace / params['glossary']).read_text()
+        findings = [Finding('glossary', f'{params["glossary"]} lacks: {t}') for t in params['terms'] if t not in glossary]
+        findings += [
+            Finding('glossary', f'existing glossary line changed: {line[1:]}')
+            for line in _changed_lines(workspace, params['glossary']) if line.startswith('-')
+        ]
+        decisions = workspace / params['decisions']
+        new = sorted(decisions.glob('0002-*.md'))
+        if not new:
+            findings.append(Finding('decision', f'no new decision file 0002-*.md in {params["decisions"]}'))
+        for path in new:
+            text = path.read_text()
+            findings += [
+                Finding('decision', f'{path.name} lacks ## {h}')
+                for h in ('Context', 'Decision', 'Consequences') if f'## {h}' not in text
+            ]
+        changed = [line[3:] for line in _git(workspace, 'status', '--porcelain').splitlines() if line.startswith(' M')]
+        findings += [
+            Finding('records', f'existing record changed: {p}')
+            for p in changed if p != params['glossary']
+        ]
+        changes = workspace / 'openspec' / 'changes'
+        findings += [
+            Finding('openspec', f'OpenSpec change created: {p.name}')
+            for p in sorted(changes.iterdir()) if p.is_dir() and p.name != 'archive'
+        ]
+        if 'openspec-propose' not in transcript:
+            findings.append(Finding('transcript', 'transcript lacks: openspec-propose'))
+        return findings
+    return check
+
+
 CHECKERS: dict[str, CheckerFactory] = {
     'setup': setup_check,
     'minimal-change': minimal_change_check,
@@ -197,6 +268,10 @@ CHECKERS: dict[str, CheckerFactory] = {
     'verify': verify_check,
     'propose': propose_check,
     'review': review_check,
+    'first-question': first_question_check,
+    'design-record': design_record_check,
+    # Transcript phrases and an unchanged workspace, without review axes.
+    'transcript': review_check,
     'receive': receive_check,
     'discovery': lambda params: lambda workspace, transcript: _transcript_findings(params, transcript),
 }

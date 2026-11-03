@@ -1,0 +1,6 @@
+fixture = "design-project"
+prompt = "Use the warrant-design skill. I want the tool to warn when the quota drops below 10 percent - by quota I mean the capacity that is still free. Nobody can answer questions during this run."
+checker = "transcript"
+
+[params]
+transcript = [["limit a cloud project sets"]]
