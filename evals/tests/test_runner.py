@@ -152,7 +152,7 @@ def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, w
     assert str(result.workspace) in write_report([result], tmp_path / 'out' / 'r.md').read_text()
 
 
-@pytest.mark.parametrize('name', ['copilot', 'agy'])
+@pytest.mark.parametrize('name', ['copilot'])
 def test_prompt_follows_the_prompt_flag(name):
     [agent] = [a for a in AGENTS if a.name == name]
 
@@ -171,19 +171,6 @@ def test_scenario_not_applicable_to_an_agent_is_not_run(tmp_path, fixture_dir, w
 
     assert result.status == 'not run'
     assert result.messages == ['not applicable: login shell resets PATH']
-
-
-def test_command_denied_by_headless_permissions_is_not_run(tmp_path, fixture_dir):
-    denied = Agent('denied', [str(_script(
-        tmp_path / 'denied',
-        'echo "no output produced - a tool required the \\"command\\" permission that headless mode cannot prompt for, so it was auto-denied."',
-    ))])
-
-    [result] = _run(tmp_path, [_scenario(fixture_dir)], [denied])
-
-    assert result.status == 'not run'
-    assert result.messages == ['command denied by headless permissions']
-
 
 
 def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
@@ -216,3 +203,7 @@ def test_setup_script_runs_in_the_workspace_after_preparation(tmp_path, fixture_
     [result] = _run(tmp_path, [scenario], [writer], prepare=prepare, keep=True)
 
     assert (result.workspace / 'setup-saw.txt').read_text() == 'prepared\n'
+
+
+def test_supported_agents():
+    assert [agent.name for agent in AGENTS] == ['claude', 'codex', 'copilot']

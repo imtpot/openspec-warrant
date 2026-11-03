@@ -9,7 +9,7 @@ context: |
   requirement, and every completion claim is warranted by verification evidence.
   Skills must not assume any project, language or agent. Project specifics come
   from a project contract that the target project declares.
-  Supported agents: Claude Code, Codex, GitHub Copilot CLI, Antigravity CLI (agy).
+  Supported agents: Claude Code, Codex, GitHub Copilot CLI.
   Skills are written from scratch; upstream skill sets (mattpocock/skills,
   obra/superpowers, DietrichGebert/ponytail) are inspiration only, never copied.
   Write all artifacts in English.

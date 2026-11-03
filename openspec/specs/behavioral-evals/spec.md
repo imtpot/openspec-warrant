@@ -3,14 +3,14 @@
 ## Purpose
 Defines the behavioral evals of openspec-warrant: fixture projects, scenarios,
 an artifact checker and headless runners that test the schema and skills on
-Claude Code, Codex, GitHub Copilot CLI and agy.
+Claude Code, Codex and GitHub Copilot CLI.
 
 ## Requirements
 
 ### Requirement: Supported agents
 
-The eval runner SHALL run each scenario headless with Claude Code, Codex,
-GitHub Copilot CLI and agy.
+The eval runner SHALL run each scenario headless with Claude Code, Codex and
+GitHub Copilot CLI.
 
 #### Scenario: Full run
 - **WHEN** the user runs the evals without an agent filter
@@ -81,26 +81,6 @@ pass or fail, checker messages and the path to the agent transcript.
 - **WHEN** one scenario passes and one fails
 - **THEN** the report lists both, and the failing entry names each failed check
 
-### Requirement: Agent not available
-
-IF an agent CLI is not installed or not authenticated, THEN the eval runner
-SHALL mark that agent's entries as not run with the reason and continue with the
-other agents.
-
-#### Scenario: Missing agy
-- **WHEN** `agy` is not on PATH
-- **THEN** agy entries are marked not run and the other agents still run
-
-### Requirement: Command denied in headless mode
-
-IF an agent reports that its permission rules denied a command it could not ask
-about in headless mode, THEN the eval runner SHALL mark the entry as not run
-with the reason "command denied by headless permissions".
-
-#### Scenario: agy denies a command
-- **WHEN** agy prints that a command was auto-denied in headless mode
-- **THEN** the entry reads not run with that reason, not fail
-
 ### Requirement: Scenario not applicable to an agent
 
 WHERE a scenario names an agent as not applicable, the eval runner SHALL mark
@@ -147,3 +127,13 @@ applies the conflicting comment or leaves the valid one unapplied.
 #### Scenario: Conflicting comment applied
 - **WHEN** the agent changes the code as the conflicting comment asks
 - **THEN** the checker fails the scenario and names the comment
+
+### Requirement: Agent CLI unavailable
+
+IF an agent CLI is not installed or not authenticated, THEN the eval runner
+SHALL mark that agent's entries as not run with the reason and continue with the
+other agents.
+
+#### Scenario: Missing Copilot CLI
+- **WHEN** `copilot` is not on PATH
+- **THEN** Copilot entries are marked not run and the other agents still run

@@ -85,10 +85,12 @@ Results of the eval scenarios (17 per agent) for openspec-warrant 0.2, run on
 | Claude Code 2.1 | 17 | 0 | `verify-no-contract` passed after the `warrant-verify` description began to cover any test run; it failed once before that change |
 | Codex 0.166 | 16 | 1 not run | `setup-wrong-version` is not applicable: Codex runs commands in a login shell that resets `PATH`, so the fixture's fake CLI is hidden |
 | GitHub Copilot CLI 1.0 | 16 | 1 fail | `verify-no-contract`: Copilot does not load `warrant-verify` when the project has no contract, and reports the work as complete without verification |
-| Antigravity CLI (agy) 1.4 | 7 | 10 not run | Headless agy denies commands that its permission rules do not match and does not name the command; see [#548](https://github.com/google-antigravity/antigravity-cli/issues/548) and [#565](https://github.com/google-antigravity/antigravity-cli/issues/565). Every scenario that agy completed passed |
 
-All four agents discover the skills in `.agents/skills/` and read the contract
-from `AGENTS.md` (`discovery` scenario).
+All three agents discover the skills in `.agents/skills/` and read the contract
+from `AGENTS.md` (`discovery` scenario). Antigravity CLI (agy) discovers them
+too, but it is not evaluated: in headless mode it denies commands that its
+permission rules allow and does not name them
+([#548](https://github.com/google-antigravity/antigravity-cli/issues/548)).
 
 Global agent configuration (user-level skills and plugins) also loads during
 evals and can change the results; run evals with it disabled.
