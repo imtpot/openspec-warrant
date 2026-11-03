@@ -4,6 +4,6 @@ prompt = "Review the current branch with the warrant-review skill. Nobody can an
 checker = "review"
 
 [params]
-spec = [["--json"], ["Negative input"], ["Shortfall verdict"]]
+spec = [["--json", "JSON option"], ["Negative input"], ["Shortfall verdict"]]
 standards = [["formatReport"], ["retries"]]
 evidence = [["make test"]]

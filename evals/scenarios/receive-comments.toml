@@ -7,4 +7,4 @@ file = "app/lookup.py"
 present = ['"""']
 unchanged = ["    if name in items:\n        return 0\n    return 2\n", "def main(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n"]
 count = { "name required" = 1 }
-transcript = [["make test"], ["Unknown item", "exit with code 2"], ["reject", "Reject"]]
+transcript = [["make test"], ["Unknown item", "exit with code 2", "exit code 2"], ["reject", "Reject"]]

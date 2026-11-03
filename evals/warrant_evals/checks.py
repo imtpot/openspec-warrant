@@ -135,7 +135,7 @@ AXES = ['Spec', 'Standards', 'Evidence']
 
 def _sections(transcript: str) -> dict[str, str] | None:
     """Text under each axis heading, or None when a heading is missing or out of order."""
-    marks = [re.search(rf'^#+ {axis}\s*$', transcript, re.M) for axis in AXES]
+    marks = [re.search(rf'^#+ {axis}\b.*$', transcript, re.M) for axis in AXES]
     if not all(marks) or [m.start() for m in marks] != sorted(m.start() for m in marks):
         return None
     ends = [m.start() for m in marks[1:]] + [len(transcript)]

@@ -70,3 +70,15 @@ def test_alternative_terms_and_plain_transcript(repo):
 
     assert _messages(params, repo, 'There are no changes to review.') == []
     assert _messages(params, repo, 'Looks good.') == ['transcript lacks: nothing to review']
+
+
+def test_axis_heading_may_carry_a_suffix(repo):
+    report = REPORT.replace('## Spec\n', '## Spec (change: add-quota-check)\n')
+
+    assert _messages(PARAMS, repo, report) == []
+
+
+def test_axis_name_inside_another_word_is_not_a_heading(repo):
+    report = REPORT.replace('## Spec\n', '## Specification notes\n')
+
+    assert _messages(PARAMS, repo, report) == ['sections Spec, Standards, Evidence missing or out of order']
