@@ -30,5 +30,12 @@ def prepare_workspace(workspace: Path, source: Path, extra: Sequence[Path] = ())
     _run(['git', 'init', '-q'], workspace)
     for skills in (source, *extra):
         _run(['skills', 'add', str(skills), '-a', 'claude-code', 'codex', '-y'], workspace)
+    commit_fixture(workspace)
+
+
+def commit_fixture(workspace: Path) -> None:
+    """Commit the workspace as it is, so `git diff` shows only the agent's changes."""
+    if not (workspace / '.git').exists():
+        _run(['git', 'init', '-q'], workspace)
     _run(['git', 'add', '-A'], workspace)
     _run(['git', *GIT_IDENTITY, 'commit', '-q', '-m', 'fixture'], workspace)

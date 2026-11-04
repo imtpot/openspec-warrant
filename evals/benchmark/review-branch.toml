@@ -1,0 +1,13 @@
+kind = "review"
+fixture = "../fixtures/review-branch"
+setup = "setup-feature.sh"
+prompt = "Review the current branch before merge. Nobody can answer questions during this run."
+# Planted problems; each group lists terms of which one must appear in the report.
+problems = [
+  ["--json", "JSON option"],
+  ["Negative input", "negative"],
+  ["Shortfall verdict", "shortfall", "\"short\"", "Not enough free"],
+  ["formatReport"],
+  ["retries"],
+  ["swap", "args.free", "argument order", "reversed"],
+]

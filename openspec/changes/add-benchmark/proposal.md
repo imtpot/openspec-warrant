@@ -64,9 +64,9 @@ kit.
 - The `bare` arm keeps the `openspec/` files, which carry the task's
   requirements, but installs no skill. Owner: requester (decided while the
   requester was away).
-- User-level configuration of Codex and Copilot loads in every arm; Codex's
-  user skills are writing aids, not workflow skills. Owner: requester (decided
-  while the requester was away).
+- User-level configuration of Codex and Copilot loads in every arm; the
+  requester removed Codex's user skills, so only built-in skills remain.
+  Owner: requester.
 - Faulty implementations replace the agent's module, so the task fixes the
   module path and function signature in its design. Owner: requester (decided
   while the requester was away).
