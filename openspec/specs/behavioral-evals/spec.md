@@ -81,15 +81,6 @@ pass or fail, checker messages and the path to the agent transcript.
 - **WHEN** one scenario passes and one fails
 - **THEN** the report lists both, and the failing entry names each failed check
 
-### Requirement: Scenario not applicable to an agent
-
-WHERE a scenario names an agent as not applicable, the eval runner SHALL mark
-that entry as not run with the scenario's reason instead of running the agent.
-
-#### Scenario: Fake CLI hidden by a login shell
-- **WHEN** a scenario relies on a fake CLI on PATH and names Codex as not applicable
-- **THEN** the Codex entry reads not run with the stated reason
-
 ### Requirement: Time limit
 
 IF an agent run exceeds 15 minutes, THEN the eval runner SHALL stop it and mark
@@ -138,18 +129,6 @@ other agents.
 - **WHEN** `copilot` is not on PATH
 - **THEN** Copilot entries are marked not run and the other agents still run
 
-### Requirement: Design scenario checks
-
-The evals SHALL include design scenarios whose checkers fail when the first
-message asks more than one question or none, asks for a fact the fixture's
-configuration states, misses a recommended option, does not record agreed terms
-and decisions in the contract's locations, creates a file for a location the
-contract declares as `none`, or creates an OpenSpec change.
-
-#### Scenario: Two questions in one message
-- **WHEN** the agent's first message contains two questions
-- **THEN** the checker fails the scenario
-
 ### Requirement: TDD scenario checks
 
 The evals SHALL include TDD scenarios whose checkers fail when a requirement
@@ -160,3 +139,12 @@ already existed, or files change although the contract has no tests command.
 #### Scenario: Test without scenario name
 - **WHEN** the agent adds a test that names neither requirement nor scenario
 - **THEN** the checker fails the scenario and names the uncovered scenario
+
+### Requirement: Leftover file check
+
+The minimal-change scenario's checker SHALL fail when the workspace holds a new
+file that the task did not ask for.
+
+#### Scenario: Backup copy left behind
+- **WHEN** the agent leaves `app/report.py.new` next to the changed file
+- **THEN** the checker fails and names `app/report.py.new`
