@@ -2,20 +2,24 @@
 
 ## ADDED Requirements
 
-### Requirement: Two arms
+### Requirement: Three arms
 
 WHEN the benchmark runs a task on an agent, the benchmark SHALL run it in the
-`openspec` arm and in the `warrant` arm with the same fixture and prompt.
+`bare`, `openspec` and `warrant` arms with the same fixture and prompt.
 
 #### Scenario: One task, one agent
 - **WHEN** the benchmark runs the implement task on `claude` with one run
-- **THEN** it reports one `openspec` result and one `warrant` result
+- **THEN** it reports one `bare`, one `openspec` and one `warrant` result
 
-### Requirement: Baseline arm
+### Requirement: Baseline arms
 
-WHERE the arm is `openspec`, the benchmark SHALL replace the Warrant contract
-in `AGENTS.md` with plain text that names the same verification commands and
-standards files, and install no warrant skill or rule.
+WHERE the arm is `bare` or `openspec`, the benchmark SHALL replace the Warrant
+contract in `AGENTS.md` with plain text that names the same verification
+commands and standards files, and install no warrant skill or rule.
+
+#### Scenario: No skills in bare
+- **WHEN** the `bare` arm workspace is prepared
+- **THEN** it has no installed skill
 
 #### Scenario: Contract becomes text
 - **WHEN** the fixture contract lists `make test` and `docs/standards.md`
@@ -57,6 +61,15 @@ problems that the agent's report names.
 #### Scenario: Two of three problems named
 - **WHEN** the report names two of three planted problems
 - **THEN** the run records 2/3
+
+### Requirement: No user settings for Claude
+
+WHEN the benchmark runs Claude, the benchmark SHALL load only project and
+local settings.
+
+#### Scenario: User plugin installed
+- **WHEN** the user has a plugin enabled in user settings
+- **THEN** the benchmark's Claude command passes `--setting-sources project,local`
 
 ### Requirement: Token usage
 

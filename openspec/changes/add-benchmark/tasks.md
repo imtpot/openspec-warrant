@@ -13,7 +13,7 @@ Files this change reaches: `evals/warrant_evals/benchmark.py`,
 
 ## 2. Arms and command
 
-- [ ] 2.1 Write failing tests, then implement the baseline and warrant arm preparation (specs: "Two arms", "Baseline arm", "Warrant arm"); verify the tests pass
+- [ ] 2.1 Write failing tests, then implement the baseline and warrant arm preparation (specs: "Three arms", "Baseline arms", "Warrant arm", "No user settings for Claude"); verify the tests pass
 - [ ] 2.2 Add the command line with `--task`, `--agent` and `--runs`; verify a test runs it with a fake agent
 
 ## 3. Tasks
