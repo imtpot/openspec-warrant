@@ -1,6 +1,6 @@
 ---
 name: warrant-review
-description: Review a diff along three separate axes - Spec (the OpenSpec change), Standards (the project's declared standards) and Evidence (the contract's verification) - without changing files. Also use when asked to address, answer or apply review comments; then check each comment before acting on it.
+description: Use when asked to review a branch, a diff or a merge request before merge, or to address, answer or apply review comments.
 license: MIT
 ---
 

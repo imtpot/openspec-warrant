@@ -42,10 +42,11 @@ The frontmatter of each warrant skill SHALL declare `license: MIT`.
 
 ### Requirement: Eval coverage
 
-The evals SHALL contain at least one scenario whose prompt names each warrant skill.
+The evals SHALL contain at least one scenario that lists each warrant skill in
+its `skills` field.
 
 #### Scenario: Skill without scenario
-- **WHEN** a new skill is added without a scenario that names it
+- **WHEN** a new skill is added and no scenario lists it in `skills`
 - **THEN** the kit test fails and names the skill
 
 ### Requirement: Place in the design map

@@ -41,7 +41,9 @@ COPILOT_TOOLS = [
 ]
 AGENTS = [
     Agent('claude', ['claude', '-p', '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}']),
-    Agent('codex', ['codex', 'exec', '-s', 'workspace-write']),
+    # A non-login shell keeps the PATH the runner sets; a login shell would
+    # re-read the user's profile and hide a fixture's fake CLI.
+    Agent('codex', ['codex', 'exec', '-s', 'workspace-write', '-c', 'allow_login_shell=false']),
     Agent('copilot', ['copilot', '-p', '{prompt}', '-s', '--allow-tool', *COPILOT_TOOLS, '--deny-tool', 'shell(git push)']),
 ]
 

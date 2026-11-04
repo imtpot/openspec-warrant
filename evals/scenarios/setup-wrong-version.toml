@@ -1,10 +1,8 @@
+skills = ["warrant-setup"]
 fixture = "wrong-version"
 prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every verification command that the project's own configuration defines, and I confirm no destructive actions."
 checker = "setup"
 path = ["bin"]
-
-[not_applicable]
-codex = "Codex runs commands in a login shell that resets PATH, so the fake openspec 1.15 is never found"
 
 [params]
 expect = "nothing"

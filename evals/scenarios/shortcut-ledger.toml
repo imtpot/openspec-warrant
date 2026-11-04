@@ -1,3 +1,4 @@
+skills = ["warrant-minimal-change"]
 fixture = "shortcut-ledger"
 prompt = "Show me the shortcut ledger of this project, using the warrant-minimal-change skill. Nobody can answer questions during this run."
 checker = "ledger"

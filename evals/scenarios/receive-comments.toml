@@ -1,3 +1,4 @@
+skills = ["warrant-review"]
 fixture = "receive-comments"
 prompt = "Address the review comments in REVIEW.md with the warrant-review skill. Nobody can answer questions during this run: list any question you would ask and leave that code unchanged."
 checker = "receive"

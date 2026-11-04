@@ -1,6 +1,6 @@
 ---
 name: warrant-tdd
-description: Implement a requirement test first - one scenario at a time, each new test seen failing before any code is written, then the least code to make it pass. Use when implementing a requirement, an OpenSpec task or a bug fix with tests. It works on the requirement it is given; choosing and checking off tasks stays with the OpenSpec apply workflow.
+description: Use when implementing a requirement, an OpenSpec task or a bug fix with tests; not for choosing or checking off tasks.
 license: MIT
 ---
 

@@ -1,3 +1,4 @@
+skills = ["warrant-minimal-change"]
 fixture = "has-helper"
 prompt = "Change report() in app/report.py so that it returns the URL slug of the title: lowercase words joined by hyphens. Follow the warrant-minimal-change skill. Nobody can answer questions during this run."
 checker = "minimal-change"

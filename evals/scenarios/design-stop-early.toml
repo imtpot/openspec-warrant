@@ -1,3 +1,4 @@
+skills = ["warrant-design"]
 fixture = "design-project"
 prompt = "Use the warrant-design skill for this request: report free capacity so that CI can use it. I have to stop now and cannot answer any question today, so end the interview here and give me the summary."
 checker = "transcript"

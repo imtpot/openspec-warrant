@@ -1,6 +1,6 @@
 ---
 name: warrant-design
-description: Settle open design decisions with the user before an OpenSpec change is proposed - one question at a time with a recommended answer, recording agreed terms in the glossary and agreed decisions in the decision records. Use when the user wants to design, plan, discuss or think through a feature before proposing it.
+description: Use when the user wants open design decisions settled and recorded before an OpenSpec change is proposed.
 license: MIT
 ---
 

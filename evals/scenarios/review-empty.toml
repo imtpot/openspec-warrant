@@ -1,3 +1,4 @@
+skills = ["warrant-review"]
 fixture = "review-branch"
 setup = "setup-empty.sh"
 prompt = "Review the current branch with the warrant-review skill. Nobody can answer questions during this run."

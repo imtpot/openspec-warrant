@@ -1,6 +1,6 @@
 ---
 name: warrant-verify
-description: Decide which verification commands may run and report their evidence. Use before running any test, lint, type-check or build command, and before any completion claim - finishing a task, reporting a fix, marking an OpenSpec task done, committing or opening a merge request. Commands come only from the project's Warrant contract, never from README or AGENTS.md prose.
+description: Use before running any test, lint, type-check or build command, and before claiming that work is complete, fixed or passing, committing or opening a merge request.
 license: MIT
 ---
 

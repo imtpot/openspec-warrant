@@ -1,6 +1,6 @@
 ---
 name: warrant-minimal-change
-description: Make the smallest complete change that fully solves a coding task, with every changed line warranted by a requirement and every deliberate limitation marked with a shortcut comment. Use when writing, fixing or refactoring code. Also use when the user asks for the shortcut ledger or the list of shortcut comments.
+description: Use when writing, fixing or refactoring code, and when the user asks for the shortcut ledger or the list of shortcut comments.
 license: MIT
 ---
 
@@ -79,10 +79,10 @@ permanent without anyone deciding it.
 When the user asks for the shortcut ledger, list the shortcuts without changing
 any file:
 
-1. Run `git grep -nE '(#|//|--|;|/\*) ?shortcut:' -- ':!.agents' ':!.claude'`.
-   This covers files tracked by git, skips installed agent skills (whose
-   examples use the convention) and requires a comment prefix, so prose that
-   only mentions the convention is not listed.
+1. Run `git grep -nE '(#|//|--|;|/\*) ?shortcut:' -- ':!.agents'`.
+   This covers files tracked by git, skips installed skills (whose examples
+   use the convention) and requires a comment prefix, so prose that only
+   mentions the convention is not listed.
 2. Print one line per hit:
    `<file>:<line> - limit: <the limit> - upgrade: <the trigger>`
 3. Tag a line `no-trigger` when its comment names no upgrade trigger.

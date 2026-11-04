@@ -1,3 +1,4 @@
+skills = ["warrant-setup"]
 fixture = "no-agents-md"
 prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every verification command that the project's own configuration defines, and I confirm no destructive actions."
 checker = "setup"

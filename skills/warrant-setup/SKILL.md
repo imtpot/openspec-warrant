@@ -1,6 +1,6 @@
 ---
 name: warrant-setup
-description: Set up or upgrade openspec-warrant in a project that uses OpenSpec 1.16 - installs the warrant schema, selects it in openspec/config.yaml and creates the Warrant contract section in AGENTS.md. Use only when the user asks to set up, install or upgrade warrant.
+description: Use when the user asks to set up, install or upgrade openspec-warrant in a project that uses OpenSpec 1.16.
 license: MIT
 ---
 

@@ -1,3 +1,4 @@
+skills = ["warrant-setup", "warrant-minimal-change", "warrant-verify"]
 fixture = "existing-contract"
 prompt = "Do not read, list or search any files and do not run any commands. From what you already have loaded, answer two things: 1. the names of all skills available to you whose names start with warrant-; 2. the verification command declared in this project's Warrant contract, quoted exactly. If you do not have something loaded, say so."
 checker = "discovery"

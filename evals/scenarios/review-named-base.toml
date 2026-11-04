@@ -1,9 +1,10 @@
+skills = ["warrant-review"]
 fixture = "review-branch"
 setup = "setup-feature.sh"
 prompt = "Review the changes since the tag v0.1.0 with the warrant-review skill. Nobody can answer questions during this run."
 checker = "review"
 
 [params]
-spec = [["--json", "JSON option"], ["Negative input"], ["Shortfall verdict"]]
+spec = [["--json", "JSON option"], ["Negative input", "negative"], ["Shortfall verdict", "shortfall"]]
 standards = [["formatReport"], ["retries"]]
 evidence = [["make test"]]

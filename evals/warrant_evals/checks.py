@@ -80,7 +80,7 @@ def _status_findings(workspace: Path) -> list[Finding]:
 
 def minimal_change_check(params: dict):
     def check(workspace: Path, transcript: str) -> list[Finding]:
-        if not _git(workspace, 'diff', '--', params['file']):
+        if not _git(workspace, 'diff', 'HEAD', '--', params['file']):
             return [Finding('diff', f'{params["file"]} was not changed')]
         _git(workspace, 'add', '-A')
         return check_duplicate_helper(_git(workspace, 'diff', '--cached'), params['helper'])
