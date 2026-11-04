@@ -31,3 +31,14 @@ unfinished work.
 #### Scenario: Rendered tasks rule
 - **WHEN** `openspec instructions tasks --json` runs after setup
 - **THEN** its `rules` ask for independent task groups
+
+### Requirement: Smaller model for settled groups
+
+WHERE the agent can choose a sub-agent's model, the warrant apply guidance
+SHALL direct it to give a task group whose requirements and design leave
+nothing open to a smaller, faster model, and every other group to the
+session's model.
+
+#### Scenario: Settled group
+- **WHEN** a task group's requirements and design leave no point open
+- **THEN** the guidance asks for a smaller, faster model for its sub-agent

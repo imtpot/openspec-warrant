@@ -53,6 +53,7 @@ operations:
     guidance:
     - "[warrant] Before the first task, run warrant-review on the change's artifacts; implement only after the review ends with Artifact review: PASS."
     - "[warrant] Implement each task group in a separate, fresh context (a sub-agent). Give it the group's tasks, the names of their requirements and the paths of the change's artifacts; it follows warrant-tdd and warrant-minimal-change and reports the scenarios, the red and green results and the changed files."
+    - "[warrant] If you can choose a sub-agent's model, give a task group whose requirements and design leave nothing open to a smaller, faster model, and every other group to the session's model."
     - "[warrant] After each sub-agent reports, run warrant-verify, then check off the group's tasks."
   archive:
     guidance:

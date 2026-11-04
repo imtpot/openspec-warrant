@@ -19,6 +19,13 @@ gives each group a clean start, as the requester and Matt Pocock recommend.
   changed files.
 - Apply guidance: after each sub-agent's report, the orchestrating agent runs
   `warrant-verify` and then checks off the group's tasks.
+- Apply guidance: where the agent can choose a sub-agent's model, a group
+  whose requirements and design leave nothing open goes to a smaller, faster
+  model; other groups keep the session's model. In the benchmark's
+  plan-implement task, Haiku with warrant matched Opus with warrant (all open
+  points marked, 6 of 6 acceptance, all faults caught) at a twelfth of the
+  cost, while on the implement task Haiku's tests caught fewer faults (0.75
+  against 0.96).
 - Tasks rule: each implementation group can be implemented from the
   artifacts and the code alone, without another group's unfinished work.
 
@@ -52,9 +59,13 @@ Features and options deliberately left out:
 ## Assumptions
 
 Confirmed by the requester: implement in sub-agents with a fresh context; no
-fallback for agents without sub-agents.
+fallback for agents without sub-agents; route clear task groups to a weaker,
+cheaper model and measure it.
 
 - One sub-agent per task group, not per task. Owner: requester (decided while
   the requester was away).
 - Groups run one after another. Owner: requester (decided while the requester
+  was away).
+- The guidance names no model: "a smaller, faster model" keeps the rule
+  agent-neutral (principle 6). Owner: requester (decided while the requester
   was away).

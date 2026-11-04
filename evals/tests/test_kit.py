@@ -101,6 +101,13 @@ def test_apply_guidance_implements_each_group_in_a_sub_agent():
     assert apply.index('warrant-verify') < apply.index('check off')
 
 
+def test_apply_guidance_routes_settled_groups_to_a_smaller_model():
+    apply = _section(RULES_FILE.read_text(), '  apply:', '  archive:')
+
+    assert 'smaller, faster model' in apply
+    assert "session's model" in apply
+
+
 def test_tasks_rules_ask_for_independent_groups():
     tasks = _section(RULES_FILE.read_text(), '  tasks:', 'operations:')
 

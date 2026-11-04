@@ -6,7 +6,7 @@ Files this change reaches: `skills/warrant-setup/rules.yaml`,
 
 ## 1. Rules
 
-- [ ] 1.1 Write failing kit tests for the sub-agent, verify-before-check-off and independent-group rules, then change `rules.yaml` and its copies (specs: "Apply guidance", "Sub-agent per task group", "Verify before checking off", "Independent task groups"); verify the kit and dogfood tests pass
+- [ ] 1.1 Write failing kit tests for the sub-agent, verify-before-check-off and independent-group rules, then change `rules.yaml` and its copies (specs: "Sub-agent per task group", "Verify before checking off", "Independent task groups", "Smaller model for settled groups"); verify the kit and dogfood tests pass
 
 ## 2. Documentation
 
@@ -21,4 +21,4 @@ Files this change reaches: `skills/warrant-setup/rules.yaml`,
 - [ ] 4.1 Run `uv run pytest` and record its result as `Result: exit <code>, <result line>`
 - [ ] 4.2 Run `openspec validate --all --strict` and record its result as `Result: exit <code>, <result line>`
 - [ ] 4.3 Run the setup scenarios on `claude` and `codex`; record each result
-- [ ] 4.4 Run the implement benchmark task on `claude` and `codex` before and after this change; record tokens and scores in `README.md`
+- [ ] 4.4 Run the plan-implement benchmark task in the warrant arm on Opus three times; record the models its sub-agents used, the scores and the cost against warrant without sub-agents
