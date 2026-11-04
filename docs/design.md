@@ -119,7 +119,8 @@ duplicated OpenSpec (principle 1).
 
 Remaining drift:
 
-- No brevity rule or closing "skipped / not checked / risk" line (principle 5).
+- Only `warrant-verify` reports carry the closing line; other skills' replies
+  have no brevity check (principle 5).
 
 ## Success criteria
 
@@ -136,9 +137,10 @@ Remaining drift:
    apply guidance; `warrant-design` removed.
 2. Done: `warrant-review` runs `openspec-verify-change` for the Spec axis and
    checks connected code; axes run in separate contexts.
-3. Economy: brevity and the closing line; decide on the Decision records subsection.
+3. Done: short verification reports ending with a `Not checked: ...; Risks: ...`
+   line. Still open: decide on the Decision records subsection.
 4. Done from anvil: an artifact review before implementation with a verdict line
-   CI can parse. Still open: verification results in a line CI can parse.
+   CI can parse, and verification results as `Result:` lines.
 5. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
 
 ## Sources

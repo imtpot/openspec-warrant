@@ -54,8 +54,15 @@ has not passed.
 
 ## 4. Report
 
-Claim completion only when every command ran and exited with code 0. Then
-report each command with its exit code and result line.
+Keep the report short: a reader understands it in one read. Give one line per
+verification command with the command, its exit code and its result line. End
+the report with exactly one closing line:
+
+```
+Not checked: <what you skipped or could not run, or none>; Risks: <known risks, or none>
+```
+
+Claim completion only when every command ran and exited with code 0.
 
 If any command failed or did not run:
 
@@ -70,4 +77,5 @@ Example of a report after a failure:
 Verification failed.
 - tests: `make test` exited with 1: FAIL: test_applies_fractional_discount (expected 90, got 99.9)
 The change is not complete.
+Not checked: none; Risks: discounts below 1 are rounded wrongly
 ```

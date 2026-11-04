@@ -17,7 +17,7 @@ rules:
   - "[warrant] For each part of the change, record the first option that fully works in the order of warrant-minimal-change's option ladder, and state why each earlier option failed."
   tasks:
   - "[warrant] End the task list with a Review group (check the diff against the specs; remove speculative generality, unused options, unrequested features and dependencies) followed by a Verification group with one task per command under '### Verification' in the Warrant contract of AGENTS.md."
-  - "[warrant] A verification task that cannot run records 'not run' with the reason, never 'passed'."
+  - "[warrant] Each verification task records its result on its own line as 'Result: exit <code>, <result line>', or as 'Result: not run, <reason>' when it cannot run; never 'passed'."
 operations:
   apply:
     guidance:
@@ -25,4 +25,4 @@ operations:
     - "[warrant] Follow warrant-tdd to implement each requirement, warrant-minimal-change while writing code, and warrant-verify before marking a task complete."
   archive:
     guidance:
-    - "[warrant] Archive only when every verification task records its result."
+    - "[warrant] Archive only when every verification task has a 'Result:' line."
