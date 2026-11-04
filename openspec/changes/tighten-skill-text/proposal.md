@@ -17,8 +17,11 @@ meanings stated in two places, and terms without one name.
 
 ## What Changes
 
-- `warrant-review` takes the EARS rule, the protected list and line tracing
-  from their one source instead of restating them.
+- `warrant-review` takes the protected list and line tracing from their one
+  source instead of restating them, and checks EARS as "one `SHALL`, in an
+  EARS pattern", which allows the two combined clauses the rules allow. A
+  first version only pointed to the rules; Codex then found no `[warrant]`
+  rules in a project without them and reported no EARS finding.
 - Apply guidance: after `Artifact review: REVISE`, revise the artifacts and
   review again; check off a group's tasks only when every verification
   command exited with 0.

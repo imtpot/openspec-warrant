@@ -5,8 +5,8 @@
 ### Requirement: EARS findings
 
 WHEN the review skill reviews a change's artifacts, the review skill SHALL
-report each requirement that breaks the warrant specs rules on EARS as a
-blocking finding naming the requirement.
+report each requirement that has more than one `SHALL` or is not written in an
+EARS pattern as a blocking finding naming the requirement.
 
 #### Scenario: Compound requirement
 - **WHEN** a requirement reads "... SHALL raise an error and SHALL NOT print output"

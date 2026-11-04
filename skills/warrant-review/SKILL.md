@@ -23,7 +23,7 @@ Change no file in this mode, not even to fix an obvious problem.
   2. `git merge-base HEAD origin/main`
   3. a base you ask the user for
 - Add untracked files: `git ls-files --others --exclude-standard`.
-- If the range has no changes, report "nothing to review" and stop.
+- If the range has no changes, write the line `nothing to review` and stop.
 
 ### 2. Choose the OpenSpec change
 
@@ -100,8 +100,9 @@ files, the contract and the `design.md` files of archived changes
 
 Report as blocking:
 
-- a requirement that breaks the `[warrant]` EARS rules under `rules.specs` in
-  `openspec/config.yaml`,
+- a requirement with more than one `SHALL`, or one not written in an EARS
+  pattern (the `[warrant]` rules for specs in `openspec/config.yaml` list the
+  patterns),
 - a requirement for which `tasks.md` has no test task,
 - a task list without a verification group,
 - a design decision that contradicts a decision in the `design.md` of an
