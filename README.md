@@ -20,10 +20,11 @@ It ships:
   selection stays with the OpenSpec apply workflow;
 - `warrant-verify`: no completion claim without running the project's
   verification commands and reading their output;
-- `warrant-review`: reviews a diff along three separate axes - Spec (the
-  OpenSpec change), Standards (the project's declared standards) and Evidence
-  (the contract's verification) - and addresses review comments by checking
-  each one before acting on it.
+- `warrant-review`: reviews a diff along three separate axes - Spec
+  (`openspec-verify-change` plus lines no requirement asks for), Standards (the
+  project's declared standards and bugs or security problems in connected
+  code) and Evidence (the contract's verification) - and addresses review
+  comments by checking each one before acting on it.
 
 Community extension; not affiliated with Fission-AI or the OpenSpec project.
 

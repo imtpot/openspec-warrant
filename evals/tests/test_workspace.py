@@ -26,3 +26,21 @@ def test_prepare_commits_the_fixture_and_installs_skills(tmp_path):
     assert log.stdout.count('\n') == 1
     status = subprocess.run(['git', 'status', '--porcelain'], cwd=workspace, capture_output=True, text=True)
     assert status.stdout == ''
+
+
+def test_prepare_installs_extra_skill_sources(tmp_path):
+    sources = []
+    for name in ('main-skill', 'extra-skill'):
+        root = tmp_path / name
+        (root / 'skills' / name).mkdir(parents=True)
+        (root / 'skills' / name / 'SKILL.md').write_text(
+            f'---\nname: {name}\ndescription: Use when testing {name}.\n---\nDemo.\n'
+        )
+        sources.append(root)
+    workspace = tmp_path / 'workspace'
+    workspace.mkdir()
+
+    prepare_workspace(workspace, sources[0], extra=[sources[1] / 'skills'])
+
+    assert (workspace / '.agents' / 'skills' / 'main-skill' / 'SKILL.md').is_file()
+    assert (workspace / '.agents' / 'skills' / 'extra-skill' / 'SKILL.md').is_file()

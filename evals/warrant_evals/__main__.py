@@ -1,14 +1,13 @@
 """Command line: run eval scenarios against agent CLIs and write a report."""
 
 import argparse
-import functools
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from warrant_evals.runner import AGENTS, run_evals, write_report
 from warrant_evals.scenarios import CheckerFactory, load_scenarios
-from warrant_evals.workspace import prepare_workspace
+from warrant_evals.workspace import openspec_skills, prepare_workspace
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -30,7 +29,7 @@ def main(argv: Sequence[str] | None = None, checkers: Mapping[str, CheckerFactor
     ]
     results = run_evals(
         scenarios, AGENTS, args.out, only=args.agent, keep=args.keep,
-        prepare=functools.partial(prepare_workspace, source=REPO),
+        prepare=lambda workspace: prepare_workspace(workspace, REPO, extra=[openspec_skills()]),
     )
     print(write_report(results, args.out / 'report.md').read_text())
     return 1 if any(r.status == 'fail' for r in results) else 0

@@ -41,7 +41,7 @@ def main(argv=None):
     parser.add_argument('needed', type=int)
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args(argv)
-    result = check(args.free, args.needed)
+    result = check(args.needed, args.free)
     print(json.dumps({'verdict': result}) if args.json else formatReport(result))
 PY
 git add -A

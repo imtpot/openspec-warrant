@@ -78,7 +78,7 @@ target project
 | `warrant-minimal-change` | how much code a change may add; `shortcut:` markers | choosing tasks |
 | `warrant-tdd` | how one requirement is implemented test first | choosing or checking off tasks |
 | `warrant-verify` | running the contract's commands before any completion claim | deciding what to verify beyond the contract |
-| `warrant-review` | Standards (declared standards, protected code, correctness and security of connected code), Evidence, and receiving review comments | spec conformance |
+| `warrant-review` | Spec (from `openspec-verify-change` plus untraced lines), Standards (declared standards, protected code, correctness and security of connected code), Evidence, and receiving review comments; Spec and Standards in separate contexts | checking requirements and test coverage itself |
 
 ## Map against OpenSpec skills
 
@@ -87,7 +87,7 @@ target project
 | `openspec-explore` | interview before a change: one question at a time, a recommendation, facts looked up, decisions kept in the conversation | nothing separate; glossary use is an artifact rule for proposal and specs |
 | `openspec-propose`, `-new-change`, `-continue-change`, `-ff-change` | write the artifacts | the `[warrant] ` artifact rules |
 | `openspec-apply-change` | pick tasks, implement, check off | apply guidance routing to `warrant-tdd`, `warrant-minimal-change`, `warrant-verify` |
-| `openspec-verify-change` | completeness, correctness (requirements and scenario coverage), coherence against artifacts; runs nothing | `warrant-verify` runs the commands; `warrant-review` covers standards and code outside the spec |
+| `openspec-verify-change` | completeness, correctness (requirements and scenario coverage), coherence against artifacts; runs nothing | `warrant-review` runs it for the Spec axis and adds untraced lines; `warrant-verify` runs the commands; `warrant-review` covers standards and connected code |
 | `openspec-archive-change`, `-sync-specs`, `-update-change` | finish and sync | nothing |
 
 OpenSpec's own spec guidance (`docs/writing-specs.md`) already asks for one
@@ -119,8 +119,6 @@ duplicated OpenSpec (principle 1).
 
 Remaining drift:
 
-- `warrant-review`'s Spec axis duplicates `openspec-verify-change` (principle 1),
-  and it misses correctness and security in connected code (Ponytail review).
 - No brevity rule or closing "skipped / not checked / risk" line (principle 5).
 - The contract's Decision records subsection is no longer read by any skill
   (principle 4).
@@ -138,7 +136,8 @@ Remaining drift:
 
 1. Done: `warrant-kit` spec with tests; rules instead of the schema fork, with
    apply guidance; `warrant-design` removed.
-2. Narrow `warrant-review` to what `openspec-verify-change` does not do.
+2. Done: `warrant-review` runs `openspec-verify-change` for the Spec axis and
+   checks connected code; axes run in separate contexts.
 3. Economy: brevity and the closing line; decide on the Decision records subsection.
 4. From anvil: an artifact review before implementation and verification
    results CI can parse.

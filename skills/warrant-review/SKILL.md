@@ -32,26 +32,35 @@ Run `openspec list --json`.
 - More than one and none named: ask the user which one, before the Spec axis.
 - None: the Spec section reads "no OpenSpec change"; continue with Standards.
 
+Run steps 3 and 4 each in a separate, fresh context, so that one axis does not
+shape the other; give each context the range, the change and only its own
+step. If you cannot start a separate context, run step 3, write its findings
+down, then run step 4 without reusing step 3's conclusions.
+
 ### 3. Spec axis
 
-Get the requirements with `openspec show <change> --type change --json`.
+Run the `openspec-verify-change` workflow for the change and report its
+findings here with their own severities (CRITICAL, WARNING, SUGGESTION). If
+that skill is not installed, write "Spec axis not run" and give the command
+`npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills`.
 
-- For each requirement, find the lines that implement it. None: blocking
-  finding "not implemented".
-- For each requirement, find a test that exercises it, in the diff or in the
-  project. None: blocking finding "untested".
-- For each added line in the diff, name the requirement it serves. None:
-  blocking finding "untraced", with file and line. Imports, test code and
-  formatting count for the requirement they support.
+Then add what that workflow does not check: for each added line in the diff,
+name the requirement it serves. None: blocking finding "untraced", with file
+and line. Imports, test code and formatting count for the requirement they
+support.
 
 ### 4. Standards axis
 
 Read each file listed under `### Standards`. If the subsection is missing or
-reads `none`, write "no standards declared" and check only the minimal-change
-rules below.
+reads `none`, write "no standards declared" and check only the rules below.
 
 - A diff part that breaks a rule in a Standards file: blocking. Quote the rule
   and name its file.
+- Read the code connected to the diff, not only the diff: every caller of a
+  changed or added function and every function the diff calls. A bug there
+  (wrong arguments, wrong order, an unhandled error, a broken contract) or a
+  security problem (injection, exposed secrets, missing authorization):
+  blocking, with file and line.
 - Removed validation at trust boundaries, removed error handling that prevents
   data loss, removed security checks: blocking.
 - Speculative generality, an option or parameter nothing uses, a new dependency
@@ -73,7 +82,8 @@ Write three sections in this order and never move a finding between them:
 ## Evidence
 ```
 
-Each finding: level (blocking or non-blocking), `file:line` where one exists,
+Each finding: level (blocking or non-blocking, or verify-change's severity on
+the Spec axis), `file:line` where one exists,
 and the quoted code, requirement or rule. End with one line per axis: number of
 blocking and non-blocking findings. Do not rank the axes against each other.
 
