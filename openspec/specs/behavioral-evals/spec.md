@@ -9,8 +9,7 @@ Claude Code and Codex.
 
 ### Requirement: Supported agents
 
-The eval runner SHALL run each scenario headless with Claude Code, Codex and
-GitHub Copilot CLI.
+The eval runner SHALL run each scenario headless with Claude Code and Codex.
 
 #### Scenario: Full run
 - **WHEN** the user runs the evals without an agent filter
@@ -126,8 +125,8 @@ SHALL mark that agent's entries as not run with the reason and continue with the
 other agents.
 
 #### Scenario: Missing Copilot CLI
-- **WHEN** `copilot` is not on PATH
-- **THEN** Copilot entries are marked not run and the other agents still run
+- **WHEN** `codex` is not on PATH
+- **THEN** Codex entries are marked not run and the other agents still run
 
 ### Requirement: TDD scenario checks
 
