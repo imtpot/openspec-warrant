@@ -75,7 +75,7 @@ target project
 | Part | Owns | Does not own |
 |---|---|---|
 | warrant rules (`rules.yaml`) | what artifacts must contain: EARS requirements, assumptions, the option ladder, review and verification tasks, glossary terms; apply guidance | how code is written or checked |
-| `warrant-setup` | merging the rules into the project configuration and creating the contract | anything at change time |
+| `warrant-setup` | merging the rules into the project configuration, drafting an empty OpenSpec `context` and creating the contract | anything at change time |
 | `warrant-minimal-change` | how much code a change may add; `shortcut:` markers | choosing tasks |
 | `warrant-tdd` | how one requirement is implemented test first | choosing or checking off tasks |
 | `warrant-verify` | running the contract's commands before any completion claim | deciding what to verify beyond the contract |

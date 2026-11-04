@@ -31,7 +31,7 @@ def _openspec(args: list[str], cwd: Path) -> dict:
 
 
 def rendered(project: Path) -> dict[str, list[str]]:
-    """Rules and operation guidance as OpenSpec renders them for `project`."""
+    """Rules, operation guidance and context as OpenSpec renders them for `project`."""
     with tempfile.TemporaryDirectory() as tmp:
         copy = Path(tmp) / 'project'
         shutil.copytree(project / 'openspec', copy / 'openspec')
@@ -40,6 +40,8 @@ def rendered(project: Path) -> dict[str, list[str]]:
         result = {a: _openspec(['instructions', a, '--change', 'probe'], copy).get('rules') or [] for a in ARTIFACTS}
         for op in OPERATIONS:
             result[op] = _openspec(['instructions', op, '--change', 'probe'], copy).get('operationGuidance') or []
+        context = _openspec(['instructions', 'proposal', '--change', 'probe'], copy).get('context')
+        result['context'] = [context] if context else []
         return result
 
 

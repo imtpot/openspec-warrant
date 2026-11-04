@@ -61,12 +61,29 @@ Then verify:
 
 If either check fails, report the problem and stop.
 
-## 5. Create the project contract
+## 5. Draft the OpenSpec context
+
+OpenSpec injects `context` from `openspec/config.yaml` into every planning
+request.
+
+- If `context` has a value, leave it unchanged and go to step 6.
+
+Otherwise, read the project's own documents: `README`, the contributing guide,
+`AGENTS.md` outside the Warrant contract and `docs/`. Collect only constraints
+that an agent cannot infer from the code, for example "All user-facing text is
+German" or "Public APIs stay backwards compatible". Leave out the tech stack,
+the directory layout, commands and general good practice.
+
+Propose at most 10 lines to the user. Write only the lines the user confirms,
+as a `context: |` block after `schema`, and keep every other key and comment.
+If the user confirms none, or you found none, write no `context`.
+
+## 6. Create the project contract
 
 Open the root `AGENTS.md`.
 
 - If it already contains a `## Warrant contract` section, leave the file
-  unchanged and go to step 6.
+  unchanged and go to step 7.
 - If the file does not exist, create it with only the contract section.
 - Otherwise, append the contract section at the end and keep the existing
   content unchanged.
@@ -109,9 +126,10 @@ Write the section in exactly this form:
   project, such as `CONTRIBUTING.md`, a style guide or a `docs/` page about
   conventions. Write only the files the user confirms, or `none`.
 
-## 6. Report
+## 7. Report
 
-Report what you did: rules added or replaced, contract created or unchanged.
+Report what you did: rules added or replaced, context written or kept,
+contract created or unchanged.
 Then print this command with the installed OpenSpec version, which installs the
 OpenSpec workflow skills for that release:
 

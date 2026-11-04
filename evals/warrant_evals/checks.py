@@ -34,7 +34,7 @@ def _transcript_findings(params: dict, transcript: str) -> list[Finding]:
 RULES_FILE = Path(__file__).resolve().parents[2] / 'skills' / 'warrant-setup' / 'rules.yaml'
 
 
-def _rules_findings(workspace: Path) -> list[Finding]:
+def _rules_findings(workspace: Path, params: dict) -> list[Finding]:
     """warrant's rendered entries equal rules.yaml; the project's own entries and schema are unchanged."""
     findings = []
     if [line for line in _changed_lines(workspace, 'openspec/config.yaml') if line[1:].startswith('schema:')]:
@@ -43,10 +43,12 @@ def _rules_findings(workspace: Path) -> list[Finding]:
         with tempfile.TemporaryDirectory() as tmp:
             archive = subprocess.run(['git', 'archive', 'HEAD', 'openspec'], cwd=workspace, capture_output=True, check=True)
             subprocess.run(['tar', '-x', '-C', tmp], input=archive.stdout, check=True)
-            _, before_project = openspec_rules.split(openspec_rules.rendered(Path(tmp)))
-        after_warrant, after_project = openspec_rules.split(openspec_rules.rendered(workspace))
+            before = openspec_rules.rendered(Path(tmp))
+        after = openspec_rules.rendered(workspace)
     except subprocess.CalledProcessError as error:
         return [*findings, Finding('rules', f'openspec cannot render the configuration: {error.stderr or error}')]
+    _, before_project = openspec_rules.split(before)
+    after_warrant, after_project = openspec_rules.split(after)
     want, _ = openspec_rules.split(openspec_rules.shipped(RULES_FILE))
     findings += [
         Finding('rules', f'{k}: warrant entries differ from rules.yaml')
@@ -56,11 +58,23 @@ def _rules_findings(workspace: Path) -> list[Finding]:
         Finding('rules', f'{k}: project entries changed')
         for k in after_project if after_project[k] != before_project[k]
     ]
+    return findings + _context_findings(before['context'], after['context'], params)
+
+
+def _context_findings(before: list[str], after: list[str], params: dict) -> list[Finding]:
+    context = '\n'.join(after)
+    findings = [Finding('context', f'context lacks: {term}') for term in _missing(context, [[t] for t in params.get('context', [])])]
+    findings += [
+        Finding('context', f'context holds the contract command: {command}')
+        for command in params.get('verification', []) if command in context
+    ]
+    if params.get('context_unchanged') and before != after:
+        findings.append(Finding('context', 'context changed'))
     return findings
 
 
 def _installed_findings(workspace: Path, params: dict) -> list[Finding]:
-    findings = _rules_findings(workspace)
+    findings = _rules_findings(workspace, params)
     agents_md = workspace / 'AGENTS.md'
     if params.get('agents_md_unchanged') and _changed_lines(workspace, 'AGENTS.md'):
         findings.append(Finding('contract', 'AGENTS.md changed'))

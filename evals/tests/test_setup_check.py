@@ -130,3 +130,35 @@ def test_expected_standards_path_missing(workspace):
     assert _check({'expect': 'installed', 'standards': ['CONTRIBUTING.md']}, workspace) == [
         'standards file not in contract: CONTRIBUTING.md'
     ]
+
+
+def _with_context(text):
+    return _merged().replace('schema: spec-driven\n', f'schema: spec-driven\ncontext: |\n  {text}\n', 1)
+
+
+def test_drafted_context_with_expected_term_passes(workspace):
+    _install(workspace, config=_with_context('All user-facing text is German.'))
+
+    assert _check({'expect': 'installed', 'context': ['German']}, workspace) == []
+
+
+def test_context_without_expected_term_fails(workspace):
+    _install(workspace, config=_with_context('Keep functions short.'))
+
+    assert _check({'expect': 'installed', 'context': ['German']}, workspace) == ['context lacks: German']
+
+
+def test_context_with_contract_command_fails(workspace):
+    _install(workspace, config=_with_context('All user-facing text is German. Run make test.'))
+
+    assert _check({'expect': 'installed', 'verification': ['make test']}, workspace) == [
+        'context holds the contract command: make test'
+    ]
+
+
+def test_changed_team_context_fails(workspace):
+    (workspace / 'openspec' / 'config.yaml').write_text(CONFIG.replace('schema: spec-driven\n', 'schema: spec-driven\ncontext: |\n  Team text.\n'))
+    _git(workspace, 'commit', '-qam', 'team context')
+    _install(workspace, config=_with_context('Other text.'))
+
+    assert _check({'expect': 'installed', 'context_unchanged': True}, workspace) == ['context changed']

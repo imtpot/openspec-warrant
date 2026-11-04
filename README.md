@@ -11,7 +11,8 @@ It ships:
   records which simpler option failed, review and verification groups at the
   end of every task list, and use of the project glossary; plus apply guidance
   that routes implementation to the warrant skills;
-- `warrant-setup`: merges the rules into `openspec/config.yaml` and creates the
+- `warrant-setup`: merges the rules into `openspec/config.yaml`, drafts an
+  empty OpenSpec `context` from the project's documents and creates the
   project contract;
 - `warrant-minimal-change`: the smallest complete change, `shortcut:` markers
   and a shortcut ledger;
@@ -40,8 +41,10 @@ npx skills add imtpot/openspec-warrant
 Then ask your agent to run the `warrant-setup` skill. It adds warrant's rules,
 each marked `[warrant] `, to the `rules` and `operations` lists in
 `openspec/config.yaml` without touching your own entries or the `schema` field,
-proposes a contract for `AGENTS.md` and prints the command that installs the
-OpenSpec workflow skills for your OpenSpec version, for example:
+proposes a `context` when yours is empty (only constraints an agent cannot
+infer from the code, written after you confirm them), proposes a contract for
+`AGENTS.md` and prints the command that installs the OpenSpec workflow skills
+for your OpenSpec version, for example:
 
 ```sh
 npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills

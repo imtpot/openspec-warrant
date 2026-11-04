@@ -6,3 +6,4 @@ checker = "setup"
 [params]
 expect = "installed"
 agents_md_unchanged = true
+context_unchanged = true

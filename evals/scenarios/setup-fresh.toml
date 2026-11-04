@@ -1,9 +1,10 @@
 skills = ["warrant-setup"]
 fixture = "fresh-project"
-prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every verification command that the project's own configuration defines, I confirm every standards file you find, and I confirm no destructive actions."
+prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every verification command that the project's own configuration defines, I confirm every standards file you find, I confirm every context line you propose, and I confirm no destructive actions."
 checker = "setup"
 
 [params]
 expect = "installed"
 verification = ["make test"]
 standards = ["CONTRIBUTING.md"]
+context = ["German"]
