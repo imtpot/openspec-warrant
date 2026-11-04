@@ -47,18 +47,7 @@ def test_codex_tokens_from_usage_line(tmp_path):
     assert benchmark.tokens('codex', 'done\ntokens used\n21,806\n', tmp_path / 'usage.json') == 21806
 
 
-def test_copilot_tokens_from_usage_file(tmp_path):
-    usage = tmp_path / 'usage.json'
-    usage.write_text(json.dumps({'modelMetrics': {
-        'a': {'usage': {'inputTokens': 100, 'outputTokens': 5}},
-        'b': {'usage': {'inputTokens': 10, 'outputTokens': 1}},
-    }}))
-
-    assert benchmark.tokens('copilot', 'ok', usage) == 116
-
-
 def test_missing_usage_is_not_measured(tmp_path):
-    assert benchmark.tokens('copilot', 'ok', tmp_path / 'usage.json') is None
     assert benchmark.tokens('codex', 'ok', tmp_path / 'usage.json') is None
     assert benchmark.tokens('claude', 'not json', tmp_path / 'usage.json') is None
 
@@ -84,8 +73,7 @@ def test_claude_benchmark_command_skips_user_settings(tmp_path):
     claude = agents['claude'].argv('go')
     assert claude[claude.index('--setting-sources') + 1] == 'project,local'
     assert claude[claude.index('--output-format') + 1] == 'json'
-    copilot = agents['copilot'].argv('go')
-    assert copilot[copilot.index('--usage-output-file') + 1] == str(tmp_path / 'usage.json')
+    assert sorted(agents) == ['claude', 'codex']
 
 
 def test_review_score_counts_named_problems():

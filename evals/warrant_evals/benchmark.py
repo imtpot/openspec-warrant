@@ -51,11 +51,10 @@ class Run:
 
 
 def bench_agents(usage_file: Path) -> list[Agent]:
-    """The eval agents, with usage output and, for Claude, without user settings."""
+    """The eval agents; Claude reports usage as JSON and runs without user settings."""
     commands = {a.name: list(a.command) for a in AGENTS}
     claude = commands['claude']
     claude[claude.index('-p') + 1:claude.index('-p') + 1] = ['--output-format', 'json', '--setting-sources', 'project,local']
-    commands['copilot'] += ['--usage-output-file', str(usage_file)]
     return [Agent(name, command) for name, command in commands.items()]
 
 
@@ -71,9 +70,6 @@ def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
     if agent == 'codex':
         match = CODEX_TOKENS.search(stdout)
         return int(match.group(1).replace(',', '')) if match else None
-    if agent == 'copilot' and usage_file.is_file():
-        models = json.loads(usage_file.read_text()).get('modelMetrics', {})
-        return sum(m['usage']['inputTokens'] + m['usage']['outputTokens'] for m in models.values())
     return None
 
 

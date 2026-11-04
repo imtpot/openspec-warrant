@@ -84,8 +84,8 @@ WHEN a run ends, the benchmark SHALL record the tokens that the agent reports.
 IF an agent reports no token usage, THEN the benchmark SHALL record the tokens
 as not measured.
 
-#### Scenario: No usage file
-- **WHEN** the Copilot usage file is missing after the run
+#### Scenario: No usage line
+- **WHEN** the Codex output has no `tokens used` line
 - **THEN** the run shows tokens as not measured
 
 ### Requirement: Summary table

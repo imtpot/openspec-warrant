@@ -6,7 +6,7 @@ Files this change reaches: `evals/warrant_evals/benchmark.py`,
 
 ## 1. Scoring
 
-- [ ] 1.1 Write failing tests, then implement token parsing for Claude, Codex and Copilot with not measured when absent (specs: "Token usage", "Missing usage"); verify the tests pass
+- [ ] 1.1 Write failing tests, then implement token parsing for Claude and Codex with not measured when absent (specs: "Token usage", "Missing usage"); verify the tests pass
 - [ ] 1.2 Write failing tests, then implement fault detection, acceptance count and added lines (specs: "Implement task scores", "Invalid agent tests"); verify the tests pass
 - [ ] 1.3 Write failing tests, then implement the review score (specs: "Review task score"); verify the tests pass
 - [ ] 1.4 Write failing tests, then implement the summary table (specs: "Summary table"); verify the tests pass
@@ -30,4 +30,4 @@ Files this change reaches: `evals/warrant_evals/benchmark.py`,
 
 - [ ] 5.1 Run `uv run pytest` and record its result as `Result: exit <code>, <result line>`
 - [ ] 5.2 Run `openspec validate --all --strict` and record its result as `Result: exit <code>, <result line>`
-- [ ] 5.3 Run the benchmark on `claude`, `codex` and `copilot`; record the table in `README.md`
+- [ ] 5.3 Run the benchmark on `claude`; record the table in `README.md`

@@ -14,7 +14,7 @@ agents in two arms; the runner already does everything except scoring.
 
 The benchmark derives its agent commands from the eval agents:
 Claude adds `--output-format json` and reads `usage` and `result`; Codex reads
-the `tokens used` line; Copilot adds `--usage-output-file` in the workspace.
+the `tokens used` line.
 Claude also gets `--setting-sources project,local`. Tokens are all input
 (including cache) plus output tokens as each agent reports them.
 
