@@ -6,16 +6,16 @@ license: MIT
 
 # Test first
 
-A test written before the code shows what the requirement asks; a test written
+A test written before the code shows what the requirement asks. A test written
 after it shows what the code happens to do. Work one scenario at a time, red
 then green.
 
-Read the `## Warrant contract` section of the root `AGENTS.md`. Find the tests
-command under `### Verification`. If there is none, tell the user to add it with
-`warrant-setup`, and stop without changing any file.
+Read the `## Warrant contract` section of the root `AGENTS.md`. Find the command
+under `### Verification` that runs the tests. If there is none, tell the user to
+add it with `warrant-setup`, and stop without changing any file.
 
-This skill works on the requirement it is given. Do not pick tasks from
-`tasks.md` and do not check them off; the OpenSpec apply workflow does that.
+Implement only the requirement you were given. The OpenSpec apply workflow
+picks the tasks in `tasks.md` and checks them off.
 
 ## 1. List the scenarios
 
@@ -25,31 +25,33 @@ This skill works on the requirement it is given. Do not pick tasks from
   comparison ("before", "after", "not after", "at least"), an exact rounding
   point, an empty or zero input, and the case just outside a stated condition.
   Example: "an exact half cent is rounded up" with only a two-thirds scenario
-  needs a case with exactly half a cent; "not after" needs the equal case.
+  needs a case with exactly half a cent. "Not after" needs the equal case.
   Treat each boundary case as a scenario in step 2.
-- Without a change: derive the scenarios from the request and list them to the
-  user before you write the first test.
+- Without a change: derive the scenarios from the request, list them to the
+  user before you write the first test, and continue without waiting for an
+  answer.
 
 ## 2. For each scenario, in order
 
 ### Red
 
-1. Write one test for this scenario only, through the interface the
-   requirement describes. Put a one-line comment above it:
-   `<Requirement>: <Scenario>` (in the test language's comment syntax), or name
-   the test after the scenario. Before you write it, name the code change that
-   would make it fail. Take the expected value from the spec or work it out by
-   hand; never compute it with the code under test or its helpers. Replace
-   only external systems, time and randomness with test doubles; run the
-   project's own modules for real.
+1. Write one test for this scenario only:
+   - First name one wrong implementation that this test will catch.
+   - Test through the interface the requirement describes.
+   - Put a one-line comment above the test, `<Requirement>: <Scenario>` in the
+     test language's comment syntax, or name the test after the scenario.
+   - Take the expected value from the spec or work it out by hand, never from
+     the code under test or its helpers.
+   - Replace only external systems, time and randomness with test doubles. Run
+     the project's own modules for real.
 2. Run only this test. Narrow the contract's tests command with the tool's own
    selection (a file path, a test id, `-k`, `--grep`, `-run`). Example: the
-   contract says `python3 -m unittest discover -s tests -t .`; run
+   contract says `python3 -m unittest discover -s tests -t .`, so run
    `python3 -m unittest tests.test_quota.QuotaTest.test_not_enough_free`.
 3. Read the result:
    - It fails because the behavior is missing: go to Green.
    - It fails for another reason (import, syntax, wrong fixture): fix the test
-     and run it again. Do not write production code to fix a broken test.
+     and run it again. Production code changes only in Green.
    - It passes: the behavior already exists. Keep the test, write no code for
      this scenario, and say so in the report.
 
@@ -63,11 +65,11 @@ This skill works on the requirement it is given. Do not pick tasks from
 
 ## 3. Finish
 
-Check the tests against realistic mutations of the code you changed: a wrong
-constant or comparison (`<` for `<=`), the other branch, a missing check for
-zero, empty or invalid input, a missing side effect, an empty or default
-return. For each mutation that no test fails on, add a test and run red and
-green as in step 2.
+List the realistic mutations of the code you changed: a wrong constant or
+comparison (`<` for `<=`), the other branch, a missing check for zero, empty or
+invalid input, a missing side effect, an empty or default return. For each
+mutation, name a test that fails on it. If no test fails on it, add one and run
+red and green as in step 2.
 
 Then run the contract's verification following `warrant-verify`.
 

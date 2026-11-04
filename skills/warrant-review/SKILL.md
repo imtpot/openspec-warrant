@@ -6,11 +6,10 @@ license: MIT
 
 # Review
 
-Three modes. **Review mode** reports findings on a diff and changes no file.
-**Artifact mode** reviews a change's planning artifacts before code. **Receive
-mode** addresses review comments. Read the `## Warrant contract` section of the
-root `AGENTS.md` first; if it is missing, tell the user to run `warrant-setup`
-and stop.
+Three modes. **Review mode** reports findings on a diff. **Artifact mode**
+reviews a change's planning artifacts before code. **Receive mode** addresses
+review comments. Read the `## Warrant contract` section of the root `AGENTS.md`
+first. If it is missing, tell the user to run `warrant-setup` and stop.
 
 ## Review mode
 
@@ -19,8 +18,10 @@ Change no file in this mode, not even to fix an obvious problem.
 ### 1. Find the range
 
 - The user named a base (a commit, tag or branch): review `git diff <base>`.
-- Otherwise: base is `git merge-base HEAD origin/HEAD`; if that fails, use
-  `git merge-base HEAD origin/main`; if that fails too, ask the user for a base.
+- Otherwise, take the first base that works:
+  1. `git merge-base HEAD origin/HEAD`
+  2. `git merge-base HEAD origin/main`
+  3. a base you ask the user for
 - Add untracked files: `git ls-files --others --exclude-standard`.
 - If the range has no changes, report "nothing to review" and stop.
 
@@ -34,7 +35,7 @@ Run `openspec list --json`.
 - None: the Spec section reads "no OpenSpec change"; continue with Standards.
 
 Run steps 3 and 4 each in a separate, fresh context (a sub-agent), so that one
-axis does not shape the other; give each context the range, the change and
+axis does not shape the other. Give each context the range, the change and
 only its own step.
 
 ### 3. Spec axis
@@ -44,10 +45,10 @@ findings here with their own severities (CRITICAL, WARNING, SUGGESTION). If
 that skill is not installed, write "Spec axis not run" and give the command
 `npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills`.
 
-Then add what that workflow does not check: for each added line in the diff,
-name the requirement it serves. None: blocking finding "untraced", with file
-and line. Imports, test code and formatting count for the requirement they
-support.
+Then add what that workflow does not check: trace each added line of the diff
+as `warrant-minimal-change` describes under "Trace lines to requirements". A
+line that serves no requirement is a blocking finding "untraced", with file and
+line.
 
 ### 4. Standards axis
 
@@ -61,8 +62,8 @@ reads `none`, write "no standards declared" and check only the rules below.
   (wrong arguments, wrong order, an unhandled error, a broken contract) or a
   security problem (injection, exposed secrets, missing authorization):
   blocking, with file and line.
-- Removed validation at trust boundaries, removed error handling that prevents
-  data loss, removed security checks: blocking.
+- Removed code from the "Protected code" list of `warrant-minimal-change`:
+  blocking.
 - Speculative generality, an option or parameter nothing uses, a new dependency
   with no stated reason: non-blocking.
 
@@ -74,7 +75,8 @@ that could not run: blocking.
 
 ### 6. Report
 
-Write three sections in this order and never move a finding between them:
+Write three sections in this order. Put each finding under the axis that found
+it:
 
 ```
 ## Spec
@@ -93,16 +95,17 @@ Use this mode for a change's `proposal.md`, `specs/`, `design.md` and
 `tasks.md` before its first task is implemented. Change no file.
 
 Review in a separate, fresh context (a sub-agent) that gets the artifact
-files, the contract and the recorded decisions, not the conversation that
-wrote them.
+files, the contract and the `design.md` files of archived changes
+(`openspec/changes/archive/`), not the conversation that wrote the artifacts.
 
 Report as blocking:
 
-- a requirement that does not use exactly one EARS pattern with one `SHALL`;
-- a requirement for which `tasks.md` has no test task, and a task list without
-  a verification group;
-- a design decision that contradicts a decision in `design.md` of an archived
-  change (`openspec/changes/archive/`); quote both;
+- a requirement that breaks the `[warrant]` EARS rules under `rules.specs` in
+  `openspec/config.yaml`,
+- a requirement for which `tasks.md` has no test task,
+- a task list without a verification group,
+- a design decision that contradicts a decision in the `design.md` of an
+  archived change, with both decisions quoted,
 - a decision the specs or design present as settled that the proposal lists
   neither as confirmed nor under Assumptions.
 
@@ -133,5 +136,5 @@ Use this mode when the user gives you review comments to address.
 4. Run the contract's verification following `warrant-verify` before you report
    the comments as addressed. If verification fails, report that instead.
 
-Do not agree with a comment only because a reviewer wrote it, and do not reject
-one only because it means more work. The code and the specs decide.
+Decide each comment by the code and the specs alone: who wrote it and how much
+work it causes do not count.

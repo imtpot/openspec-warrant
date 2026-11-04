@@ -19,29 +19,29 @@ rules:
   proposal:
   - "[warrant] Add a 'Why code is needed' section: why a configuration change, an existing tool or a documentation change cannot meet the need. If one can, propose that instead."
   - "[warrant] Add an 'Out of scope' section: one sentence on what the change does not do, then the features and options deliberately left out."
-  - "[warrant] Add an 'Assumptions' section listing every decision the requester has not confirmed, each with an owner. Write None only when the requester confirmed every decision; a decision you made yourself is an assumption."
-  - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md. Add a new term to that glossary only after the requester confirms its meaning; until then list it under Assumptions."
+  - "[warrant] Add an 'Assumptions' section that lists every decision the requester has not confirmed, each with an owner. A decision you made yourself is an assumption. Write None only when the requester confirmed every decision."
+  - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md. List a new term under Assumptions, and add it to the glossary only after the requester confirms its meaning."
   specs:
   - "[warrant] Write each requirement in exactly one EARS pattern: 'The <subject> SHALL <response>.', 'WHEN <trigger>, the <subject> SHALL <response>.', 'WHILE <state>, the <subject> SHALL <response>.', 'IF <condition>, THEN the <subject> SHALL <response>.' or 'WHERE <feature or option>, the <subject> SHALL <response>.' Combine at most two clauses, in the order WHERE, WHILE, WHEN or IF."
-  - "[warrant] Use WHERE only for an optional feature or option; a state of the environment takes WHILE, or IF when it is a failure."
-  - "[warrant] Add an IF/THEN requirement for each failure that an event or state requirement can actually meet; do not invent failure modes."
-  - "[warrant] Trace every requirement to the request or to an assumption in the proposal; remove a requirement that traces to neither."
+  - "[warrant] Use WHERE only for an optional feature or option. A state of the environment takes WHILE, or IF when it is a failure."
+  - "[warrant] Add an IF/THEN requirement for each failure that can actually occur during an event or state requirement. Add only failures that can occur."
+  - "[warrant] Trace every requirement to the request or to an assumption in the proposal. Remove a requirement that traces to neither."
   - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md."
   design:
-  - "[warrant] For each part of the change, record the first option that fully works in the order of warrant-minimal-change's option ladder, and state why each earlier option failed."
+  - "[warrant] For each part of the change, record the first option that fully works in the order of the option ladder in warrant-minimal-change, and state why each earlier option failed."
   tasks:
   - Map each requirement to at least one test task
   - List every file, fixture and configuration the change must reach
-  - "[warrant] End the task list with a Review group (check the diff against the specs; remove speculative generality, unused options, unrequested features and dependencies) followed by a Verification group with one task per command under '### Verification' in the Warrant contract of AGENTS.md."
-  - "[warrant] Make each implementation group implementable from the artifacts and the code alone, without another group's unfinished work; order the groups so that each builds only on finished groups."
-  - "[warrant] Each verification task records its result on its own line as 'Result: exit <code>, <result line>', or as 'Result: not run, <reason>' when it cannot run; never 'passed'."
+  - "[warrant] End the task list with a Review group, then a Verification group. The Review group checks the diff against the specs and removes speculative generality, unused options, unrequested features and dependencies. The Verification group has one task per command under '### Verification' in the Warrant contract of AGENTS.md."
+  - "[warrant] Make each implementation group implementable from the artifacts and the code alone, without another group's unfinished work. Order the groups so that each builds only on finished groups."
+  - "[warrant] Each verification task records its result on its own line as 'Result: exit <code>, <result line>', or as 'Result: not run, <reason>' when it cannot run. A command that did not run has not passed."
 operations:
   apply:
     guidance:
-    - "[warrant] Before the first task, run warrant-review on the change's artifacts; implement only after the review ends with Artifact review: PASS."
-    - "[warrant] Implement each task group in a separate, fresh context (a sub-agent). Give it the group's tasks, the names of their requirements and the paths of the change's artifacts; it follows warrant-tdd and warrant-minimal-change and reports the scenarios, the red and green results and the changed files."
+    - "[warrant] Before the first task, run warrant-review on the change's artifacts. Implement only after the review ends with Artifact review: PASS. After Artifact review: REVISE, revise the artifacts and review again."
+    - "[warrant] Implement each task group in a separate, fresh context (a sub-agent). Give the sub-agent the group's tasks, the names of their requirements and the paths of the change's artifacts. The sub-agent follows warrant-tdd and warrant-minimal-change, then reports the scenarios, the red and green results and the changed files."
     - "[warrant] If you can choose a sub-agent's model, give a task group whose requirements and design leave nothing open to a smaller, faster model, and every other group to the session's model."
-    - "[warrant] After each sub-agent reports, run warrant-verify, then check off the group's tasks."
+    - "[warrant] After each sub-agent reports, run warrant-verify. Check off the group's tasks only when every verification command exited with 0."
   archive:
     guidance:
     - "[warrant] Archive only when every verification task has a 'Result:' line."

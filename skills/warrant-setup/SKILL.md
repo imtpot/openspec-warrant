@@ -15,17 +15,19 @@ Stop at the first step that says stop, and write nothing after it.
 Run `openspec --version`.
 
 - If the version is older than `1.16.0`, stop. Report the installed version and
-  that warrant needs OpenSpec 1.16 or later. Do not write any file.
+  that warrant needs OpenSpec 1.16 or later.
 
 ## 2. Check for an OpenSpec root
 
 Run `openspec list --json` and read `root`. OpenSpec searches parent
 directories, so it can report the root of an enclosing repository.
 
-- If `root` is `null`, or `root.path` is not this project's top directory (the
-  output of `git rev-parse --show-toplevel`, or the current directory outside
-  git), stop. Tell the user to run `openspec init` in this project first. Do
-  not write any file and do not run `openspec init` yourself.
+This project's top directory is the output of `git rev-parse --show-toplevel`,
+or the current directory outside git.
+
+- If `root` is `null`, or `root.path` is not this project's top directory,
+  stop. Tell the user to run `openspec init` in this project first. Leave
+  `openspec init` to the user.
 
 ## 3. Find the shipped rules
 
@@ -53,7 +55,7 @@ For each of these lists:
 Change nothing else: keep `schema`, `context`, comments, the project's own
 entries and their order.
 
-Then verify:
+Then check:
 
 - `openspec list --json` prints no warning about `rules` or `operations`.
 - The number of list entries that start with `[warrant] ` in
@@ -119,8 +121,9 @@ Write the section in exactly this form:
 
 - Keep the four subsections in this order, even when one is empty.
 - Under Destructive actions, propose deploy, publish, delete and migration
-  commands found in the project, and write only the confirmed ones.
-- Under Glossary, write a path only if that file exists; otherwise write
+  commands found in the project, and write only the confirmed ones. If the
+  user confirms none, leave the subsection empty.
+- Under Glossary, write a path only if that file exists. Otherwise write
   `none`.
 - Under Standards, propose existing files that state coding rules for this
   project, such as `CONTRIBUTING.md`, a style guide or a `docs/` page about
@@ -130,11 +133,10 @@ Write the section in exactly this form:
 
 Report what you did: rules added or replaced, context written or kept,
 contract created or unchanged.
-Then print this command with the installed OpenSpec version, which installs the
-OpenSpec workflow skills for that release:
+Then print the command below, with `<installed version>` replaced by the
+version from step 1. The command installs the OpenSpec workflow skills for that
+release. Leave running it to the user.
 
 ```sh
 npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills
 ```
-
-Do not run it yourself.

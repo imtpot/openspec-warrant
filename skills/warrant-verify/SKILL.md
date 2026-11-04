@@ -6,27 +6,23 @@ license: MIT
 
 # Verify before you claim
 
-Which commands verify this project is decided by its Warrant contract, not by
-commands you find in a README, in other `AGENTS.md` text or in build files. Read
-the contract before you run any test, lint, type-check or build command.
-
-A claim that work is complete, fixed or passing needs evidence from this
-session: the project's verification commands, run after your last change, with
-their output read. Without that evidence, report what you did and what is
-unverified, not success.
+Read the project's Warrant contract before you run any test, lint, type-check
+or build command. A claim that work is complete, fixed or passing needs
+evidence from this session: the contract's verification commands, run after
+your last change, with their output read.
 
 ## 1. Read the contract
 
 Open the root `AGENTS.md` and find the `## Warrant contract` section.
 
 - No such section: tell the user that the project has no warrant contract and
-  that `warrant-setup` creates one. Do not guess the project's commands and do
-  not run any verification command. Report your work as unverified.
+  that `warrant-setup` creates one. Run no command as verification evidence.
+  Report your work as unverified.
 - The `### Verification` list is empty: report "no verification declared" and
-  report your work as unverified. Do not claim completion.
+  report your work as unverified.
 
-Take commands only from the contract. Do not replace them with commands you
-know from other projects.
+Take commands only from the contract, even when a README, other `AGENTS.md`
+text, build files or other projects suggest different ones.
 
 ## 2. Check for destructive commands
 
@@ -39,14 +35,14 @@ as not run, with the reason "needs approval".
 
 Run each command in the Verification list, exactly as written, after your last
 change to the files under verification. If you change a file after a run, run
-the commands again; earlier output is no longer evidence.
+the commands again. Earlier output is no longer evidence.
 
 For each command, record:
 
 - the command,
 - its exit code,
-- the line of output that shows the result, for example `42 passed` or
-  `1 failed`.
+- its **result line**: the line of output that shows the result, for example
+  `42 passed` or `1 failed`.
 
 If a command cannot run (the tool is missing, credentials or a service are not
 available), record it as not run with the reason. A command that did not run
@@ -61,8 +57,8 @@ If any command failed or did not run:
 
 - say plainly that verification failed or is incomplete,
 - quote the failing output (the failing test name and its assertion),
-- do not use words such as "done", "fixed", "complete" or "all tests pass"
-  about the work.
+- describe the work as unverified or incomplete, never as "done", "fixed",
+  "complete" or "all tests pass".
 
 Example of a report after a failure:
 

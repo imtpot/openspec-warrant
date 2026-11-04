@@ -98,7 +98,7 @@ def test_apply_guidance_implements_each_group_in_a_sub_agent():
 
     assert 'fresh context (a sub-agent)' in apply
     assert 'task group' in apply
-    assert apply.index('warrant-verify') < apply.index('check off')
+    assert apply.index('warrant-verify') < apply.lower().index('check off')
 
 
 def test_apply_guidance_routes_settled_groups_to_a_smaller_model():
@@ -106,6 +106,23 @@ def test_apply_guidance_routes_settled_groups_to_a_smaller_model():
 
     assert 'smaller, faster model' in apply
     assert "session's model" in apply
+
+
+def test_apply_guidance_gives_a_path_after_revise():
+    apply = _section(RULES_FILE.read_text(), '  apply:', '  archive:')
+
+    assert 'Artifact review: REVISE' in apply
+    assert 'review again' in apply
+
+
+def test_tasks_are_checked_off_only_after_passing_verification():
+    apply = _section(RULES_FILE.read_text(), '  apply:', '  archive:')
+
+    assert 'only when every verification command exited with 0' in apply
+
+
+def test_no_rule_joins_instructions_with_a_semicolon():
+    assert [line for line in _rule_lines() if ';' in line] == []
 
 
 def test_tasks_rules_ask_for_independent_groups():

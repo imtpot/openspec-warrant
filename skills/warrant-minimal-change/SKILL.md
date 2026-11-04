@@ -7,28 +7,28 @@ license: MIT
 # Minimal change
 
 A change is warranted line by line: each added or changed line exists because
-the task or a requirement needs it. Be economical with the solution, never with
-completeness: a change that breaks a caller or a test is not finished.
+the task or a requirement needs it. Be economical with the solution and
+complete with its reach.
 
 ## Before you write code
 
-1. Read the task and the code it touches.
-2. List every place the change must reach: callers, tests, fixtures,
+1. List every place the change must reach: callers, tests, fixtures,
    configuration, exports, documentation that names the changed behavior.
-3. If the work belongs to an OpenSpec change, read its specs. They define what
-   is required; nothing else is.
+2. If the work belongs to an OpenSpec change, read its specs. Only the specs
+   define what is required.
 
-## Choose the first option that fully works
+## Option ladder
 
-Check these options in order and take the first that solves the whole task:
+Go through these options in order and take the first that solves the whole
+task:
 
 1. **No change.** The behavior already exists, or a setting already provides it.
 2. **Existing project code.** A function, module or pattern in this project
    already does it. Call it the way the surrounding code does.
-3. **Standard library or platform.** Use it unless the project has its own
-   wrapper for the same thing; then use the wrapper.
-4. **An installed dependency.** Use it. Do not add a dependency for what a few
-   lines of code can do.
+3. **Standard library or platform.** Use it. If the project has its own wrapper
+   for the same thing, use the wrapper.
+4. **An installed dependency.** Use it. Write a few lines of code instead of
+   adding a dependency for them.
 5. **New code.** Write the least code that works and that a reader understands
    at a glance.
 
@@ -37,11 +37,11 @@ for, name it in one line of your report, so the requester can ask for it.
 
 ## While you write
 
-- Add no wrapper, abstraction, parameter, option, configuration or "for later"
-  code that the task does not need. Deleting code beats adding code.
+- Write only the code the task needs: no wrapper, abstraction, parameter,
+  option, configuration or "for later" code beyond it. Deleting code beats
+  adding code.
 - Keep the structure the project already has: its layers, names and conventions.
-- Fix a bug at its root, once, in the shared code. Before you edit a shared
-  function, find all of its callers.
+- Fix a bug at its root, once, in the shared code.
 - Update every caller, test, fixture and configuration that your change breaks,
   in the same change.
 - When you move or merge code, keep its validation and error handling.
@@ -50,7 +50,10 @@ for, name it in one line of your report, so the requester can ask for it.
 - Delete every temporary, backup or scratch file you created before you report
   the change.
 
-Never leave out or remove, to make a change smaller, in new or existing code:
+## Protected code
+
+Keep these in new and existing code, even when leaving them out would make the
+change smaller:
 
 - validation at trust boundaries (user input, network input, file input),
 - error handling that prevents data loss,
@@ -61,9 +64,10 @@ Never leave out or remove, to make a change smaller, in new or existing code:
 ## Trace lines to requirements
 
 When the work belongs to an OpenSpec change, review your diff before you report
-completion. For each added line, name the requirement it serves. Remove every
-line that serves none. If the line is needed but no requirement covers it, stop
-and tell the user: the specs are missing a requirement.
+completion. For each added line, name the requirement it serves. Imports, test
+code and formatting count for the requirement they support. Remove every line
+that serves none. If the line is needed but no requirement covers it, stop and
+tell the user that the specs are missing a requirement.
 
 ## Mark deliberate limitations
 
@@ -74,7 +78,7 @@ shortcut: <the limit>, <when to upgrade>
 ```
 
 Example: `# shortcut: first 100 items only, paginate when a project exceeds 100`.
-Always name the trigger for the upgrade; a shortcut without a trigger becomes
+Always name the trigger for the upgrade. A shortcut without a trigger becomes
 permanent without anyone deciding it.
 
 ## Shortcut ledger
