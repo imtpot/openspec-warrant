@@ -10,6 +10,8 @@ Files this change reaches: `evals/warrant_evals/benchmark.py`,
 - [ ] 1.2 Write failing tests, then score marked ambiguities (specs: "Marked ambiguity"); verify the tests pass
 - [ ] 1.3 Write failing tests, then score plan-implement runs (specs: "Plan-implement task scores"); verify the tests pass
 
+- [ ] 1.4 Write failing tests, then send several prompts in one session (specs: "Prompts in one session"); verify the tests pass
+
 ## 2. Task
 
 - [ ] 2.1 Add the allocation fixture, reference, faults and acceptance tests; verify the reference passes and every fault fails an acceptance test

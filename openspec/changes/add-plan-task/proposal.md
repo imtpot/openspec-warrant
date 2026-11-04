@@ -11,8 +11,13 @@ together, as a real change runs.
 ## What Changes
 
 - A `plan-implement` task kind: the agent gets a short request with three
-  hidden ambiguities, plans it as an OpenSpec change and implements it in the
-  same run.
+  hidden ambiguities and plans it as an OpenSpec change; a second request in
+  the same session asks it to implement the change. Two requests follow
+  OpenSpec's planning boundary: `openspec-propose` stops after planning even
+  when the first request asks to build.
+- Benchmark tasks may list several prompts; every prompt after the first
+  continues the agent's session (`claude -p --continue`,
+  `codex exec resume --last`).
 - Scores: the share of ambiguities the agent marks as open or assumed, hidden
   acceptance tests on the unambiguous behavior, fault detection and added
   lines.

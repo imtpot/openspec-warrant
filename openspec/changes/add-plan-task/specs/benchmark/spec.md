@@ -41,3 +41,12 @@ assume, question, confirm, unclear, ambiguous, decided or chose.
 #### Scenario: Silent decision
 - **WHEN** the code handles an empty list but no text marks it as open or assumed
 - **THEN** the empty-list ambiguity does not count
+
+### Requirement: Prompts in one session
+
+WHERE a task lists several prompts, the benchmark SHALL send each prompt after
+the first as a continuation of the agent's session in the same workspace.
+
+#### Scenario: Plan then implement
+- **WHEN** the plan-implement task lists a plan prompt and an implement prompt
+- **THEN** Claude gets the second prompt with `--continue` and Codex with `exec resume --last`
