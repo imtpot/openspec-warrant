@@ -55,3 +55,13 @@ The design document `docs/design.md` SHALL name each warrant skill.
 #### Scenario: Skill missing from the design
 - **WHEN** a skill is not mentioned in `docs/design.md`
 - **THEN** the kit test fails and names the skill
+
+### Requirement: Fresh context with a fallback
+
+WHERE a warrant skill asks for a separate, fresh context, the skill SHALL state
+what to do when no separate context is available, in a sentence that starts with
+"If you cannot start a separate context".
+
+#### Scenario: Review in a fresh context
+- **WHEN** a skill says to run a review in a separate, fresh context
+- **THEN** the skill also contains "If you cannot start a separate context" followed by the fallback
