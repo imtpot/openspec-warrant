@@ -1,4 +1,0 @@
-kind = "implement"
-fixture = "implement-split/fixture"
-module = "app/split.py"
-prompt = "Implement the OpenSpec change add-weighted-split. Nobody can answer questions during this run."

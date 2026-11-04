@@ -138,11 +138,13 @@ warrant's skills, rules and contract). In `bare` and `openspec`, `AGENTS.md`
 names the verification commands as plain text. Claude runs with
 `--setting-sources project,local`, so user plugins stay out of every arm.
 
-- `implement-split`: implement a ready OpenSpec change. Scores: hidden
-  acceptance tests passed (of 8), the share of 7 faulty implementations that
-  the agent's own tests reject, and non-test lines added.
-- `review-branch`: review a branch with 6 planted problems. Score: the share
-  of problems the report names.
+- `implement-proration`: implement a ready OpenSpec change in an existing
+  billing module. Scores: hidden acceptance tests passed (of 11), the share of
+  8 faulty implementations that the agent's own tests reject (3 of them break
+  a requirement that no example scenario shows), and non-test lines added.
+- `review-export`: review a branch with 6 planted problems that need the
+  spec, the standards or code outside the diff. Score: the share of problems
+  the report names.
 - Every run records the tokens the agent reports. Compare tokens between arms
   of one agent, not between agents.
 

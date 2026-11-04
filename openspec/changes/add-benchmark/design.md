@@ -31,8 +31,12 @@ contract into text, so all arms share one fixture and cannot drift apart.
 `bare` installs no skill; `openspec` installs the OpenSpec skills; `warrant`
 installs both and merges `rules.yaml`.
 
-### 5. Implement task
+### 5. Tasks hard enough to differ
 
-The fixture holds a sound OpenSpec change `add-weighted-split` for
-`split(total, weights)` in `app/split.py`. Faulty implementations each break
-one requirement.
+A first version used a weight split and the eval's review branch; every arm
+of a Claude smoke run scored the maximum, so the tasks could not show a
+difference. `implement-proration` adds `prorate` to an existing billing
+module; three of its eight faults break a requirement that no example scenario
+shows. `review-export` plants an off-by-one page, a wrong tie order, an
+unclosed file, shell injection, a mutable default and a caller outside the diff
+broken by a changed signature.

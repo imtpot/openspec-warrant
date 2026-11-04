@@ -1,0 +1,4 @@
+kind = "implement"
+fixture = "implement-proration/fixture"
+module = "app/billing.py"
+prompt = "Implement the OpenSpec change add-proration. Nobody can answer questions during this run."

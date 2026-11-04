@@ -1,0 +1,13 @@
+kind = "review"
+fixture = "review-export/fixture"
+setup = "setup.sh"
+prompt = "Review the current branch before merge. Nobody can answer questions during this run."
+# Planted problems; each group lists terms of which one must appear in the report.
+problems = [
+  ["size - 1", "size-1", "off-by-one", "off by one", "one order short", "one item short", "drops the last"],
+  ["tie", "id descending", "reverse=True"],
+  ["not closed", "never closed", "with open", "file handle", "leak", "f.close"],
+  ["shell=True", "injection"],
+  ["mutable default", "seen=[]", "default argument", "shared list"],
+  ["report.py"],
+]

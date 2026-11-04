@@ -19,8 +19,10 @@ bugs or only spends more tokens than plain OpenSpec.
   arm.
 - An implement task measures hidden acceptance tests passed, the share of
   prepared faulty implementations that the agent's own tests reject, and the
-  non-test lines added.
-- A review task measures the share of planted problems the review names.
+  non-test lines added. Some faults break only a requirement's text, not one
+  of its example scenarios.
+- A review task measures the share of planted problems the review names; the
+  problems need reading the spec, the standards or code outside the diff.
 - Every run records the tokens the agent reports.
 - The benchmark writes a table with the mean per task, agent and arm.
 
@@ -36,7 +38,7 @@ None.
 
 New `evals/warrant_evals/benchmark.py`, `evals/benchmark/` (tasks, fixture,
 hidden tests and faulty implementations), tests, `README.md`,
-`docs/design.md`. The review task reuses the `review-branch` fixture.
+`docs/design.md`.
 
 ## Why code is needed
 

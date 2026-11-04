@@ -221,15 +221,15 @@ def test_main_runs_every_arm_and_writes_the_table(tmp_path, monkeypatch):
         assert f'| review | fake | {arm} | 1 | 0.50 (1) | n/a |' in table
 
 
-IMPLEMENT = benchmark.TASKS / 'implement-split'
+IMPLEMENT = benchmark.TASKS / 'implement-proration'
 
 
 def _acceptance_failures(tmp_path, code):
     workspace = tmp_path / 'workspace'
     shutil.rmtree(workspace, ignore_errors=True)
     shutil.copytree(IMPLEMENT / 'fixture', workspace)
-    (workspace / 'app' / 'split.py').write_text(code)
-    return 8 - benchmark.acceptance(workspace, IMPLEMENT / 'hidden')
+    (workspace / 'app' / 'billing.py').write_text(code)
+    return 11 - benchmark.acceptance(workspace, IMPLEMENT / 'hidden')
 
 
 def test_reference_passes_every_acceptance_test(tmp_path):
@@ -242,16 +242,23 @@ def test_every_fault_fails_an_acceptance_test(tmp_path, fault):
 
 
 def test_implement_task_change_follows_warrant_rules():
-    change = IMPLEMENT / 'fixture' / 'openspec' / 'changes' / 'add-weighted-split'
+    change = IMPLEMENT / 'fixture' / 'openspec' / 'changes' / 'add-proration'
 
     assert check_proposal((change / 'proposal.md').read_text()) == []
-    assert check_spec((change / 'specs' / 'weighted-split' / 'spec.md').read_text()) == []
+    assert check_spec((change / 'specs' / 'billing' / 'spec.md').read_text()) == []
 
 
 def test_tasks_load_with_fixtures_and_kinds():
     tasks = {t['name']: t for t in benchmark.load_tasks()}
 
-    assert sorted(tasks) == ['implement-split', 'review-branch']
+    assert sorted(tasks) == ['implement-proration', 'review-export']
     assert all(t['fixture'].is_dir() for t in tasks.values())
-    assert len(tasks['review-branch']['problems']) == 6
-    assert (tasks['review-branch']['fixture'] / tasks['review-branch']['setup']).is_file()
+    assert len(tasks['review-export']['problems']) == 6
+    assert (tasks['review-export']['fixture'] / tasks['review-export']['setup']).is_file()
+
+
+def test_review_task_change_follows_warrant_rules():
+    change = benchmark.TASKS / 'review-export' / 'fixture' / 'openspec' / 'changes' / 'add-order-export'
+
+    assert check_proposal((change / 'proposal.md').read_text()) == []
+    assert check_spec((change / 'specs' / 'order-export' / 'spec.md').read_text()) == []

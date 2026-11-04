@@ -19,7 +19,7 @@ Files this change reaches: `evals/warrant_evals/benchmark.py`,
 ## 3. Tasks
 
 - [ ] 3.1 Add the implement task fixture, hidden tests, reference and faulty implementations; verify the reference passes the hidden tests and every faulty implementation fails them
-- [ ] 3.2 Add the review task on the `review-branch` fixture
+- [ ] 3.2 Add the review task with a fixture whose planted problems need the spec, the standards or code outside the diff
 - [ ] 3.3 Document the benchmark in `README.md` and `docs/design.md`
 
 ## 4. Review
