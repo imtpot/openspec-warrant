@@ -6,4 +6,4 @@ path = ["bin"]
 
 [params]
 expect = "nothing"
-transcript = ["1.15.0"]
+transcript = ["1.15.0", "install"]

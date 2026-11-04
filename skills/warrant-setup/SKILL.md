@@ -1,35 +1,49 @@
 ---
 name: warrant-setup
-description: Use when the user asks to set up, install or upgrade openspec-warrant in a project that uses OpenSpec 1.16 or later.
+description: Use when the user asks to set up, install or upgrade openspec-warrant in a project.
 license: MIT
 ---
 
 # Set up openspec-warrant
 
-Add warrant's rules to the project's OpenSpec configuration and declare the
-project contract that the other `warrant-*` skills read. Run the steps in order.
-Stop at the first step that says stop, and write nothing after it.
+Set up OpenSpec, add warrant's rules and declare the contract the `warrant-*`
+skills read. Run the steps in order. At a step that says stop, write nothing.
 
-## 1. Check the OpenSpec CLI version
+## 1. Check the OpenSpec CLI
 
 Run `openspec --version`.
 
-- If the version is older than `1.16.0`, stop. Report the installed version and
-  that warrant needs OpenSpec 1.16 or later.
+- If the command is missing or older than `1.16.0`, propose one install
+  command: through the project's tool pinning (`mise.toml`, `package.json` dev
+  dependencies) if it has one, else `npm install -g @fission-ai/openspec@latest`
+  or `brew install openspec`. Run it only after the user confirms, then check
+  the version again. Without confirmation, stop and report the installed
+  version, that warrant needs 1.16 or later, and the command.
 
 ## 2. Check for an OpenSpec root
 
 Run `openspec list --json` and read `root`. OpenSpec searches parent
 directories, so it can report the root of an enclosing repository.
 
-This project's top directory is the output of `git rev-parse --show-toplevel`,
-or the current directory outside git.
+The project's top directory is `git rev-parse --show-toplevel`, or the current
+directory outside git.
 
 - If `root` is `null`, or `root.path` is not this project's top directory,
-  stop. Tell the user to run `openspec init` in this project first. Leave
-  `openspec init` to the user.
+  propose `openspec init --tools agents --profile core`, which also writes the
+  OpenSpec skills to `.agents/skills/`. Run it only after the user confirms.
+  Without confirmation, stop and name the command.
 
-## 3. Find the shipped rules
+## 3. Link the OpenSpec skills
+
+For each `.agents/skills/openspec-*` directory and each existing
+`.<agent>/skills/` directory, create the missing link `.<agent>/skills/<skill>`
+pointing to `../../.agents/skills/<skill>`. Keep every existing entry.
+
+If `.agents/skills/openspec-verify-change` is missing, note for the report
+that the Spec axis of `warrant-review` needs it and that `openspec config
+profile`, then `openspec update`, adds it.
+
+## 4. Find the shipped rules
 
 The rules ship next to this skill as `rules.yaml`. Use the first that exists:
 
@@ -39,7 +53,7 @@ The rules ship next to this skill as `rules.yaml`. Use the first that exists:
 - If neither exists, stop. Report both paths and suggest reinstalling with
   `npx skills add imtpot/openspec-warrant`.
 
-## 4. Merge the rules into `openspec/config.yaml`
+## 5. Merge the rules into `openspec/config.yaml`
 
 `rules.yaml` holds the lists `rules.<artifact>` and
 `operations.<operation>.guidance`. Every entry starts with `[warrant] `.
@@ -63,12 +77,12 @@ Then check:
 
 If either check fails, report the problem and stop.
 
-## 5. Draft the OpenSpec context
+## 6. Draft the OpenSpec context
 
 OpenSpec injects `context` from `openspec/config.yaml` into every planning
 request.
 
-- If `context` has a value, leave it unchanged and go to step 6.
+- If `context` has a value, leave it unchanged and go to step 7.
 
 Otherwise, read the project's own documents: `README`, the contributing guide,
 `AGENTS.md` outside the Warrant contract and `docs/`. Collect only constraints
@@ -80,12 +94,12 @@ Propose at most 10 lines to the user. Write only the lines the user confirms,
 as a `context: |` block after `schema`, and keep every other key and comment.
 If the user confirms none, or you found none, write no `context`.
 
-## 6. Create the project contract
+## 7. Create the project contract
 
 Open the root `AGENTS.md`.
 
 - If it already contains a `## Warrant contract` section, leave the file
-  unchanged and go to step 7.
+  unchanged and go to step 8.
 - If the file does not exist, create it with only the contract section.
 - Otherwise, append the contract section at the end and keep the existing
   content unchanged.
@@ -129,14 +143,8 @@ Write the section in exactly this form:
   project, such as `CONTRIBUTING.md`, a style guide or a `docs/` page about
   conventions. Write only the files the user confirms, or `none`.
 
-## 7. Report
+## 8. Report
 
-Report what you did: rules added or replaced, context written or kept,
-contract created or unchanged.
-Then print the command below, with `<installed version>` replaced by the
-version from step 1. The command installs the OpenSpec workflow skills for that
-release. Leave running it to the user.
-
-```sh
-npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills
-```
+Report what you did: OpenSpec installed or initialized, skill links created,
+rules added or replaced, context written or kept, contract created or
+unchanged, and the note from step 3 if there is one.

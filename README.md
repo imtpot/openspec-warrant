@@ -33,23 +33,29 @@ Community extension; not affiliated with Fission-AI or the OpenSpec project.
 
 ## Install
 
-Requirements: OpenSpec CLI 1.16 or later and an OpenSpec root (`openspec init`).
-
 ```sh
 npx skills add imtpot/openspec-warrant
 ```
 
-Then ask your agent to run the `warrant-setup` skill. It adds warrant's rules,
-each marked `[warrant] `, to the `rules` and `operations` lists in
-`openspec/config.yaml` without touching your own entries or the `schema` field,
-proposes a `context` when yours is empty (only constraints an agent cannot
-infer from the code, written after you confirm them), proposes a contract for
-`AGENTS.md` and prints the command that installs the OpenSpec workflow skills
-for your OpenSpec version, for example:
+Then ask your agent to run the `warrant-setup` skill. With your confirmation at
+each step, it:
 
-```sh
-npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills
-```
+- installs the OpenSpec CLI if it is missing or older than 1.16 (through your
+  project's tool pinning, npm or Homebrew),
+- runs `openspec init --tools agents --profile core` if the project has no
+  OpenSpec root, which writes the OpenSpec workflow skills to `.agents/skills/`,
+- links those skills into each agent skills directory the project already has,
+  such as `.claude/skills/`,
+- adds warrant's rules, each marked `[warrant] `, to the `rules` and
+  `operations` lists in `openspec/config.yaml` without touching your own
+  entries or the `schema` field,
+- proposes a `context` when yours is empty (only constraints an agent cannot
+  infer from the code),
+- proposes a contract for `AGENTS.md`.
+
+The `core` profile has no `verify` workflow, which the Spec axis of
+`warrant-review` uses; add it with `openspec config profile`, then
+`openspec update`.
 
 Run `warrant-setup` again after updating the kit: it replaces only the
 `[warrant] ` entries.

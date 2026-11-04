@@ -5,4 +5,4 @@ checker = "setup"
 
 [params]
 expect = "nothing"
-transcript = ["openspec init"]
+transcript = ["openspec init --tools agents"]
