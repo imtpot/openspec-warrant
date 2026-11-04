@@ -136,8 +136,8 @@ docs/glossary.md
 
 | Agent | Eval scenarios passed |
 |---|---|
-| Claude Code 2.1 | 25 of 25 |
-| Codex 0.166 | 25 of 25 |
+| Claude Code 2.1 | 24 of 24 |
+| Codex 0.166 | 24 of 24 |
 
 The skills name no agent, so other agents can load them from `.agents/skills/`;
 only Claude Code and Codex are evaluated. How the evals run:

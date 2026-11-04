@@ -49,12 +49,11 @@ SHALL leave the contract unchanged.
 
 ### Requirement: No OpenSpec root
 
-IF the project has no OpenSpec root and the user does not confirm
-`openspec init --tools agents --profile core`, THEN the setup skill SHALL stop
-without writing files and name that command.
+IF the project has no OpenSpec root, THEN the setup skill SHALL stop without
+writing files and name `openspec init --tools agents --profile core`.
 
 #### Scenario: Plain repository
-- **WHEN** setup runs in a repository without `openspec/` and nobody confirms
+- **WHEN** setup runs in a repository without `openspec/`
 - **THEN** no file is created and the output names `openspec init --tools agents`
 
 #### Scenario: Root of an enclosing repository
@@ -64,12 +63,12 @@ without writing files and name that command.
 
 ### Requirement: Unsupported OpenSpec version
 
-IF the OpenSpec CLI is missing or older than 1.16 and the user does not confirm
-an install command, THEN the setup skill SHALL stop without writing files and
-report the installed version, the supported version and the install command.
+IF the OpenSpec CLI is missing or older than 1.16, THEN the setup skill SHALL
+stop without writing files and report the installed version, the supported
+version and an install command.
 
 #### Scenario: Older CLI
-- **WHEN** `openspec --version` prints `1.15.0` and nobody confirms
+- **WHEN** `openspec --version` prints `1.15.0`
 - **THEN** setup reports `1.15.0`, `1.16` and an install command, and writes nothing
 
 ### Requirement: Install the rules
@@ -139,15 +138,6 @@ the Destructive actions subsection empty.
 #### Scenario: Nothing confirmed
 - **WHEN** setup proposes `make deploy` and the user confirms none
 - **THEN** `### Destructive actions` has no entry
-
-### Requirement: Confirmed install and init
-
-WHEN the user confirms the install command or the init command, the setup
-skill SHALL run it and continue the setup.
-
-#### Scenario: Init confirmed
-- **WHEN** a repository has no `openspec/` and the user confirms the init command
-- **THEN** setup runs it, merges the rules and creates the contract
 
 ### Requirement: OpenSpec skills for every agent directory
 
