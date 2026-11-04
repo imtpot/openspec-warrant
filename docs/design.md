@@ -49,9 +49,9 @@ them checkable.
    `## Warrant contract` section of `AGENTS.md`.
 4. **One rule, one place.** A rule lives in `rules.yaml` or in one skill, and
    other parts refer to it by name.
-5. **Spend the reader's tokens carefully.** Short skills, short replies a busy
-   person understands in one read, a closing line with what was skipped, not
-   checked or risky, and skill descriptions that say only when to use the skill.
+5. **Spend the reader's tokens carefully.** Short skills, fixed report endings
+   where a reader or CI needs them, and skill descriptions that say only when to
+   use the skill.
    (Ponytail: "Lower cost and latency are a side effect.")
 6. **Agent-neutral.** No skill names an agent or an agent's tools. A skill may
    ask for a separate, fresh context (a sub-agent), which all three supported
@@ -119,8 +119,8 @@ duplicated OpenSpec (principle 1).
 
 Remaining drift:
 
-- Only `warrant-verify` reports carry the closing line; other skills' replies
-  have no brevity check (principle 5).
+- No skill asks for short replies, and evals do not measure reply length
+  (principle 5). Decide after real use whether replies are too long.
 
 ## Success criteria
 
@@ -137,8 +137,9 @@ Remaining drift:
    apply guidance; `warrant-design` removed.
 2. Done: `warrant-review` runs `openspec-verify-change` for the Spec axis and
    checks connected code; axes run in separate contexts.
-3. Done: short verification reports ending with a `Not checked: ...; Risks: ...`
-   line. Still open: decide on the Decision records subsection.
+3. Economy: a brevity rule was tried in `warrant-verify` only and dropped so
+   that no skill is an exception; revisit with data from real use. Still open:
+   remove the Decision records subsection.
 4. Done from anvil: an artifact review before implementation with a verdict line
    CI can parse, and verification results as `Result:` lines.
 5. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).

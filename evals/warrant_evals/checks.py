@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 
 from warrant_evals import openspec_rules
-from warrant_evals.behavior import check_closing_line, check_duplicate_helper, check_success_claim
+from warrant_evals.behavior import check_duplicate_helper, check_success_claim
 from warrant_evals.contract import ContractError, parse_contract
 from warrant_evals.requirements import Finding, check_proposal, check_spec
 from warrant_evals.scenarios import CheckerFactory
@@ -134,7 +134,6 @@ def verify_check(params: dict):
     def check(workspace: Path, transcript: str) -> list[Finding]:
         findings = _transcript_findings(params, transcript)
         findings += check_success_claim(transcript, tests_fail=True)
-        findings += check_closing_line(transcript)
         if 'marker' in params and (workspace / params['marker']).exists():
             findings.append(Finding('verify', 'verification ran although the project has no contract'))
         return findings

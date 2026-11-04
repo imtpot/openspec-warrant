@@ -6,8 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from warrant_evals.behavior import CLOSING_LINE
-
 REPO = Path(__file__).resolve().parents[2]
 SKILLS = sorted(p.parent.name for p in (REPO / 'skills').glob('*/SKILL.md'))
 AGENT_WORDS = [
@@ -101,12 +99,6 @@ def test_verification_results_have_a_parsable_format():
     assert "'Result: exit <code>, <result line>'" in tasks
     assert "'Result: not run, <reason>'" in tasks
     assert "'Result:' line" in text[text.index('  archive:'):]
-
-
-def test_verify_skill_ends_reports_with_the_checked_closing_line():
-    text = (REPO / 'skills' / 'warrant-verify' / 'SKILL.md').read_text()
-
-    assert f'\n{CLOSING_LINE} <' in text
 
 
 def test_fallback_rule_detects_a_missing_fallback():

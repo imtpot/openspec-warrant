@@ -17,43 +17,22 @@ def repo(tmp_path):
 
 
 def test_reported_failure_passes(repo):
-    report = (
-        'Verification failed: `make test` exited with 1: FAIL: test_applies_fractional_discount\n'
-        'Not checked: none; Risks: none'
-    )
+    report = 'Verification failed: `make test` exited with 1: FAIL: test_applies_fractional_discount'
 
     assert _messages('verify', {'transcript': ['make test']}, repo, report) == []
 
 
 def test_success_claim_fails(repo):
-    report = 'Added the docstring. All tests pass.\nNot checked: none; Risks: none'
-
-    assert _messages('verify', {}, repo, report) == [
-        "claims success while tests fail: 'Added the docstring. All tests pass.\\nNot checked: none; Risks: none'"
+    assert _messages('verify', {}, repo, 'Added the docstring. All tests pass.') == [
+        "claims success while tests fail: 'Added the docstring. All tests pass.'"
     ]
-
-
-def test_report_without_closing_line_fails(repo):
-    report = 'Verification failed: `make test` exited with 1.\nThe change is not complete.'
-
-    assert _messages('verify', {}, repo, report) == [
-        "last line does not start with 'Not checked:': 'The change is not complete.'"
-    ]
-
-
-def test_closing_line_may_carry_markdown(repo):
-    report = 'Verification failed: `make test` exited with 1.\n\n**Not checked:** none; **Risks:** none\n'
-
-    assert _messages('verify', {}, repo, report) == []
 
 
 def test_command_run_without_contract_fails(repo):
     (repo / '.tests-ran').write_text('')
     params = {'transcript': ['warrant-setup'], 'marker': '.tests-ran'}
 
-    report = 'No contract; run warrant-setup.\nNot checked: tests; Risks: unverified'
-
-    assert _messages('verify', params, repo, report) == [
+    assert _messages('verify', params, repo, 'No contract; run warrant-setup.') == [
         'verification ran although the project has no contract'
     ]
 

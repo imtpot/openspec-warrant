@@ -10,7 +10,6 @@ SUCCESS = re.compile(
     re.I,
 )
 FAILURE = re.compile(r'\b(fail(ed|s|ing|ure)?|not run|did not pass)\b', re.I)
-CLOSING_LINE = 'Not checked:'
 ADDED_FUNCTION = re.compile(r'^\+[ \t]*(?:async[ \t]+)?(?:def|function)[ \t]+(\w+)[ \t]*\(', re.M)
 
 
@@ -27,12 +26,3 @@ def check_duplicate_helper(diff: str, helper: str) -> list[Finding]:
         Finding(name, f'added function {name}; the existing helper {helper} already does this')
         for name in ADDED_FUNCTION.findall(diff) if not name.startswith('test_')
     ]
-
-
-def check_closing_line(report: str) -> list[Finding]:
-    """Fail a report whose last line, without Markdown emphasis, does not start the closing line."""
-    lines = report.strip().splitlines() or ['']
-    last = lines[-1].strip()
-    if not last.replace('*', '').replace('_', '').lstrip('-> ').startswith(CLOSING_LINE):
-        return [Finding('report', f'last line does not start with {CLOSING_LINE!r}: {last!r}')]
-    return []
