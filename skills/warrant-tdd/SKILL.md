@@ -37,7 +37,11 @@ This skill works on the requirement it is given. Do not pick tasks from
 1. Write one test for this scenario only, through the interface the
    requirement describes. Put a one-line comment above it:
    `<Requirement>: <Scenario>` (in the test language's comment syntax), or name
-   the test after the scenario.
+   the test after the scenario. Before you write it, name the code change that
+   would make it fail. Take the expected value from the spec or work it out by
+   hand; never compute it with the code under test or its helpers. Replace
+   only external systems, time and randomness with test doubles; run the
+   project's own modules for real.
 2. Run only this test. Narrow the contract's tests command with the tool's own
    selection (a file path, a test id, `-k`, `--grep`, `-run`). Example: the
    contract says `python3 -m unittest discover -s tests -t .`; run
@@ -59,7 +63,13 @@ This skill works on the requirement it is given. Do not pick tasks from
 
 ## 3. Finish
 
-Run the contract's verification following `warrant-verify`.
+Check the tests against realistic mutations of the code you changed: a wrong
+constant or comparison (`<` for `<=`), the other branch, a missing check for
+zero, empty or invalid input, a missing side effect, an empty or default
+return. For each mutation that no test fails on, add a test and run red and
+green as in step 2.
+
+Then run the contract's verification following `warrant-verify`.
 
 ## Report
 

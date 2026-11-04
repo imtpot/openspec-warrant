@@ -24,3 +24,31 @@ tested after the spec's scenarios.
 #### Scenario: Report with a boundary case
 - **WHEN** the skill tested an exact half cent besides the spec's scenarios
 - **THEN** the report lists the exact half cent as a boundary case
+
+### Requirement: Independent expected values
+
+The TDD skill SHALL take each expected value from the spec or from a worked
+example computed by hand, never from the code under test or its helpers.
+
+#### Scenario: Sum of line items
+- **WHEN** a test checks the total of items priced 10 and 5
+- **THEN** the test expects the literal 15, not a sum computed in the test
+
+### Requirement: Mocks only at external boundaries
+
+The TDD skill SHALL replace only external systems, time and randomness with
+test doubles, and run the project's own modules for real.
+
+#### Scenario: Module calls a helper of the same project
+- **WHEN** the code under test calls `days_between` from the same project
+- **THEN** the test runs the real `days_between`
+
+### Requirement: Mutation check
+
+WHEN the TDD skill has finished every scenario and boundary case, the TDD
+skill SHALL check each realistic mutation of the changed code against the
+tests and add a test, red then green, for each mutation that no test fails on.
+
+#### Scenario: Rounding mutation not caught
+- **WHEN** replacing round-half-up with round-half-even fails no test
+- **THEN** the skill adds a test that fails on that mutation and passes on the code

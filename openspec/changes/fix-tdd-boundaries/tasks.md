@@ -10,7 +10,7 @@ Files this change reaches: `skills/warrant-tdd/SKILL.md`,
 
 ## 2. Skill
 
-- [ ] 2.1 Add boundary cases to the scenario list, the red-green loop and the report of `warrant-tdd` (specs: test-first "Boundary cases from the requirement text", "Boundary cases in the report"); verify the kit tests pass
+- [ ] 2.1 Add boundary cases, independent expected values, boundary-only mocks and the mutation check to `warrant-tdd` (specs: test-first "Boundary cases from the requirement text", "Boundary cases in the report", "Independent expected values", "Mocks only at external boundaries", "Mutation check"); verify the kit tests pass
 
 ## 3. Review
 
