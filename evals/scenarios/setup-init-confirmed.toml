@@ -1,8 +1,0 @@
-skills = ["warrant-setup"]
-fixture = "no-openspec"
-prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every OpenSpec install or init command you propose, every verification command that the project's own configuration defines, and no destructive actions."
-checker = "setup"
-
-[params]
-expect = "installed"
-verification = ["make test"]

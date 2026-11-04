@@ -46,43 +46,26 @@ so OpenSpec updates reach you unchanged. The principles behind it are in
 ## Install
 
 ```sh
+npm install -g @fission-ai/openspec@latest   # or: brew install openspec
+openspec init --tools agents --profile core   # skip if the project has openspec/
 npx skills add imtpot/openspec-warrant
 ```
 
-Then ask your agent to run the `warrant-setup` skill. With your confirmation at
-each step, it:
+`openspec init --tools agents` writes the OpenSpec workflow skills to
+`.agents/skills/`, where any agent can load them. Then ask your agent to run
+the `warrant-setup` skill. With your confirmation where it proposes something,
+it:
 
-1. installs the OpenSpec CLI if it is missing or older than 1.16, through your
-   project's tool pinning, npm or Homebrew;
-2. runs `openspec init --tools agents --profile core` if the project has no
-   OpenSpec root, which writes the OpenSpec workflow skills to
-   `.agents/skills/`, and links them into each agent skills directory the
-   project already has, such as `.claude/skills/`;
-3. adds warrant's rules, each marked `[warrant] `, to `openspec/config.yaml`
+1. links the OpenSpec skills into each agent skills directory the project
+   already has, such as `.claude/skills/`;
+2. adds warrant's rules, each marked `[warrant] `, to `openspec/config.yaml`
    and keeps your own entries;
-4. proposes an OpenSpec `context` when yours is empty and a contract for
+3. proposes an OpenSpec `context` when yours is empty and a contract for
    `AGENTS.md`.
 
-Run `warrant-setup` again after updating the kit: it replaces only the
+If the OpenSpec CLI or the OpenSpec root is missing, `warrant-setup` stops and
+names the command. Run it again after updating the kit: it replaces only the
 `[warrant] ` entries.
-
-### Manual setup
-
-To set up OpenSpec yourself, for example under Codex, whose sandbox cannot
-write `.agents/`:
-
-```sh
-npm install -g @fission-ai/openspec@latest   # or: brew install openspec
-openspec init --tools agents --profile core
-mkdir -p .claude/skills                       # only for agents that read their own directory
-for skill in .agents/skills/openspec-*; do
-  ln -s "../../$skill" ".claude/skills/$(basename "$skill")"
-done
-npx skills add imtpot/openspec-warrant
-```
-
-Then run `warrant-setup`: it finds OpenSpec in place and adds the rules, the
-context and the contract.
 
 ### Dependencies
 
@@ -90,9 +73,6 @@ context and the contract.
 - The `verify` workflow for the Spec axis of `warrant-review`. The `core`
   profile does not include it: add it with `openspec config profile`, then
   `openspec update`.
-- Codex's `workspace-write` sandbox does not let it write `.agents/`, so under
-  Codex run `openspec init --tools agents --profile core` yourself when setup
-  asks for it.
 
 ### Migrating from the warrant schema (0.5 and earlier)
 

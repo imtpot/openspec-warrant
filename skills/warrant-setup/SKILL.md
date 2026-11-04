@@ -6,19 +6,17 @@ license: MIT
 
 # Set up openspec-warrant
 
-Set up OpenSpec, add warrant's rules and declare the contract the `warrant-*`
-skills read. Run the steps in order. At a step that says stop, write nothing.
+Add warrant's rules to the project's OpenSpec configuration and declare the
+contract the `warrant-*` skills read. Run the steps in order. At a step that
+says stop, write nothing.
 
 ## 1. Check the OpenSpec CLI
 
 Run `openspec --version`.
 
-- If the command is missing or older than `1.16.0`, propose one install
-  command: through the project's tool pinning (`mise.toml`, `package.json` dev
-  dependencies) if it has one, else `npm install -g @fission-ai/openspec@latest`
-  or `brew install openspec`. Run it only after the user confirms, then check
-  the version again. Without confirmation, stop and report the installed
-  version, that warrant needs 1.16 or later, and the command.
+- If the command is missing or older than `1.16.0`, stop. Report the installed
+  version, that warrant needs 1.16 or later, and the install command
+  `npm install -g @fission-ai/openspec@latest` (or `brew install openspec`).
 
 ## 2. Check for an OpenSpec root
 
@@ -29,9 +27,9 @@ The project's top directory is `git rev-parse --show-toplevel`, or the current
 directory outside git.
 
 - If `root` is `null`, or `root.path` is not this project's top directory,
-  propose `openspec init --tools agents --profile core`, which also writes the
-  OpenSpec skills to `.agents/skills/`. Run it only after the user confirms.
-  Without confirmation, stop and name the command.
+  stop. Tell the user to run `openspec init --tools agents --profile core`,
+  which also writes the OpenSpec skills to `.agents/skills/`, and then this
+  skill again.
 
 ## 3. Link the OpenSpec skills
 
@@ -145,6 +143,5 @@ Write the section in exactly this form:
 
 ## 8. Report
 
-Report what you did: OpenSpec installed or initialized, skill links created,
-rules added or replaced, context written or kept, contract created or
+Report what you did: skill links created, rules added or replaced, context written or kept, contract created or
 unchanged, and the note from step 3 if there is one.
