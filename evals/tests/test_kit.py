@@ -121,6 +121,12 @@ def test_tasks_are_checked_off_only_after_passing_verification():
     assert 'only when every verification command exited with 0' in apply
 
 
+def test_archive_guidance_replaces_the_placeholder_purpose():
+    archive = RULES_FILE.read_text().split('  archive:')[1]
+
+    assert 'placeholder Purpose' in archive
+
+
 def test_no_rule_joins_instructions_with_a_semicolon():
     assert [line for line in _rule_lines() if ';' in line] == []
 

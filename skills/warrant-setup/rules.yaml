@@ -29,3 +29,4 @@ operations:
   archive:
     guidance:
     - "[warrant] Archive only when every verification task has a 'Result:' line."
+    - "[warrant] After the archive, replace the placeholder Purpose of every main spec it created with what the capability is for, then run warrant-verify."
