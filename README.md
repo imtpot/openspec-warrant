@@ -172,20 +172,39 @@ is the number of runs that measured it. `runs.md` lists, per run, the faults
 the agent's tests let through or the problems its review missed; with `--keep`
 it also names each run's kept workspace.
 
-Results on Claude Code (Opus 5.5), `implement-proration`, three runs per arm,
-2026-11-04:
+Results on Claude Code, three runs per cell, 2026-11-04. Faults are the share
+of faulty implementations the agent's own tests reject.
 
-| Arm | Acceptance tests passed | Faults the agent's tests reject | Cost per run |
+`plan-implement-allocation` (plan, then implement in the same session):
+
+| Model | Arm | Open points marked | Acceptance | Faults | Lines added | Cost per run |
+|---|---|---|---|---|---|---|
+| Opus 5.5 | `bare` | 0.00 | 6 of 6 | 1.00 | 37 | $1.13 |
+| | `openspec` | 0.22 | 6 of 6 | 1.00 | 40 | $1.39 |
+| | `warrant` | 1.00 | 6 of 6 | 1.00 | 19 | $2.30 |
+| Sonnet 5.5 | `bare` | 0.22 | 6 of 6 | 0.83 | 31 | $0.36 |
+| | `openspec` | 0.67 | 6 of 6 | 1.00 | 29 | $0.57 |
+| | `warrant` | 1.00 | 6 of 6 | 1.00 | 20 | $0.75 |
+| Haiku 5.5 | `bare` | 0.00 | 6 of 6 | 1.00 | 31 | $0.03 |
+| | `openspec` | 0.11 | 6 of 6 | 1.00 | 34 | $0.04 |
+| | `warrant` | 1.00 | 6 of 6 | 1.00 | 18 | $0.19 |
+
+`implement-proration` (implement a ready change):
+
+| Model | `bare` | `openspec` | `warrant` |
 |---|---|---|---|
-| `bare` | 11 of 11 | 0.75 | $0.27 |
-| `openspec` | 11 of 11 | 0.92 | $0.46 |
-| `warrant` | 11 of 11 | 0.96 | $1.18 |
+| Opus 5.5 | 0.75 | 0.92 | 0.96 |
+| Sonnet 5.5 | 0.75 | 0.79 | 0.83 |
+| Haiku 5.5 | 0.79 | 0.67 | 0.75 |
 
-Every arm writes correct code; they differ in how many faults their own tests
-catch. warrant reached 0.96 after `warrant-tdd` started testing the boundaries
-a requirement states but no scenario shows; before, it tested only the spec's
-examples and reached 0.67. On `review-export`, every arm named all 6 planted
-problems in a single run, so that task does not separate the arms on Opus.
+Every arm writes correct code. warrant's clear gain is in planning: on every
+model, every warrant run named all three points the request left open, while
+plain OpenSpec named 11 to 67% and no kit almost none. warrant also adds about
+half as many lines. Its tests catch faults about as well as plain OpenSpec's,
+after `warrant-tdd` started testing the boundaries a requirement states but no
+scenario shows (before: 0.67 on Opus). warrant costs 1.3 to 1.7 times plain
+OpenSpec on Opus and Sonnet. On `review-export`, every arm named all 6 planted
+problems in a single Opus run, so that task does not separate the arms yet.
 
 ## Inspired by
 
