@@ -238,16 +238,6 @@ is called by a changed function as a blocking Standards finding.
 - **WHEN** the diff adds a call that passes the arguments of `check(free, needed)` in the wrong order
 - **THEN** the Standards section lists the call as blocking
 
-### Requirement: Axes in separate contexts
-
-The review skill SHALL run the Spec axis and the Standards axis each in a
-separate, fresh context, or one after another without reusing conclusions
-when no separate context is available.
-
-#### Scenario: Agent without separate contexts
-- **WHEN** the agent cannot start a separate context
-- **THEN** the skill runs the axes one after another and reports each axis's findings on their own
-
 ### Requirement: Artifact mode changes no file
 
 WHILE the review skill reviews a change's artifacts, the review skill SHALL
@@ -297,15 +287,6 @@ proposal lists neither as confirmed nor under Assumptions, as a blocking finding
 - **WHEN** the design fixes an output path that the proposal never mentions
 - **THEN** the report names the decision as an unlisted assumption
 
-### Requirement: Artifact review in a fresh context
-
-The review skill SHALL review the artifacts in a separate, fresh context that
-receives the artifact files and not the conversation that produced them.
-
-#### Scenario: Agent without separate contexts
-- **WHEN** the agent cannot start a separate context
-- **THEN** the skill re-reads the artifact files from disk and reviews them as written, ignoring its own earlier reasoning
-
 ### Requirement: Verdict line
 
 WHEN the artifact review ends, the review skill SHALL end its report with the
@@ -315,3 +296,21 @@ line `Artifact review: REVISE` if any blocking finding exists and
 #### Scenario: Blocking finding
 - **WHEN** the review reports one blocking finding
 - **THEN** the last line of the report is `Artifact review: REVISE`
+
+### Requirement: Axes in fresh contexts
+
+The review skill SHALL run the Spec axis and the Standards axis each in a
+separate, fresh context.
+
+#### Scenario: Branch review
+- **WHEN** a branch is reviewed
+- **THEN** each axis runs in its own fresh context and the report keeps their findings apart
+
+### Requirement: Artifact review in a sub-agent
+
+The review skill SHALL review the artifacts in a separate, fresh context that
+receives the artifact files and not the conversation that produced them.
+
+#### Scenario: Artifacts written in this conversation
+- **WHEN** the agent wrote the artifacts earlier in the conversation
+- **THEN** a fresh context reviews them from the files on disk
