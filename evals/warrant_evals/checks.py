@@ -40,10 +40,14 @@ def _rules_findings(workspace: Path, params: dict) -> list[Finding]:
     if [line for line in _changed_lines(workspace, 'openspec/config.yaml') if line[1:].startswith('schema:')]:
         findings.append(Finding('config', 'schema field changed'))
     try:
-        with tempfile.TemporaryDirectory() as tmp:
-            archive = subprocess.run(['git', 'archive', 'HEAD', 'openspec'], cwd=workspace, capture_output=True, check=True)
-            subprocess.run(['tar', '-x', '-C', tmp], input=archive.stdout, check=True)
-            before = openspec_rules.rendered(Path(tmp))
+        if subprocess.run(['git', 'cat-file', '-e', 'HEAD:openspec'], cwd=workspace, capture_output=True).returncode:
+            # Setup created the OpenSpec root, so nothing was configured before.
+            before = {key: [] for key in [*openspec_rules.ARTIFACTS, *openspec_rules.OPERATIONS, 'context']}
+        else:
+            with tempfile.TemporaryDirectory() as tmp:
+                archive = subprocess.run(['git', 'archive', 'HEAD', 'openspec'], cwd=workspace, capture_output=True, check=True)
+                subprocess.run(['tar', '-x', '-C', tmp], input=archive.stdout, check=True)
+                before = openspec_rules.rendered(Path(tmp))
         after = openspec_rules.rendered(workspace)
     except subprocess.CalledProcessError as error:
         return [*findings, Finding('rules', f'openspec cannot render the configuration: {error.stderr or error}')]

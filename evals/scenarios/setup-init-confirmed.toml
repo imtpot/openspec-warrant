@@ -6,4 +6,3 @@ checker = "setup"
 [params]
 expect = "installed"
 verification = ["make test"]
-transcript = ["openspec init --tools agents"]

@@ -72,6 +72,9 @@ Run `warrant-setup` again after updating the kit: it replaces only the
 - The `verify` workflow for the Spec axis of `warrant-review`. The `core`
   profile does not include it: add it with `openspec config profile`, then
   `openspec update`.
+- Codex's `workspace-write` sandbox does not let it write `.agents/`, so under
+  Codex run `openspec init --tools agents --profile core` yourself when setup
+  asks for it.
 
 ### Migrating from the warrant schema (0.5 and earlier)
 

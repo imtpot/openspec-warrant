@@ -162,3 +162,14 @@ def test_changed_team_context_fails(workspace):
     _install(workspace, config=_with_context('Other text.'))
 
     assert _check({'expect': 'installed', 'context_unchanged': True}, workspace) == ['context changed']
+
+
+def test_setup_that_created_the_openspec_root_passes(tmp_path):
+    (tmp_path / 'AGENTS.md').write_text('# Demo\n')
+    _git(tmp_path, 'init', '-q')
+    _git(tmp_path, 'add', '-A')
+    _git(tmp_path, '-c', 'user.name=t', '-c', 'user.email=t@invalid', 'commit', '-q', '-m', 'fixture')
+    (tmp_path / 'openspec').mkdir()
+    _install(tmp_path, config='schema: spec-driven\n\n' + RULES[RULES.index('rules:'):])
+
+    assert _check({'expect': 'installed', 'verification': ['make test']}, tmp_path) == []
