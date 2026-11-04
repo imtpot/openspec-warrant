@@ -216,6 +216,15 @@ def test_codex_output_gives_skill_reads():
     assert parse_output('codex', out) == (out, ['skill:warrant-tdd'])
 
 
+def test_codex_listing_of_skill_files_is_not_a_load():
+    out = ("exec\n/bin/zsh -c 'cat .agents/skills/warrant-setup/SKILL.md' in /w\n"
+           "exec\n/bin/zsh -c 'find .agents/skills -name SKILL.md' in /w\n"
+           ".agents/skills/warrant-tdd/SKILL.md\n"
+           '/bin/zsh -c "pwd; cat .agents/skills/warrant-verify/SKILL.md"\n')
+
+    assert parse_output('codex', out)[1] == ['skill:warrant-setup', 'skill:warrant-verify']
+
+
 def test_missing_required_skill_fails_the_run(tmp_path, fixture_dir, writer):
     scenario = Scenario(name='demo', fixture=fixture_dir, prompt='do it', check=_passes, loaded=['warrant-verify'])
 

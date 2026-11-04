@@ -77,6 +77,7 @@ class Result:
 
 
 SKILL_FILE = re.compile(r'skills/([\w-]+)/SKILL\.md')
+CODEX_READ = re.compile(r"""-c ['"].*\b(cat|sed|head|tail|nl|less|awk)\b""")
 
 
 def _claude_tool(call: dict) -> str | None:
@@ -93,7 +94,10 @@ def _claude_tool(call: dict) -> str | None:
 def parse_output(agent: str, stdout: str) -> tuple[str, list[str]]:
     """The report text for checkers and the tool calls seen in an agent's output."""
     if agent == 'codex':
-        return stdout, [f'skill:{name}' for name in dict.fromkeys(SKILL_FILE.findall(stdout))]
+        # A command that reads the file loads the skill; a listing only names it.
+        reads = [line for line in stdout.splitlines() if CODEX_READ.search(line)]
+        names = [name for line in reads for name in SKILL_FILE.findall(line)]
+        return stdout, [f'skill:{name}' for name in dict.fromkeys(names)]
     events = []
     for line in stdout.splitlines():
         try:
