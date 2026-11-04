@@ -18,6 +18,9 @@ Files this change reaches: `skills/warrant-setup/rules.yaml`,
 
 ## 4. Verification
 
-- [ ] 4.1 Run `uv run pytest` and record its result as `Result: exit <code>, <result line>`
-- [ ] 4.2 Run `openspec validate --all --strict` and record its result as `Result: exit <code>, <result line>`
-- [ ] 4.3 Run the setup-fresh, setup-upgrade and propose scenarios on `claude`, `codex` and `copilot`; record each result
+- [x] 4.1 Run `uv run pytest` and record its result as `Result: exit <code>, <result line>`
+  Result: exit 0, 148 passed in 49.98s
+- [x] 4.2 Run `openspec validate --all --strict` and record its result as `Result: exit <code>, <result line>`
+  Result: exit 0, Totals: 10 passed, 0 failed (10 items)
+- [x] 4.3 Run the setup-fresh, setup-upgrade and propose scenarios on `claude`, `codex` and `copilot`; record each result
+  Result: exit 0, 9 of 9 pass (3 scenarios x claude, codex, copilot)

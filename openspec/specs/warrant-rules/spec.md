@@ -98,3 +98,13 @@ before the first task and for implementation only after `Artifact review: PASS`.
 #### Scenario: Rendered apply guidance
 - **WHEN** `openspec instructions apply --json` runs for a change after setup
 - **THEN** its `operationGuidance` asks for the artifact review before the first task
+
+### Requirement: Verification result format
+
+The warrant tasks rules SHALL require each verification task to record its
+result on its own line as `Result: exit <code>, <result line>` or
+`Result: not run, <reason>`.
+
+#### Scenario: Rendered tasks rule
+- **WHEN** `openspec instructions tasks --json` runs after setup
+- **THEN** its `rules` contain the result format
