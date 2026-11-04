@@ -167,3 +167,14 @@ report the swapped arguments at the fixture's call site.
 #### Scenario: Missed call-site bug
 - **WHEN** the report's Standards section does not mention the swapped call
 - **THEN** the checker fails and names the missing finding
+
+### Requirement: Artifact review scenario checks
+
+The evals SHALL include an artifact review scenario whose checker fails unless
+the report names each planted flaw and ends with `Artifact review: REVISE`, and
+a scenario on sound artifacts whose checker fails unless the report ends with
+`Artifact review: PASS`.
+
+#### Scenario: Missed compound requirement
+- **WHEN** the report does not name the compound requirement
+- **THEN** the checker fails and names the missing finding
