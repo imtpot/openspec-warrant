@@ -40,5 +40,5 @@ Files this change reaches: `skills/warrant-setup/` (`rules.yaml` added,
 
 ## 7. Verification
 
-- [ ] 7.1 Run each command of this repository's contract and record its result
-- [ ] 7.2 Run every eval scenario on `claude`, `codex` and `copilot`; record pass, fail or not run per entry and update the README agent table
+- [x] 7.1 Run each command of this repository's contract and record its result. Result: `uv run pytest` 132 passed, exit 0; `openspec validate --all --strict` 11 passed, 0 failed, exit 0
+- [x] 7.2 Run every eval scenario on `claude`, `codex` and `copilot`; record pass, fail or not run per entry and update the README agent table. Result (21 scenarios): Claude 21, Codex 21, Copilot 18-19. Codex exposed a real setup bug (the marker count included a comment line in rules.yaml); fixed and rerun on all three. After removing rules that duplicate OpenSpec's spec guidance, `propose` and the setup scenarios were rerun: Claude and Codex pass, Copilot once wrote a two-SHALL requirement. Copilot also leaves a stray file in `minimal-change` and is unstable in `verify-no-contract`

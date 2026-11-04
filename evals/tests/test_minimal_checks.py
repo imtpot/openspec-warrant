@@ -83,3 +83,13 @@ def test_leftover_file_fails(repo):
     assert _messages('minimal-change', {'helper': 'slugify', 'file': 'app/report.py'}, repo) == [
         'file left in the change: app/report.py.new'
     ]
+
+
+def test_new_test_file_and_test_function_are_allowed(repo):
+    (repo / 'app' / 'report.py').write_text(
+        'from app.text import slugify\n\n\ndef report(title):\n    return slugify(title)\n'
+    )
+    (repo / 'tests').mkdir()
+    (repo / 'tests' / 'test_report.py').write_text('def test_report_slug():\n    pass\n')
+
+    assert _messages('minimal-change', {'helper': 'slugify', 'file': 'app/report.py'}, repo) == []

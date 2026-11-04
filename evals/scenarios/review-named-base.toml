@@ -5,6 +5,6 @@ prompt = "Review the changes since the tag v0.1.0 with the warrant-review skill.
 checker = "review"
 
 [params]
-spec = [["--json", "JSON option"], ["Negative input", "negative"], ["Shortfall verdict", "shortfall"]]
+spec = [["--json", "JSON option"], ["Negative input", "negative"], ["Shortfall verdict", "shortfall", "\"short\""]]
 standards = [["formatReport"], ["retries"]]
 evidence = [["make test"]]

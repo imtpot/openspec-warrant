@@ -105,7 +105,8 @@ def minimal_change_check(params: dict):
     def check(workspace: Path, transcript: str) -> list[Finding]:
         if not _git(workspace, 'diff', 'HEAD', '--', params['file']):
             return [Finding('diff', f'{params["file"]} was not changed')]
-        new = [p for p in _git(workspace, 'ls-files', '--others', '--exclude-standard').split() if p not in params.get('new_files', [])]
+        # New tests belong to a change; any other new file is left over.
+        new = [p for p in _git(workspace, 'ls-files', '--others', '--exclude-standard').split() if not p.startswith('tests/')]
         findings = [Finding('files', f'file left in the change: {p}') for p in new]
         _git(workspace, 'add', '-A')
         return findings + check_duplicate_helper(_git(workspace, 'diff', '--cached'), params['helper'])

@@ -94,14 +94,14 @@ none
 
 ## Supported agents
 
-Results of the eval scenarios (25 per agent) for openspec-warrant 0.5, run on
+Results of the eval scenarios (21 per agent) for openspec-warrant 0.6, run on
 2026-11-04 with each agent in a restricted permission mode.
 
 | Agent | Pass | Not pass | Notes |
 |---|---|---|---|
-| Claude Code 2.1 | 24 | 1 fail | `design-stop-early`: lists the open decisions without an owner each |
-| Codex 0.166 | 25 | 0 | runs commands in a non-login shell (`-c allow_login_shell=false`) so a fixture's fake CLI stays on `PATH` |
-| GitHub Copilot CLI 1.0 | 24 | 1 fail | `minimal-change`: the change is right, but a stray copy `app/report.py.new` stays in the tree |
+| Claude Code 2.1 | 21 | 0 | |
+| Codex 0.166 | 21 | 0 | runs commands in a non-login shell (`-c allow_login_shell=false`) so a fixture's fake CLI stays on `PATH` |
+| GitHub Copilot CLI 1.0 | 18-19 | 2-3 fail | `minimal-change`: leaves a stray copy `app/report.py.new`; `verify-no-contract`: sometimes runs `make test` from `AGENTS.md` prose without loading `warrant-verify`; `propose`: once wrote a requirement with two `SHALL` despite OpenSpec's one-behavior guidance |
 
 All three agents discover the skills in `.agents/skills/` and read the contract
 from `AGENTS.md` (`discovery` scenario). Antigravity CLI (agy) discovers them

@@ -88,6 +88,26 @@ target project
 | `openspec-verify-change` | completeness, correctness (requirements and scenario coverage), coherence against artifacts; runs nothing | `warrant-verify` runs the commands; `warrant-review` covers standards and code outside the spec |
 | `openspec-archive-change`, `-sync-specs`, `-update-change` | finish and sync | nothing |
 
+OpenSpec's own spec guidance (`docs/writing-specs.md`) already asks for one
+`SHALL` per requirement, observable outcomes and failure cases, so warrant's
+rules add only EARS patterns, WHERE versus WHILE, IF/THEN for real failures,
+traceability and the glossary.
+
+## Related work
+
+[anvil](https://github.com/jikkujoyce/openspec-schemas/tree/main/schemas/anvil)
+is a community OpenSpec schema with the closest goals: an adversarial review of
+the artifacts before any code, a test plan that maps every scenario to a named
+test, red-green-refactor tasks and a `verify` artifact with a `DECISION:` line
+that CI can parse. It forks the workflow into seven artifacts and relies on
+sub-agents or a second model for the review. warrant stays on `spec-driven`,
+adds no artifacts and names no agent, and adds what anvil lacks: EARS,
+assumptions, minimal change, the project contract and evals on three agents.
+
+Ideas from anvil worth taking, without an agent-specific mechanism: a review of
+the artifacts before implementation, verification results in a line CI can
+parse, and a bound on review rounds.
+
 ## Current state and drift
 
 Built: the artifact rules, the contract, `warrant-setup`, `warrant-minimal-change`,
@@ -118,7 +138,9 @@ Remaining drift:
    apply guidance; `warrant-design` removed.
 2. Narrow `warrant-review` to what `openspec-verify-change` does not do.
 3. Economy: brevity and the closing line; decide on the Decision records subsection.
-4. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
+4. From anvil: an artifact review before implementation and verification
+   results CI can parse.
+5. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
 
 ## Sources
 
@@ -133,3 +155,5 @@ Ideas come from, and are written anew rather than copied:
 - [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail): the
   option ladder, `shortcut:` markers, short replies and fewer tokens.
 - [EARS](https://alistairmavin.com/ears/): requirement syntax.
+- [anvil](https://github.com/jikkujoyce/openspec-schemas/tree/main/schemas/anvil):
+  see Related work.

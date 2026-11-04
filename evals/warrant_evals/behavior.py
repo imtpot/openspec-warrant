@@ -24,5 +24,5 @@ def check_duplicate_helper(diff: str, helper: str) -> list[Finding]:
     """Fail every function the diff adds instead of calling the fixture helper."""
     return [
         Finding(name, f'added function {name}; the existing helper {helper} already does this')
-        for name in ADDED_FUNCTION.findall(diff)
+        for name in ADDED_FUNCTION.findall(diff) if not name.startswith('test_')
     ]

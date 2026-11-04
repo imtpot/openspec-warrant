@@ -67,7 +67,7 @@ def test_installed_setup_passes(workspace):
 
 
 def test_outdated_warrant_rule_fails(workspace):
-    _install(workspace, config=_merged(RULES.replace('[warrant] Replace vague', '[warrant] Avoid vague')))
+    _install(workspace, config=_merged(RULES.replace('[warrant] Use WHERE only', '[warrant] Use WHERE mostly')))
 
     assert _check({'expect': 'installed'}, workspace) == ['specs: warrant entries differ from rules.yaml']
 

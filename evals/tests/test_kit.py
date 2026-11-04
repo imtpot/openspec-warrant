@@ -78,3 +78,9 @@ def test_rules_cover_every_artifact_and_operation():
 
 def test_every_rule_entry_is_one_marked_line():
     assert [line for line in _rule_lines() if not line.startswith('- "[warrant] ')] == []
+
+
+def test_rules_leave_openspec_spec_guidance_to_openspec():
+    duplicated = [line for line in _rule_lines() if re.search(r'one SHALL|observable response', line)]
+
+    assert duplicated == []

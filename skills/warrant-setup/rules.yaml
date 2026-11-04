@@ -1,6 +1,6 @@
 # openspec-warrant rules for openspec/config.yaml. warrant-setup merges these
-# lists into a project's configuration; every entry starts with "[warrant] " so
-# that a later setup can replace exactly these entries.
+# lists into a project's configuration; every entry carries the warrant marker
+# so that a later setup can replace exactly these entries.
 rules:
   proposal:
   - "[warrant] Add a 'Why code is needed' section: why a configuration change, an existing tool or a documentation change cannot meet the need. If one can, propose that instead."
@@ -9,12 +9,9 @@ rules:
   - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md. Add a new term to that glossary only after the requester confirms its meaning; until then list it under Assumptions."
   specs:
   - "[warrant] Write each requirement in exactly one EARS pattern: 'The <subject> SHALL <response>.', 'WHEN <trigger>, the <subject> SHALL <response>.', 'WHILE <state>, the <subject> SHALL <response>.', 'IF <condition>, THEN the <subject> SHALL <response>.' or 'WHERE <feature or option>, the <subject> SHALL <response>.' Combine at most two clauses, in the order WHERE, WHILE, WHEN or IF."
-  - "[warrant] Give each requirement exactly one SHALL and one observable response; write one requirement per outcome."
   - "[warrant] Use WHERE only for an optional feature or option; a state of the environment takes WHILE, or IF when it is a failure."
-  - "[warrant] Name a concrete subject (a command, a component, a rule), never 'the system'."
   - "[warrant] Add an IF/THEN requirement for each failure that an event or state requirement can actually meet; do not invent failure modes."
   - "[warrant] Trace every requirement to the request or to an assumption in the proposal; remove a requirement that traces to neither."
-  - "[warrant] Replace vague qualities such as fast, safe or correct with measurable values."
   - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md."
   design:
   - "[warrant] For each part of the change, record the first option that fully works in the order of warrant-minimal-change's option ladder, and state why each earlier option failed."

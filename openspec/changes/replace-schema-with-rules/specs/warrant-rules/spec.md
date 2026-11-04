@@ -35,12 +35,22 @@ existing tool or a documentation change cannot meet the need.
 
 ### Requirement: EARS requirements
 
-The warrant specs rules SHALL require one EARS pattern and one `SHALL` per
-requirement, WHERE only for options, and a trace to the request or an assumption.
+The warrant specs rules SHALL require one EARS pattern per requirement, WHERE
+only for options, an IF/THEN requirement for each real failure, and a trace to
+the request or an assumption.
 
 #### Scenario: Rendered specs rules
 - **WHEN** `openspec instructions specs --json` runs after setup
-- **THEN** its `rules` contain the EARS, one-outcome, WHERE and trace rules
+- **THEN** its `rules` contain the EARS, WHERE, IF/THEN and trace rules
+
+### Requirement: No rule OpenSpec already gives
+
+The warrant rules SHALL contain no rule that OpenSpec's own spec guidance
+already gives, such as one `SHALL` per requirement or observable outcomes.
+
+#### Scenario: One-SHALL rule
+- **WHEN** OpenSpec's `writing-specs` guidance asks for one `SHALL` per requirement
+- **THEN** `rules.yaml` has no rule about the number of `SHALL` per requirement
 
 ### Requirement: Option ladder in the design
 

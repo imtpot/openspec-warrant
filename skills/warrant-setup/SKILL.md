@@ -56,8 +56,8 @@ entries and their order.
 Then verify:
 
 - `openspec list --json` prints no warning about `rules` or `operations`.
-- The number of lines containing `[warrant] ` in `openspec/config.yaml` equals
-  the number in `rules.yaml`.
+- The number of list entries that start with `[warrant] ` in
+  `openspec/config.yaml` equals the number of list entries in `rules.yaml`.
 
 If either check fails, report the problem and stop.
 
