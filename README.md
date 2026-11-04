@@ -142,8 +142,9 @@ names the verification commands as plain text. Claude runs with
   billing module. Scores: hidden acceptance tests passed (of 11), the share of
   8 faulty implementations that the agent's own tests reject (3 of them break
   a requirement that no example scenario shows), and non-test lines added.
-- `plan-implement-allocation`: plan a short request as an OpenSpec change and
-  implement it in the same run. The request leaves three things open:
+- `plan-implement-allocation`: plan a short request as an OpenSpec change,
+  then, in the same session, implement it (two prompts, because OpenSpec's
+  propose workflow stops after planning). The request leaves three things open:
   percentages that do not add up to 100, where leftover cents go, and an empty
   list or a zero percentage. Scores: the share of these the agent marks as
   assumed or open (in a proposal's Assumptions, or in a sentence that says

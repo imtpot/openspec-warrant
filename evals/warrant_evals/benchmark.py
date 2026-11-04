@@ -37,6 +37,7 @@ COUNT_TESTS = (
     'print(json.dumps([result.testsRun, [t.id() for t, _ in result.failures + result.errors]]))\n'
 )
 TEST_TIMEOUT = 120
+TIMEOUT = 15 * 60
 # A sentence that names an ambiguity marks it only with one of these words.
 MARKER = re.compile(r'assum|question|confirm|unclear|ambigu|decid|chose|choose', re.I)
 SENTENCE = re.compile(r'(?<=[.!?])\s+|\n')
@@ -73,7 +74,9 @@ def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list
             ]
         name = agent.name
         if agent.name in models:
-            command[1:1] = [MODEL_FLAGS[agent.name], models[agent.name]]
+            flag = [MODEL_FLAGS[agent.name], models[agent.name]]
+            # Claude's command ends with `-- {prompt}`; Codex takes the prompt last.
+            command = [command[0], *flag, *command[1:]] if agent.name == 'claude' else [*command, *flag]
             name = f'{agent.name}:{models[agent.name]}'
         agents.append(Agent(name, command))
     return agents
@@ -81,6 +84,19 @@ def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list
 
 def _base(agent: str) -> str:
     return agent.split(':')[0]
+
+
+def continue_agent(agent: Agent) -> Agent:
+    """The command that sends a later prompt into the agent's latest session in the workspace."""
+    command = list(agent.command)
+    if _base(agent.name) == 'claude':
+        command.insert(command.index('-p') + 1, '--continue')
+    elif _base(agent.name) == 'codex':
+        # `codex exec resume` has no -s flag; the sandbox mode moves to -c.
+        i = command.index('-s')
+        command[i:i + 2] = ['-c', 'sandbox_mode="workspace-write"']
+        command[command.index('exec') + 1:command.index('exec') + 1] = ['resume', '--last']
+    return Agent(agent.name, command)
 
 
 def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
@@ -235,14 +251,17 @@ def summary(runs: Sequence[Run]) -> str:
     return '\n'.join(lines) + '\n'
 
 
-def _score(task: dict, run: Run, workspace: Path, stdout: str, usage_file: Path) -> None:
-    run.scores['tokens'] = tokens(run.agent, stdout, usage_file)
+def _score(task: dict, run: Run, workspace: Path, outputs: Sequence[str], usage_file: Path) -> None:
+    """Score a run from its workspace and the output of every prompt it got."""
+    counted = [t for t in (tokens(run.agent, out, usage_file) for out in outputs) if t is not None]
+    run.scores['tokens'] = sum(counted) if counted else None
+    report = '\n'.join(report_text(run.agent, out) for out in outputs)
     if task['kind'] == 'plan-implement':
         changes = workspace / 'openspec' / 'changes'
         proposals = [p.read_text() for p in sorted(changes.glob('**/proposal.md'))]
         artifacts = [p.read_text() for p in sorted(changes.glob('**/*.md')) if p.name != 'proposal.md']
         run.scores['ambiguities'], unmarked = marked_ambiguities(
-            proposals, [report_text(run.agent, stdout), *artifacts], task['ambiguities'],
+            proposals, [report, *artifacts], task['ambiguities'],
         )
         hidden = task['dir'] / 'hidden'
         run.scores['acceptance_count'] = acceptance(workspace, hidden)
@@ -255,7 +274,7 @@ def _score(task: dict, run: Run, workspace: Path, stdout: str, usage_file: Path)
         run.scores['faults'], run.missed = fault_detection(workspace, hidden, task['module'])
         run.scores['added_lines_count'] = added_lines(workspace)
     else:
-        run.scores['problems'], run.missed = review_score(report_text(run.agent, stdout), task['problems'])
+        run.scores['problems'], run.missed = review_score(report, task['problems'])
 
 
 def marked_ambiguities(
@@ -313,16 +332,28 @@ def run_benchmark(
                             continue
                         run = Run(task['name'], agent.name, arm, number=n)
 
-                        def check(workspace, stdout, run=run, usage_file=usage_file):
-                            _score(task, run, workspace, stdout, usage_file)
+                        prompts = task.get('prompts') or [task['prompt']]
+                        name = f'{task["name"]}-{arm}-{n}'
+
+                        def check(workspace, stdout, run=run, agent=agent, name=name, usage_file=usage_file):
+                            outputs = [stdout]
+                            for prompt in prompts[1:]:
+                                done = subprocess.run(
+                                    continue_agent(agent).argv(prompt), cwd=workspace, capture_output=True,
+                                    stdin=subprocess.DEVNULL, text=True, timeout=TIMEOUT, check=False,
+                                )
+                                outputs.append(done.stdout)
+                                with (out_dir / f'{name}-{agent.name}.log').open('a') as log:
+                                    log.write(done.stdout + done.stderr)
+                            _score(task, run, workspace, outputs, usage_file)
                             run.workspace = workspace if keep else None
                             return []
 
                         scenario = Scenario(
-                            f'{task["name"]}-{arm}-{n}', task['fixture'], task['prompt'], check,
+                            name, task['fixture'], prompts[0], check,
                             path=task.get('path', []), setup=task.get('setup'),
                         )
-                        _run_one(scenario, agent, out_dir, root, lambda w, arm=arm: prepare_arm(w, arm), 15 * 60)
+                        _run_one(scenario, agent, out_dir, root, lambda w, arm=arm: prepare_arm(w, arm), TIMEOUT)
                         results.append(run)
     return results
 

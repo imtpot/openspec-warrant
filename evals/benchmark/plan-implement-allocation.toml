@@ -1,7 +1,12 @@
 kind = "plan-implement"
 fixture = "plan-implement-allocation/fixture"
 module = "app/allocation.py"
-prompt = "Add allocate(total_cents, percents) to app/allocation.py. It splits an invoice total in cents between cost centers by integer percentages and returns one share in cents per cost center, in the order of the percentages. Plan it as an OpenSpec change, then implement it. Nobody can answer questions during this run."
+# The plan request and, in the same session, the implement request: OpenSpec's
+# propose workflow stops after planning even when one request asks for both.
+prompts = [
+  "Add allocate(total_cents, percents) to app/allocation.py. It splits an invoice total in cents between cost centers by integer percentages and returns one share in cents per cost center, in the order of the percentages. Plan it as an OpenSpec change. Nobody can answer questions during this run.",
+  "Implement the change you planned. Nobody can answer questions during this run.",
+]
 # Hidden ambiguities the request leaves open; each group lists terms of which
 # one must be marked as assumed or open.
 ambiguities = [

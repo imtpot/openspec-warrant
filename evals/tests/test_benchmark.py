@@ -407,3 +407,32 @@ def test_every_allocation_fault_fails_an_acceptance_test(tmp_path, fault):
 def test_allocation_fixture_has_no_change_yet():
     changes = ALLOCATION / 'fixture' / 'openspec' / 'changes'
     assert [p.name for p in changes.iterdir() if p.name != 'archive'] == []
+
+
+def test_continued_agents_resume_the_session(tmp_path):
+    agents = {a.name: a for a in benchmark.bench_agents(tmp_path / 'usage.json', {'codex': 'mini'})}
+
+    claude = benchmark.continue_agent(agents['claude']).argv('go')
+    assert claude[:3] == ['claude', '-p', '--continue']
+    codex = benchmark.continue_agent(agents['codex:mini']).argv('go')
+    assert codex[:4] == ['codex', 'exec', 'resume', '--last']
+    assert '-s' not in codex
+    assert codex[codex.index('-m') + 1] == 'mini'
+    assert 'sandbox_mode="workspace-write"' in codex
+
+
+def test_later_prompts_continue_and_count_in_the_score(tmp_path, monkeypatch):
+    fixture = tmp_path / 'fixture'
+    fixture.mkdir()
+    (fixture / 'AGENTS.md').write_text('# Demo\n')
+    task = {'name': 'two', 'kind': 'review', 'fixture': fixture, 'prompts': ['one', 'two'],
+            'problems': [['step one'], ['step two']]}
+    fake = benchmark.Agent('fake', ['python3', '-c', 'import sys; print("step", sys.argv[1])'])
+    monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file, models=None: [fake])
+    monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
+
+    benchmark.main(['--runs', '1', '--arm', 'bare', '--out', str(tmp_path / 'out')])
+
+    assert '| two | fake | bare | 1 | 1.00 (1) | n/a |' in (tmp_path / 'out' / 'benchmark.md').read_text()
+    assert 'step two' in (tmp_path / 'out' / 'two-bare-1-fake.log').read_text()
