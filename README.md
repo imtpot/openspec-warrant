@@ -66,6 +66,24 @@ each step, it:
 Run `warrant-setup` again after updating the kit: it replaces only the
 `[warrant] ` entries.
 
+### Manual setup
+
+To set up OpenSpec yourself, for example under Codex, whose sandbox cannot
+write `.agents/`:
+
+```sh
+npm install -g @fission-ai/openspec@latest   # or: brew install openspec
+openspec init --tools agents --profile core
+mkdir -p .claude/skills                       # only for agents that read their own directory
+for skill in .agents/skills/openspec-*; do
+  ln -s "../../$skill" ".claude/skills/$(basename "$skill")"
+done
+npx skills add imtpot/openspec-warrant
+```
+
+Then run `warrant-setup`: it finds OpenSpec in place and adds the rules, the
+context and the contract.
+
 ### Dependencies
 
 - Node.js 22.12 or later for the OpenSpec CLI and `npx skills`.
