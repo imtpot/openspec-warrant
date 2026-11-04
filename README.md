@@ -78,12 +78,6 @@ names the command. Run it again after updating the kit: it replaces only the
 
 - Node.js 22.12 or later for the OpenSpec CLI and `npx skills`.
 
-### Migrating from the warrant schema (0.5 and earlier)
-
-Set `schema: spec-driven` in `openspec/config.yaml`, run `warrant-setup`, and
-delete `openspec/schemas/warrant/` once no active change uses it.
-`warrant-design` is gone; use `openspec-explore`.
-
 ## Usage
 
 Work with OpenSpec as usual; warrant's rules and apply guidance come with it.
