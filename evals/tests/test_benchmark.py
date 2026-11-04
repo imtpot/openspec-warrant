@@ -1,5 +1,6 @@
 import json
 import shutil
+from pathlib import Path
 import subprocess
 
 import pytest
@@ -90,7 +91,7 @@ def test_claude_benchmark_command_skips_user_settings(tmp_path):
 def test_review_score_counts_named_problems():
     problems = [['formatReport'], ['retries'], ['swap', 'args.free']]
 
-    assert benchmark.review_score('formatReport is camelCase; RETRIES is unused.', problems) == pytest.approx(2 / 3)
+    assert benchmark.review_score('formatReport is camelCase; RETRIES is unused.', problems) == (pytest.approx(2 / 3), ['swap'])
 
 
 REFERENCE = 'def double(x):\n    return 2 * x\n'
@@ -131,7 +132,7 @@ def test_fault_detection_counts_rejected_faults(task):
     workspace, hidden = task
     _agent_test(workspace, 'self.assertEqual(double(3), 6)')
 
-    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == pytest.approx(1 / 2)
+    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == (pytest.approx(1 / 2), ['same.py'])
     assert (workspace / 'app' / 'calc.py').read_text() == REFERENCE
 
 
@@ -139,13 +140,13 @@ def test_tests_failing_on_reference_are_not_measured(task):
     workspace, hidden = task
     _agent_test(workspace, 'self.assertEqual(double(3), 7)')
 
-    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') is None
+    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == (None, [])
 
 
 def test_no_agent_tests_detect_nothing(task):
     workspace, hidden = task
 
-    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == 0
+    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == (0, ['add.py', 'same.py'])
 
 
 def test_acceptance_counts_passed_hidden_tests(task):
@@ -219,6 +220,24 @@ def test_main_runs_every_arm_and_writes_the_table(tmp_path, monkeypatch):
     table = (tmp_path / 'out' / 'benchmark.md').read_text()
     for arm in benchmark.ARMS:
         assert f'| review | fake | {arm} | 1 | 0.50 (1) | n/a |' in table
+    runs = (tmp_path / 'out' / 'runs.md').read_text()
+    assert '| review | fake | warrant | 1 | retries |  |' in runs
+
+
+def test_keep_leaves_workspaces_in_the_run_list(tmp_path, monkeypatch):
+    fixture = tmp_path / 'fixture'
+    fixture.mkdir()
+    (fixture / 'AGENTS.md').write_text('# Demo\n')
+    task = {'name': 'review', 'kind': 'review', 'fixture': fixture, 'prompt': 'Review.', 'problems': [['x']]}
+    monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
+    monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
+
+    benchmark.main(['--runs', '1', '--keep', '--agent', 'fake', '--out', str(tmp_path / 'out')])
+
+    rows = [line for line in (tmp_path / 'out' / 'runs.md').read_text().splitlines() if line.startswith('| review')]
+    kept = [Path(row.split('|')[6].strip()) for row in rows]
+    assert len(kept) == 3 and all(path.is_dir() for path in kept)
 
 
 IMPLEMENT = benchmark.TASKS / 'implement-proration'

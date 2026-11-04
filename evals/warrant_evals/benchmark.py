@@ -44,6 +44,10 @@ class Run:
     agent: str
     arm: str
     scores: dict[str, float | None] = field(default_factory=dict)
+    number: int = 1
+    # Faults the agent's tests let through, or planted problems the report missed.
+    missed: list[str] = field(default_factory=list)
+    workspace: Path | None = None
 
 
 def bench_agents(usage_file: Path) -> list[Agent]:
@@ -124,23 +128,27 @@ def _count_tests(workspace: Path, directory: str) -> tuple[int, int]:
     return run, failed
 
 
-def fault_detection(workspace: Path, hidden: Path, module: str, tests: str = 'tests') -> float | None:
-    """Share of faulty implementations the agent's tests reject; None if they reject the reference."""
+def fault_detection(workspace: Path, hidden: Path, module: str, tests: str = 'tests') -> tuple[float | None, list[str]]:
+    """Share of faulty implementations the agent's tests reject, and the faults they let through.
+
+    The share is None when the tests reject the reference implementation.
+    """
     target = workspace / module
     original = target.read_text() if target.exists() else None
     try:
         target.write_text((hidden / 'reference.py').read_text())
         run, failed = _count_tests(workspace, tests)
-        if run == 0:
-            return 0.0
-        if failed:
-            return None
         faults = sorted((hidden / 'faults').glob('*.py'))
-        rejected = 0
+        if run == 0:
+            return 0.0, [f.name for f in faults]
+        if failed:
+            return None, []
+        missed = []
         for fault in faults:
             target.write_text(fault.read_text())
-            rejected += _count_tests(workspace, tests)[1] > 0
-        return rejected / len(faults)
+            if not _count_tests(workspace, tests)[1]:
+                missed.append(fault.name)
+        return 1 - len(missed) / len(faults), missed
     finally:
         if original is None:
             target.unlink(missing_ok=True)
@@ -169,8 +177,10 @@ def added_lines(workspace: Path) -> int:
     return sum(int(line.split('\t')[0]) for line in numstat.splitlines() if line.split('\t')[0].isdigit())
 
 
-def review_score(report: str, problems: list[list[str]]) -> float:
-    return 1 - len(_missing(report, problems)) / len(problems)
+def review_score(report: str, problems: list[list[str]]) -> tuple[float, list[str]]:
+    """Share of planted problems the report names, and the first term of each missed one."""
+    missed = _missing(report, problems)
+    return 1 - len(missed) / len(problems), missed
 
 
 def summary(runs: Sequence[Run]) -> str:
@@ -195,16 +205,25 @@ def summary(runs: Sequence[Run]) -> str:
     return '\n'.join(lines) + '\n'
 
 
-def _score(task: dict, agent: str, workspace: Path, stdout: str, usage_file: Path) -> dict[str, float | None]:
-    scores: dict[str, float | None] = {'tokens': tokens(agent, stdout, usage_file)}
+def _score(task: dict, run: Run, workspace: Path, stdout: str, usage_file: Path) -> None:
+    run.scores['tokens'] = tokens(run.agent, stdout, usage_file)
     if task['kind'] == 'implement':
         hidden = task['dir'] / 'hidden'
-        scores['acceptance_count'] = acceptance(workspace, hidden)
-        scores['faults'] = fault_detection(workspace, hidden, task['module'])
-        scores['added_lines_count'] = added_lines(workspace)
+        run.scores['acceptance_count'] = acceptance(workspace, hidden)
+        run.scores['faults'], run.missed = fault_detection(workspace, hidden, task['module'])
+        run.scores['added_lines_count'] = added_lines(workspace)
     else:
-        scores['problems'] = review_score(report_text(agent, stdout), task['problems'])
-    return scores
+        run.scores['problems'], run.missed = review_score(report_text(run.agent, stdout), task['problems'])
+
+
+def run_list(runs: Sequence[Run]) -> str:
+    """One row per run with what it missed and, with --keep, its workspace."""
+    lines = ['| Task | Agent | Arm | Run | Missed | Workspace |', '|---|---|---|---|---|---|']
+    lines += [
+        f'| {r.task} | {r.agent} | {r.arm} | {r.number} | {", ".join(r.missed)} | {r.workspace or ""} |'
+        for r in runs
+    ]
+    return '\n'.join(lines) + '\n'
 
 
 def load_tasks(directory: Path = TASKS) -> list[dict]:
@@ -218,10 +237,14 @@ def load_tasks(directory: Path = TASKS) -> list[dict]:
     return tasks
 
 
-def run_benchmark(tasks: Sequence[dict], agents: Sequence[str] | None, runs: int, out_dir: Path) -> list[Run]:
+def run_benchmark(
+    tasks: Sequence[dict], agents: Sequence[str] | None, runs: int, out_dir: Path, keep: bool = False,
+) -> list[Run]:
     out_dir.mkdir(parents=True, exist_ok=True)
     results = []
     with tempfile.TemporaryDirectory(prefix='warrant-bench-') as tmp:
+        # Kept workspaces stay outside any repository, like the temporary ones.
+        root = Path(tempfile.mkdtemp(prefix='warrant-bench-')) if keep else Path(tmp)
         for task in tasks:
             for arm in ARMS:
                 for n in range(1, runs + 1):
@@ -229,17 +252,18 @@ def run_benchmark(tasks: Sequence[dict], agents: Sequence[str] | None, runs: int
                     for agent in bench_agents(usage_file):
                         if agents and agent.name not in agents:
                             continue
-                        run = Run(task['name'], agent.name, arm)
+                        run = Run(task['name'], agent.name, arm, number=n)
 
-                        def check(workspace, stdout, run=run, agent=agent.name, usage_file=usage_file):
-                            run.scores = _score(task, agent, workspace, stdout, usage_file)
+                        def check(workspace, stdout, run=run, usage_file=usage_file):
+                            _score(task, run, workspace, stdout, usage_file)
+                            run.workspace = workspace if keep else None
                             return []
 
                         scenario = Scenario(
                             f'{task["name"]}-{arm}-{n}', task['fixture'], task['prompt'], check,
                             path=task.get('path', []), setup=task.get('setup'),
                         )
-                        _run_one(scenario, agent, out_dir, Path(tmp), lambda w, arm=arm: prepare_arm(w, arm), 15 * 60)
+                        _run_one(scenario, agent, out_dir, root, lambda w, arm=arm: prepare_arm(w, arm), 15 * 60)
                         results.append(run)
     return results
 
@@ -250,10 +274,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument('--agent', action='append', help='run only these agents')
     parser.add_argument('--runs', type=int, default=3)
     parser.add_argument('--out', type=Path, default=REPO / 'evals' / 'out' / 'benchmark')
+    parser.add_argument('--keep', action='store_true', help='keep workspaces and list them in runs.md')
     args = parser.parse_args(argv)
     tasks = [t for t in load_tasks() if not args.task or t['name'] in args.task]
-    table = summary(run_benchmark(tasks, args.agent, args.runs, args.out))
+    runs = run_benchmark(tasks, args.agent, args.runs, args.out, keep=args.keep)
+    table = summary(runs)
     (args.out / 'benchmark.md').write_text(table)
+    (args.out / 'runs.md').write_text(run_list(runs))
     print(table)
     return 0
 

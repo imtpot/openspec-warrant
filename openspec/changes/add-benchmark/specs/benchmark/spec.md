@@ -96,3 +96,21 @@ score per task, agent and arm, and the number of runs behind each mean.
 #### Scenario: Three runs
 - **WHEN** three warrant runs record fault detection 1, 2/3 and 1
 - **THEN** the table shows 0.89 with 3 runs
+
+### Requirement: Run list
+
+WHEN all runs end, the benchmark SHALL write one row per run with the faults
+its tests let through or the planted problems its report missed.
+
+#### Scenario: One fault let through
+- **WHEN** a run's tests accept the faulty implementation `bankers_rounding.py`
+- **THEN** its row lists `bankers_rounding.py`
+
+### Requirement: Kept workspaces
+
+WHERE `--keep` is given, the benchmark SHALL keep each run's workspace and
+list its path in the run's row.
+
+#### Scenario: Inspect an agent's tests
+- **WHEN** the benchmark runs with `--keep`
+- **THEN** each row names a workspace directory that still exists
