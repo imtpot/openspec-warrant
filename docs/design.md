@@ -50,9 +50,11 @@ them checkable.
    each change's `design.md`, kept by the archive.
 4. **One rule, one place.** A rule lives in `rules.yaml` or in one skill, and
    other parts refer to it by name.
-5. **Spend the reader's tokens carefully.** Short skills, fixed report endings
-   where a reader or CI needs them, and skill descriptions that say only when to
-   use the skill.
+5. **Tokens buy quality, nothing else.** No step is cut to save tokens; a step
+   stays when it catches faults the kit exists to catch. Skills stay short and
+   free of duplication because extra text blurs what the model must do, and
+   descriptions say only when to use the skill. The benchmark records tokens as
+   the price of each arm, not as a target.
    (Ponytail: "Lower cost and latency are a side effect.")
 6. **Agent-neutral.** No skill names an agent or an agent's tools. A skill may
    require a separate, fresh context (a sub-agent); all supported agents offer

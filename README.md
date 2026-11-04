@@ -157,6 +157,21 @@ is the number of runs that measured it. `runs.md` lists, per run, the faults
 the agent's tests let through or the problems its review missed; with `--keep`
 it also names each run's kept workspace.
 
+Results on Claude Code (Opus 5.5), `implement-proration`, three runs per arm,
+2026-11-04:
+
+| Arm | Acceptance tests passed | Faults the agent's tests reject | Cost per run |
+|---|---|---|---|
+| `bare` | 11 of 11 | 0.75 | $0.27 |
+| `openspec` | 11 of 11 | 0.92 | $0.46 |
+| `warrant` | 11 of 11 | 0.96 | $1.18 |
+
+Every arm writes correct code; they differ in how many faults their own tests
+catch. warrant reached 0.96 after `warrant-tdd` started testing the boundaries
+a requirement states but no scenario shows; before, it tested only the spec's
+examples and reached 0.67. On `review-export`, every arm named all 6 planted
+problems in a single run, so that task does not separate the arms on Opus.
+
 ## Inspired by
 
 The skills are written from scratch. Their ideas come from:
