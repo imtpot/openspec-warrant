@@ -11,16 +11,16 @@ assuming a language, tool or layout.
 
 The project contract SHALL be the `## Warrant contract` section of the target
 project's root `AGENTS.md`, with the subsections `### Verification`,
-`### Destructive actions`, `### Glossary`, `### Decision records` and the
-optional `### Standards`, in that order.
+`### Destructive actions`, `### Glossary` and the optional `### Standards`, in
+that order.
 
 #### Scenario: Contract created by setup
 - **WHEN** `warrant-setup` completes in a project
-- **THEN** the root `AGENTS.md` contains `## Warrant contract` with the five
+- **THEN** the root `AGENTS.md` contains `## Warrant contract` with the four
   subsections in that order
 
 #### Scenario: Contract without Standards
-- **WHEN** a contract has the first four subsections and no `### Standards`
+- **WHEN** a contract has the first three subsections and no `### Standards`
 - **THEN** the contract is valid
 
 ### Requirement: Verification entries
@@ -41,15 +41,6 @@ an agent must not run without explicit user approval.
 - **WHEN** a project lists `pulumi up` as destructive
 - **THEN** warrant skills ask the user before running any command that starts
   with `pulumi up`
-
-### Requirement: Location entries
-
-The Glossary and Decision records subsections SHALL each contain one relative
-path or the word `none`.
-
-#### Scenario: No decision records
-- **WHEN** a project keeps no decision records
-- **THEN** the Decision records subsection contains `none`
 
 ### Requirement: Skills read only the contract
 
@@ -105,3 +96,20 @@ standards as `none`.
 #### Scenario: Contract from warrant v1
 - **WHEN** a contract written by warrant v1 has no Standards subsection
 - **THEN** `warrant-review` reports "no standards declared"
+
+### Requirement: Glossary entry
+
+The Glossary subsection SHALL contain one relative path or the word `none`.
+
+#### Scenario: No glossary
+- **WHEN** a project keeps no glossary
+- **THEN** the Glossary subsection contains `none`
+
+### Requirement: Former Decision records subsection
+
+IF a contract contains a `### Decision records` subsection, THEN the warrant
+skills SHALL ignore that subsection.
+
+#### Scenario: Contract written by an earlier setup
+- **WHEN** a contract has `### Decision records` between Glossary and Standards
+- **THEN** the contract is valid and its Standards entries are read

@@ -280,11 +280,11 @@ verification group, as a blocking finding.
 ### Requirement: Contradicted decision
 
 WHEN the review skill reviews a change's artifacts, the review skill SHALL
-report a design decision that contradicts a recorded decision as a blocking
-finding quoting both.
+report a design decision that contradicts a decision in `design.md` of an
+archived change as a blocking finding quoting both.
 
 #### Scenario: Output format already decided
-- **WHEN** a recorded decision says machine output is JSON and the design chooses YAML
+- **WHEN** an archived change's design says machine output is JSON and the design chooses YAML
 - **THEN** the report quotes both decisions and marks the conflict as blocking
 
 ### Requirement: Unlisted assumption

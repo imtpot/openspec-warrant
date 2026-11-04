@@ -9,7 +9,7 @@ project contract into a target project that already uses OpenSpec 1.16.
 ### Requirement: Create the contract skeleton
 
 WHEN the root `AGENTS.md` has no warrant contract, the setup skill SHALL append
-the contract section with all five subsections.
+the contract section with all four subsections.
 
 #### Scenario: AGENTS.md without contract
 - **WHEN** `AGENTS.md` exists without `## Warrant contract`
