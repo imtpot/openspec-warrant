@@ -23,5 +23,6 @@ def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> l
             check=checkers[data['checker']](data.get('params', {})),
             path=data.get('path', []),
             setup=data.get('setup'),
+            loaded=data.get('loaded', []),
         ))
     return scenarios

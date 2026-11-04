@@ -1,5 +1,6 @@
 """Run eval scenarios headless against agent CLIs in isolated workspaces."""
 
+import json
 import os
 import re
 import shutil
@@ -36,7 +37,11 @@ CLAUDE_TOOLS = [
     'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)', 'Skill',
 ]
 AGENTS = [
-    Agent('claude', ['claude', '-p', '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}']),
+    # Streamed output shows the tool calls: skill loads and sub-agents.
+    Agent('claude', [
+        'claude', '-p', '--output-format', 'stream-json', '--verbose',
+        '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}',
+    ]),
     # A non-login shell keeps the PATH the runner sets; a login shell would
     # re-read the user's profile and hide a fixture's fake CLI.
     Agent('codex', ['codex', 'exec', '-s', 'workspace-write', '-c', 'allow_login_shell=false']),
@@ -55,6 +60,8 @@ class Scenario:
     path: list[str] = field(default_factory=list)
     # Fixture script run in the workspace after preparation, e.g. to build git history.
     setup: str | None = None
+    # Skills the agent must load itself, because the prompt names none.
+    loaded: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -65,6 +72,45 @@ class Result:
     messages: list[str] = field(default_factory=list)
     transcript: Path | None = None
     workspace: Path | None = None
+    # Skill loads (`skill:<name>`) and sub-agents (`agent:<model>`) seen in the output.
+    tools: list[str] = field(default_factory=list)
+
+
+SKILL_FILE = re.compile(r'skills/([\w-]+)/SKILL\.md')
+
+
+def _claude_tool(call: dict) -> str | None:
+    name, args = call.get('name'), call.get('input') or {}
+    if name == 'Skill':
+        return f'skill:{args.get("skill")}'
+    if name in ('Agent', 'Task'):
+        return f'agent:{args.get("model") or args.get("subagent_type") or "default"}'
+    if name == 'Read' and (match := SKILL_FILE.search(args.get('file_path', ''))):
+        return f'skill:{match.group(1)}'
+    return None
+
+
+def parse_output(agent: str, stdout: str) -> tuple[str, list[str]]:
+    """The report text for checkers and the tool calls seen in an agent's output."""
+    if agent == 'codex':
+        return stdout, [f'skill:{name}' for name in dict.fromkeys(SKILL_FILE.findall(stdout))]
+    events = []
+    for line in stdout.splitlines():
+        try:
+            events.append(json.loads(line))
+        except ValueError:
+            continue
+    if agent != 'claude' or len(events) < 2:
+        return stdout, []
+    tools, report = [], ''
+    for event in events:
+        if event.get('type') == 'assistant':
+            for call in event.get('message', {}).get('content', []):
+                if call.get('type') == 'tool_use' and (tool := _claude_tool(call)) and tool not in tools:
+                    tools.append(tool)
+        elif event.get('type') == 'result':
+            report = event.get('result') or ''
+    return report, tools
 
 
 def _workspace(root: Path, scenario: Scenario, agent: Agent) -> Path:
@@ -98,9 +144,14 @@ def _run_one(
     transcript.write_text(output)
     if done.returncode != 0 and NOT_AUTHENTICATED.search(output):
         return Result(scenario.name, agent.name, 'not run', ['not authenticated'], transcript, workspace)
-    messages = [f'{f.requirement}: {f.message}' for f in scenario.check(workspace, done.stdout)]
+    report, tools = parse_output(agent.name, done.stdout)
+    if agent.name == 'codex':
+        # Codex prints the commands it runs on stderr.
+        tools = parse_output(agent.name, output)[1]
+    messages = [f'{f.requirement}: {f.message}' for f in scenario.check(workspace, report)]
+    messages += [f'skills: skill not loaded: {name}' for name in scenario.loaded if f'skill:{name}' not in tools]
     status = 'fail' if messages else 'pass'
-    return Result(scenario.name, agent.name, status, messages, transcript, workspace)
+    return Result(scenario.name, agent.name, status, messages, transcript, workspace, tools)
 
 
 def run_evals(
@@ -126,10 +177,10 @@ def run_evals(
 
 
 def write_report(results: Sequence[Result], path: Path) -> Path:
-    lines = ['| Scenario | Agent | Status | Messages | Transcript | Workspace |', '|---|---|---|---|---|---|']
+    lines = ['| Scenario | Agent | Status | Messages | Loaded | Transcript | Workspace |', '|---|---|---|---|---|---|---|']
     lines += [
-        f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {r.transcript or ""} '
-        f'| {r.workspace if r.workspace and r.workspace.exists() else ""} |'
+        f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {", ".join(r.tools)} '
+        f'| {r.transcript or ""} | {r.workspace if r.workspace and r.workspace.exists() else ""} |'
         for r in results
     ]
     path.parent.mkdir(parents=True, exist_ok=True)

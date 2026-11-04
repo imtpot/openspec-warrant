@@ -436,3 +436,10 @@ def test_later_prompts_continue_and_count_in_the_score(tmp_path, monkeypatch):
 
     assert '| two | fake | bare | 1 | 1.00 (1) | n/a |' in (tmp_path / 'out' / 'benchmark.md').read_text()
     assert 'step two' in (tmp_path / 'out' / 'two-bare-1-fake.log').read_text()
+
+
+def test_benchmark_claude_command_has_one_output_format(tmp_path):
+    claude = {a.name: a for a in benchmark.bench_agents(tmp_path / 'usage.json')}['claude'].argv('go')
+
+    assert claude.count('--output-format') == 1
+    assert 'stream-json' not in claude

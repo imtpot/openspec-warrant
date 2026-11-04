@@ -69,6 +69,9 @@ def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list
     for agent in AGENTS:
         command = list(agent.command)
         if agent.name == 'claude':
+            # One JSON object with usage replaces the eval runner's stream.
+            command = [c for c in command if c not in ('stream-json', '--verbose')]
+            command.remove('--output-format')
             command[command.index('-p') + 1:command.index('-p') + 1] = [
                 '--output-format', 'json', '--setting-sources', 'project,local',
             ]

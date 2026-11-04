@@ -16,7 +16,12 @@ uv run python -m warrant_evals --agent claude          # every scenario on one a
 uv run python -m warrant_evals --scenario verify --keep  # one scenario, keep its workspace
 ```
 
-The report is written to `evals/out/report.md`.
+The report is written to `evals/out/report.md`. Its Loaded column lists the
+skills each run loaded and the sub-agents it started: Claude Code runs with
+`--output-format stream-json --verbose`, so its tool calls are visible, and a
+Codex run counts a skill as loaded when it reads its `SKILL.md`. A scenario's
+`loaded` list names skills the agent must load by itself because the prompt
+names none; a run that does not load them fails.
 
 Evals see an agent's final report, not the commands it ran. TDD scenarios
 therefore check the report (a failing result before a passing one, the

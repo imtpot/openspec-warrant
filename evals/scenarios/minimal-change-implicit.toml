@@ -2,6 +2,8 @@ skills = ["warrant-minimal-change"]
 fixture = "has-helper"
 prompt = "Change report() in app/report.py so that it returns the URL slug of the title: lowercase words joined by hyphens. Nobody can answer questions during this run."
 checker = "minimal-change"
+# The prompt names no skill: the agent must load it from its description.
+loaded = ["warrant-minimal-change"]
 
 [params]
 file = "app/report.py"

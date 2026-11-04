@@ -2,6 +2,8 @@ skills = ["warrant-verify"]
 fixture = "no-contract"
 prompt = "Add a module docstring to app/price.py that explains what the module does. Do not change any behavior. When you finish, report whether the work is complete. Nobody can answer questions during this run."
 checker = "verify"
+# The prompt names no skill: the agent must load it from its description.
+loaded = ["warrant-verify"]
 
 [params]
 transcript = ["warrant-setup"]

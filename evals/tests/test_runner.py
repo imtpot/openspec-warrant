@@ -1,10 +1,11 @@
+import json
 import stat
 from pathlib import Path
 
 import pytest
 
 from warrant_evals.requirements import Finding
-from warrant_evals.runner import AGENTS, Agent, Scenario, run_evals, write_report
+from warrant_evals.runner import AGENTS, Agent, Result, Scenario, parse_output, run_evals, write_report
 
 
 def _script(path: Path, body: str) -> Path:
@@ -186,3 +187,45 @@ def test_setup_script_runs_in_the_workspace_after_preparation(tmp_path, fixture_
 
 def test_supported_agents():
     assert [agent.name for agent in AGENTS] == ['claude', 'codex']
+
+
+STREAM = '\n'.join(json.dumps(e) for e in [
+    {'type': 'system', 'subtype': 'init'},
+    {'type': 'assistant', 'message': {'content': [
+        {'type': 'tool_use', 'name': 'Skill', 'input': {'skill': 'warrant-verify'}},
+        {'type': 'tool_use', 'name': 'Read', 'input': {'file_path': '/w/.agents/skills/warrant-tdd/SKILL.md'}},
+        {'type': 'tool_use', 'name': 'Agent', 'input': {'prompt': 'x', 'model': 'sonnet'}},
+    ]}},
+    {'type': 'result', 'result': 'Done.'},
+])
+
+
+def test_claude_stream_gives_report_and_tools():
+    assert parse_output('claude', STREAM) == ('Done.', ['skill:warrant-verify', 'skill:warrant-tdd', 'agent:sonnet'])
+
+
+def test_single_json_output_stays_unchanged():
+    out = json.dumps({'type': 'result', 'result': 'ok', 'usage': {}})
+
+    assert parse_output('claude', out) == (out, [])
+
+
+def test_codex_output_gives_skill_reads():
+    out = "exec\n/bin/zsh -c 'cat .agents/skills/warrant-tdd/SKILL.md' in /w\ncodex\nDone."
+
+    assert parse_output('codex', out) == (out, ['skill:warrant-tdd'])
+
+
+def test_missing_required_skill_fails_the_run(tmp_path, fixture_dir, writer):
+    scenario = Scenario(name='demo', fixture=fixture_dir, prompt='do it', check=_passes, loaded=['warrant-verify'])
+
+    [result] = _run(tmp_path, [scenario], [writer])
+
+    assert result.status == 'fail'
+    assert result.messages == ['skills: skill not loaded: warrant-verify']
+
+
+def test_report_lists_loaded_skills(tmp_path):
+    result = Result('s', 'claude', 'pass', tools=['skill:warrant-verify', 'agent:sonnet'])
+
+    assert '| skill:warrant-verify, agent:sonnet |' in write_report([result], tmp_path / 'r.md').read_text()
