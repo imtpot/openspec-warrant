@@ -1,6 +1,6 @@
 skills = ["warrant-tdd"]
 fixture = "tdd-project"
-prompt = "Implement the requirements of the OpenSpec change add-quota-verdicts with the warrant-tdd skill. Nobody can answer questions during this run."
+prompt = "Implement the requirements of the OpenSpec change add-quota-verdicts with the warrant-tdd skill. This run tests warrant-tdd alone; do not run the OpenSpec apply workflow. Nobody can answer questions during this run."
 checker = "tdd"
 
 [params]
