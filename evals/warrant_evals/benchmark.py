@@ -50,17 +50,37 @@ class Run:
     workspace: Path | None = None
 
 
-def bench_agents(usage_file: Path) -> list[Agent]:
-    """The eval agents; Claude reports usage as JSON and runs without user settings."""
-    commands = {a.name: list(a.command) for a in AGENTS}
-    claude = commands['claude']
-    claude[claude.index('-p') + 1:claude.index('-p') + 1] = ['--output-format', 'json', '--setting-sources', 'project,local']
-    return [Agent(name, command) for name, command in commands.items()]
+MODEL_FLAGS = {'claude': '--model', 'codex': '-m'}
+
+
+def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list[Agent]:
+    """The eval agents; Claude reports usage as JSON and runs without user settings.
+
+    An agent with a model from `models` is named `<agent>:<model>`.
+    """
+    models = models or {}
+    agents = []
+    for agent in AGENTS:
+        command = list(agent.command)
+        if agent.name == 'claude':
+            command[command.index('-p') + 1:command.index('-p') + 1] = [
+                '--output-format', 'json', '--setting-sources', 'project,local',
+            ]
+        name = agent.name
+        if agent.name in models:
+            command[1:1] = [MODEL_FLAGS[agent.name], models[agent.name]]
+            name = f'{agent.name}:{models[agent.name]}'
+        agents.append(Agent(name, command))
+    return agents
+
+
+def _base(agent: str) -> str:
+    return agent.split(':')[0]
 
 
 def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
     """All input (including cache) plus output tokens as the agent reports them."""
-    if agent == 'claude':
+    if _base(agent) == 'claude':
         try:
             data = json.loads(stdout)
         except ValueError:
@@ -74,14 +94,14 @@ def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
             return None
         keys = ['input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens']
         return sum(usage.get(key, 0) for key in keys)
-    if agent == 'codex':
+    if _base(agent) == 'codex':
         match = CODEX_TOKENS.search(stdout)
         return int(match.group(1).replace(',', '')) if match else None
     return None
 
 
 def report_text(agent: str, stdout: str) -> str:
-    if agent == 'claude':
+    if _base(agent) == 'claude':
         try:
             return json.loads(stdout)['result']
         except (ValueError, KeyError, TypeError):
@@ -242,7 +262,7 @@ def load_tasks(directory: Path = TASKS) -> list[dict]:
 
 def run_benchmark(
     tasks: Sequence[dict], agents: Sequence[str] | None, runs: int, out_dir: Path, keep: bool = False,
-    arms: Sequence[str] = ARMS,
+    arms: Sequence[str] = ARMS, models: dict[str, str] | None = None,
 ) -> list[Run]:
     out_dir.mkdir(parents=True, exist_ok=True)
     results = []
@@ -253,8 +273,8 @@ def run_benchmark(
             for arm in arms:
                 for n in range(1, runs + 1):
                     usage_file = out_dir / f'{task["name"]}-{arm}-{n}.usage.json'
-                    for agent in bench_agents(usage_file):
-                        if agents and agent.name not in agents:
+                    for agent in bench_agents(usage_file, models):
+                        if agents and _base(agent.name) not in agents:
                             continue
                         run = Run(task['name'], agent.name, arm, number=n)
 
@@ -280,9 +300,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument('--out', type=Path, default=REPO / 'evals' / 'out' / 'benchmark')
     parser.add_argument('--keep', action='store_true', help='keep workspaces and list them in runs.md')
     parser.add_argument('--arm', action='append', choices=ARMS, help='run only these arms')
+    parser.add_argument('--model', action='append', default=[], metavar='AGENT=MODEL', help='model for an agent')
     args = parser.parse_args(argv)
     tasks = [t for t in load_tasks() if not args.task or t['name'] in args.task]
-    runs = run_benchmark(tasks, args.agent, args.runs, args.out, keep=args.keep, arms=args.arm or ARMS)
+    models = dict(item.split('=', 1) for item in args.model)
+    runs = run_benchmark(tasks, args.agent, args.runs, args.out, keep=args.keep, arms=args.arm or ARMS, models=models)
     table = summary(runs)
     (args.out / 'benchmark.md').write_text(table)
     (args.out / 'runs.md').write_text(run_list(runs))

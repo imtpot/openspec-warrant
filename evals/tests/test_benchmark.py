@@ -85,6 +85,34 @@ def test_claude_benchmark_command_skips_user_settings(tmp_path):
     assert sorted(agents) == ['claude', 'codex']
 
 
+def test_model_option_sets_the_model_and_labels_the_agent(tmp_path):
+    agents = {a.name: a for a in benchmark.bench_agents(tmp_path / 'usage.json', {'claude': 'sonnet', 'codex': 'gpt-mini'})}
+
+    claude = agents['claude:sonnet'].argv('go')
+    assert claude[claude.index('--model') + 1] == 'sonnet'
+    codex = agents['codex:gpt-mini'].argv('go')
+    assert codex[codex.index('-m') + 1] == 'gpt-mini'
+
+
+def test_labelled_agent_reads_its_base_agent_output(tmp_path):
+    stdout = json.dumps({'result': 'ok', 'usage': {'input_tokens': 3, 'output_tokens': 4}})
+
+    assert benchmark.tokens('claude:sonnet', stdout, tmp_path / 'usage.json') == 7
+    assert benchmark.report_text('claude:sonnet', stdout) == 'ok'
+
+
+def test_main_parses_model_options(tmp_path, monkeypatch):
+    seen = {}
+    monkeypatch.setattr(benchmark, 'load_tasks', lambda: [])
+    monkeypatch.setattr(benchmark, 'run_benchmark', lambda *a, **k: seen.update(k) or [])
+
+    (tmp_path / 'out').mkdir()
+
+    benchmark.main(['--model', 'claude=haiku', '--out', str(tmp_path / 'out')])
+
+    assert seen['models'] == {'claude': 'haiku'}
+
+
 def test_review_score_counts_named_problems():
     problems = [['formatReport'], ['retries'], ['swap', 'args.free']]
 
@@ -209,7 +237,7 @@ def test_main_runs_every_arm_and_writes_the_table(tmp_path, monkeypatch):
             'problems': [['formatReport'], ['retries']]}
     fake = benchmark.Agent('fake', ['python3', '-c', 'print("formatReport is camelCase")'])
     monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
-    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file: [fake])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file, models=None: [fake])
     monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
 
     assert benchmark.main(['--runs', '1', '--out', str(tmp_path / 'out')]) == 0
@@ -227,7 +255,7 @@ def test_keep_leaves_workspaces_in_the_run_list(tmp_path, monkeypatch):
     (fixture / 'AGENTS.md').write_text('# Demo\n')
     task = {'name': 'review', 'kind': 'review', 'fixture': fixture, 'prompt': 'Review.', 'problems': [['x']]}
     monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
-    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file, models=None: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
     monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
 
     benchmark.main(['--runs', '1', '--keep', '--agent', 'fake', '--out', str(tmp_path / 'out')])
@@ -286,7 +314,7 @@ def test_arm_filter_runs_only_named_arms(tmp_path, monkeypatch):
     (fixture / 'AGENTS.md').write_text('# Demo\n')
     task = {'name': 'review', 'kind': 'review', 'fixture': fixture, 'prompt': 'Review.', 'problems': [['x']]}
     monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
-    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file, models=None: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
     monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
 
     benchmark.main(['--runs', '1', '--arm', 'warrant', '--out', str(tmp_path / 'out')])

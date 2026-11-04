@@ -150,7 +150,11 @@ names the verification commands as plain text. Claude runs with
 
 ```sh
 uv run python -m warrant_evals.benchmark --agent claude --runs 3
+uv run python -m warrant_evals.benchmark --agent claude --model claude=sonnet --arm warrant
 ```
+
+`--model <agent>=<model>` runs that agent with another model; its rows read
+`<agent>:<model>`. `--arm` and `--task` limit the run.
 
 The table is written to `evals/out/benchmark/benchmark.md`; `(k)` after a mean
 is the number of runs that measured it. `runs.md` lists, per run, the faults
