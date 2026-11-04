@@ -12,4 +12,4 @@
 
 ## 3. Verification
 
-- [ ] 3.1 Run `python3 -m unittest discover -s tests -t .` and record its result as `Result: exit <code>, <result line>`
+- [ ] 3.1 Run `python3 -m unittest discover -s tests -t .` and record its result as `Result: exit <code>, <result line>`, or `Result: not run, <reason>` if it cannot run

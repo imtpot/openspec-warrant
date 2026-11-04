@@ -26,8 +26,10 @@ None.
 
 ## Why code is needed
 
-No configuration or existing tool computes prorated charges; `days_between`
-in `app/billing.py` counts days and stays the only day counter.
+No configuration setting or existing tool computes prorated charges, and a
+documentation change cannot compute a charge: support already has written
+rules and still gets different results by hand. `days_between` in
+`app/billing.py` counts days and stays the only day counter.
 
 ## Out of scope
 
@@ -41,5 +43,9 @@ Features and options deliberately left out:
 
 ## Assumptions
 
-Confirmed by the requester: every rule in the spec below, including rounding
-half up and clamping to the period. No other decision is open.
+Confirmed by the requester: every rule in the spec, including rounding half
+up and clamping to the period; `prorate` lives in `app/billing.py` next to
+`days_between` and counts every day with it; rounding uses the standard
+library's `decimal` module; the terms "billing period" (the days of
+`[period_start, period_end)`) and "used days" (the days of `[start, end)`
+inside the billing period). No other decision is open.
