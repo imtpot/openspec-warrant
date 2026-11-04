@@ -2,8 +2,10 @@
 
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
+from warrant_evals import openspec_rules
 from warrant_evals.behavior import check_duplicate_helper, check_success_claim
 from warrant_evals.contract import ContractError, parse_contract
 from warrant_evals.requirements import Finding, check_proposal, check_spec
@@ -29,15 +31,36 @@ def _transcript_findings(params: dict, transcript: str) -> list[Finding]:
     ]
 
 
-def _installed_findings(workspace: Path, params: dict) -> list[Finding]:
+RULES_FILE = Path(__file__).resolve().parents[2] / 'skills' / 'warrant-setup' / 'rules.yaml'
+
+
+def _rules_findings(workspace: Path) -> list[Finding]:
+    """warrant's rendered entries equal rules.yaml; the project's own entries and schema are unchanged."""
     findings = []
-    if not (workspace / 'openspec' / 'schemas' / 'warrant' / 'schema.yaml').is_file():
-        findings.append(Finding('schema', 'openspec/schemas/warrant/schema.yaml missing'))
-    config = _changed_lines(workspace, 'openspec/config.yaml')
-    if any(not line[1:].startswith('schema:') for line in config):
-        findings.append(Finding('config', 'openspec/config.yaml changed beyond the schema field'))
-    if '+schema: warrant' not in config:
-        findings.append(Finding('config', 'schema: warrant not set'))
+    if [line for line in _changed_lines(workspace, 'openspec/config.yaml') if line[1:].startswith('schema:')]:
+        findings.append(Finding('config', 'schema field changed'))
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = subprocess.run(['git', 'archive', 'HEAD', 'openspec'], cwd=workspace, capture_output=True, check=True)
+            subprocess.run(['tar', '-x', '-C', tmp], input=archive.stdout, check=True)
+            _, before_project = openspec_rules.split(openspec_rules.rendered(Path(tmp)))
+        after_warrant, after_project = openspec_rules.split(openspec_rules.rendered(workspace))
+    except subprocess.CalledProcessError as error:
+        return [*findings, Finding('rules', f'openspec cannot render the configuration: {error.stderr or error}')]
+    want, _ = openspec_rules.split(openspec_rules.shipped(RULES_FILE))
+    findings += [
+        Finding('rules', f'{k}: warrant entries differ from rules.yaml')
+        for k in want if after_warrant[k] != want[k]
+    ]
+    findings += [
+        Finding('rules', f'{k}: project entries changed')
+        for k in after_project if after_project[k] != before_project[k]
+    ]
+    return findings
+
+
+def _installed_findings(workspace: Path, params: dict) -> list[Finding]:
+    findings = _rules_findings(workspace)
     agents_md = workspace / 'AGENTS.md'
     if params.get('agents_md_unchanged') and _changed_lines(workspace, 'AGENTS.md'):
         findings.append(Finding('contract', 'AGENTS.md changed'))
@@ -82,8 +105,10 @@ def minimal_change_check(params: dict):
     def check(workspace: Path, transcript: str) -> list[Finding]:
         if not _git(workspace, 'diff', 'HEAD', '--', params['file']):
             return [Finding('diff', f'{params["file"]} was not changed')]
+        new = [p for p in _git(workspace, 'ls-files', '--others', '--exclude-standard').split() if p not in params.get('new_files', [])]
+        findings = [Finding('files', f'file left in the change: {p}') for p in new]
         _git(workspace, 'add', '-A')
-        return check_duplicate_helper(_git(workspace, 'diff', '--cached'), params['helper'])
+        return findings + check_duplicate_helper(_git(workspace, 'diff', '--cached'), params['helper'])
     return check
 
 
@@ -190,77 +215,6 @@ def receive_check(params: dict):
     return check
 
 
-def question_sentences(text: str) -> list[str]:
-    """Sentences ending in '?' outside code, list items and table rows."""
-    text = re.sub(r'```.*?```', '', text, flags=re.S)
-    text = re.sub(r'`[^`]*`', '', text)
-    prose = [
-        line for line in text.splitlines()
-        if not re.match(r'\s*([-*+|]|\d+[.)])\s', line) and not line.lstrip().startswith('|')
-    ]
-    return [s.strip() for s in re.findall(r'[^.!?\n]*\?', '\n'.join(prose)) if s.strip() != '?']
-
-
-CHOICE_PROMPT = re.compile(r'^(which|what)\b[\w\s]{0,30}\b(want|prefer|choose|pick)\?$', re.I)
-
-
-def first_question_check(params: dict):
-    """The interview opens with exactly one question and a recommended option."""
-    def check(workspace: Path, transcript: str) -> list[Finding]:
-        # Identical sentences are one question; some agents repeat their final message.
-        questions = list(dict.fromkeys(question_sentences(transcript)))
-        # A short closing "Which one do you want?" repeats the question it follows.
-        choice = [q for q in questions if CHOICE_PROMPT.match(q)]
-        if len(questions) > 1 and choice:
-            questions = [q for q in questions if q not in choice]
-        findings = []
-        if len(questions) != 1:
-            findings.append(Finding('question', f'{len(questions)} questions asked, expected 1'))
-        if not re.search(r'recommend', transcript, re.I):
-            findings.append(Finding('question', 'no recommended option'))
-        findings += [
-            Finding('question', f'asked about a known fact: {fact}')
-            for fact in params.get('not_asked', []) if any(fact in q for q in questions)
-        ]
-        return findings + _status_findings(workspace)
-    return check
-
-
-def design_record_check(params: dict):
-    """Agreed terms and decisions are recorded; existing records and changes stay as they were."""
-    def check(workspace: Path, transcript: str) -> list[Finding]:
-        glossary = (workspace / params['glossary']).read_text()
-        findings = [Finding('glossary', f'{params["glossary"]} lacks: {t}') for t in params['terms'] if t not in glossary]
-        findings += [
-            Finding('glossary', f'existing glossary line changed: {line[1:]}')
-            for line in _changed_lines(workspace, params['glossary']) if line.startswith('-')
-        ]
-        decisions = workspace / params['decisions']
-        new = sorted(decisions.glob('0002-*.md'))
-        if not new:
-            findings.append(Finding('decision', f'no new decision file 0002-*.md in {params["decisions"]}'))
-        for path in new:
-            text = path.read_text()
-            findings += [
-                Finding('decision', f'{path.name} lacks ## {h}')
-                for h in ('Context', 'Decision', 'Consequences') if f'## {h}' not in text
-            ]
-        changed = [line[3:] for line in _git(workspace, 'status', '--porcelain').splitlines() if line.startswith(' M')]
-        findings += [
-            Finding('records', f'existing record changed: {p}')
-            for p in changed if p != params['glossary']
-        ]
-        changes = workspace / 'openspec' / 'changes'
-        findings += [
-            Finding('openspec', f'OpenSpec change created: {p.name}')
-            for p in sorted(changes.iterdir()) if p.is_dir() and p.name != 'archive'
-        ]
-        if 'openspec-propose' not in transcript:
-            findings.append(Finding('transcript', 'transcript lacks: openspec-propose'))
-        return findings
-    return check
-
-
 def _normalized(text: str) -> str:
     return re.sub(r'[\s_-]+', ' ', text.lower())
 
@@ -323,8 +277,6 @@ CHECKERS: dict[str, CheckerFactory] = {
     'verify': verify_check,
     'propose': propose_check,
     'review': review_check,
-    'first-question': first_question_check,
-    'design-record': design_record_check,
     'tdd': tdd_check,
     # Transcript phrases and an unchanged workspace, without review axes.
     'transcript': review_check,

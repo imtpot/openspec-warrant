@@ -47,6 +47,8 @@ for, name it in one line of your report, so the requester can ask for it.
 - When you move or merge code, keep its validation and error handling.
 - Between two options of the same size, take the one that handles edge cases.
 - Give new non-trivial logic (a branch, a loop, a parser) one small test.
+- Delete every temporary, backup or scratch file you created before you report
+  the change.
 
 Never remove, to make a change smaller:
 

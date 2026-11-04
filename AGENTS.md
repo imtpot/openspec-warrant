@@ -13,7 +13,7 @@ Installed skills are not tracked. Install them before working on a change:
 
 ```sh
 npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills -a claude-code codex -y
-npx skills add . -s warrant-setup warrant-minimal-change warrant-verify warrant-review warrant-design warrant-tdd -a claude-code codex -y
+npx skills add . -s warrant-setup warrant-minimal-change warrant-verify warrant-review warrant-tdd -a claude-code codex -y
 ```
 
 Run the second command again after editing anything under `skills/`.
@@ -24,7 +24,6 @@ Run the second command again after editing anything under `skills/`.
 
 - tests: `uv run pytest`
 - openspec: `openspec validate --all --strict`
-- schema: `openspec schema validate warrant`
 
 ### Destructive actions
 

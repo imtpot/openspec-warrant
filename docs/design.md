@@ -38,16 +38,16 @@ These are the rules every part of warrant follows. The `warrant-kit` spec makes
 them checkable.
 
 1. **Extend OpenSpec, do not duplicate it.** Where an OpenSpec skill already
-   covers a step, warrant adds rules to that step through the schema's
-   instructions and `operations.apply.guidance`, not through a parallel skill.
+   covers a step, warrant adds rules to that step through artifact `rules`
+   and `operations.apply.guidance` in the project configuration, not through a parallel skill.
    A warrant skill exists only for work no OpenSpec skill does.
-2. **Route through OpenSpec's own mechanisms.** The schema carries the artifact
+2. **Route through OpenSpec's own mechanisms.** `rules` carry the artifact
    rules; `warrant-setup` writes apply guidance that points to the warrant
    skills; nothing relies on agent-specific hooks or commands.
 3. **Project facts come only from the contract.** Commands, destructive
    actions, glossary, decision records and standards are declared once in the
    `## Warrant contract` section of `AGENTS.md`.
-4. **One rule, one place.** A rule lives in the schema or in one skill, and
+4. **One rule, one place.** A rule lives in `rules.yaml` or in one skill, and
    other parts refer to it by name.
 5. **Spend the reader's tokens carefully.** Short skills, short replies a busy
    person understands in one read, a closing line with what was skipped, not
@@ -63,16 +63,16 @@ them checkable.
 ```
 target project
 ├── AGENTS.md                ## Warrant contract  ← project facts (principle 3)
-├── openspec/config.yaml     schema: warrant; operations.apply.guidance → warrant skills
-├── openspec/schemas/warrant schema with EARS, assumptions, option ladder,
-│                            review and verification task groups
+├── openspec/config.yaml     schema: spec-driven; [warrant] rules (EARS, assumptions,
+│                            option ladder, review and verification tasks, glossary)
+│                            and apply guidance → warrant skills
 └── .agents/skills/          openspec-* (dependency) + warrant-* (this kit)
 ```
 
 | Part | Owns | Does not own |
 |---|---|---|
-| `warrant` schema | what artifacts must contain: EARS requirements, assumptions, the option ladder, review and verification tasks, glossary terms | how code is written or checked |
-| `warrant-setup` | installing the schema, the contract and the apply guidance | anything at change time |
+| warrant rules (`rules.yaml`) | what artifacts must contain: EARS requirements, assumptions, the option ladder, review and verification tasks, glossary terms; apply guidance | how code is written or checked |
+| `warrant-setup` | merging the rules into the project configuration and creating the contract | anything at change time |
 | `warrant-minimal-change` | how much code a change may add; `shortcut:` markers | choosing tasks |
 | `warrant-tdd` | how one requirement is implemented test first | choosing or checking off tasks |
 | `warrant-verify` | running the contract's commands before any completion claim | deciding what to verify beyond the contract |
@@ -82,31 +82,26 @@ target project
 
 | OpenSpec skill | What it does | What warrant adds, and where |
 |---|---|---|
-| `openspec-explore` | interview before a change: one question at a time, a recommendation, facts looked up, decisions kept in the conversation | nothing separate; glossary use is a schema rule for proposal and design |
-| `openspec-propose`, `-new-change`, `-continue-change`, `-ff-change` | write the artifacts | the warrant schema's instructions and templates |
+| `openspec-explore` | interview before a change: one question at a time, a recommendation, facts looked up, decisions kept in the conversation | nothing separate; glossary use is an artifact rule for proposal and specs |
+| `openspec-propose`, `-new-change`, `-continue-change`, `-ff-change` | write the artifacts | the `[warrant] ` artifact rules |
 | `openspec-apply-change` | pick tasks, implement, check off | apply guidance routing to `warrant-tdd`, `warrant-minimal-change`, `warrant-verify` |
 | `openspec-verify-change` | completeness, correctness (requirements and scenario coverage), coherence against artifacts; runs nothing | `warrant-verify` runs the commands; `warrant-review` covers standards and code outside the spec |
 | `openspec-archive-change`, `-sync-specs`, `-update-change` | finish and sync | nothing |
 
 ## Current state and drift
 
-Built: schema, contract, `warrant-setup`, `warrant-minimal-change`,
-`warrant-tdd`, `warrant-verify`, `warrant-review`, `warrant-design`, and 25 eval
-scenarios per agent.
+Built: the artifact rules, the contract, `warrant-setup`, `warrant-minimal-change`,
+`warrant-tdd`, `warrant-verify` and `warrant-review`, with eval scenarios on
+three agents. The schema fork and `warrant-design` were removed because they
+duplicated OpenSpec (principle 1).
 
-Drift from the principles, found by comparing with the sources:
+Remaining drift:
 
-- `warrant-design` duplicates `openspec-explore` and contradicts it by writing
-  files (principle 1). Planned: remove it; move the glossary rule into the schema.
 - `warrant-review`'s Spec axis duplicates `openspec-verify-change` (principle 1),
   and it misses correctness and security in connected code (Ponytail review).
-- `warrant-setup` writes no apply guidance, so target projects never route to
-  the warrant skills (principle 2).
-- No brevity rule or closing "skipped / not checked / risk" line; three skill
-  descriptions summarize their workflow; accessibility is missing from the
-  protected list (principle 5).
-- The option ladder lives in both the schema and `warrant-minimal-change`; the
-  contract preamble repeats in five skills (principle 4).
+- No brevity rule or closing "skipped / not checked / risk" line (principle 5).
+- The contract's Decision records subsection is no longer read by any skill
+  (principle 4).
 
 ## Success criteria
 
@@ -119,11 +114,10 @@ Drift from the principles, found by comparing with the sources:
 
 ## Order of work
 
-1. `warrant-kit` spec: the principles as requirements, with tests for the
-   mechanical ones.
-2. Align with principle 1: remove `warrant-design`, narrow `warrant-review`.
-3. Routing and economy: apply guidance in `warrant-setup`, brevity and closing
-   line, "when to use" descriptions, one place per rule.
+1. Done: `warrant-kit` spec with tests; rules instead of the schema fork, with
+   apply guidance; `warrant-design` removed.
+2. Narrow `warrant-review` to what `openspec-verify-change` does not do.
+3. Economy: brevity and the closing line; decide on the Decision records subsection.
 4. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
 
 ## Sources

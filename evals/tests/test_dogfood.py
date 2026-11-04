@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SKILLS = ['warrant-setup', 'warrant-minimal-change', 'warrant-verify', 'warrant-review', 'warrant-design', 'warrant-tdd']
+SKILLS = ['warrant-setup', 'warrant-minimal-change', 'warrant-verify', 'warrant-review', 'warrant-tdd']
 
 
 def _differences(source: Path, copy: Path) -> list[str]:
@@ -15,11 +15,18 @@ def _differences(source: Path, copy: Path) -> list[str]:
     return mismatch + errors
 
 
-def test_project_schema_matches_the_shipped_schema():
-    assert _differences(
-        REPO / 'skills' / 'warrant-setup' / 'schema' / 'warrant',
-        REPO / 'openspec' / 'schemas' / 'warrant',
-    ) == []
+def _warrant_lines(path: Path) -> list[str]:
+    lines = [line.strip() for line in path.read_text().splitlines()]
+    return [line for line in lines if '[warrant] ' in line and not line.startswith('#')]
+
+
+@pytest.mark.parametrize('config', [
+    'openspec/config.yaml', 'evals/fixtures/warrant-project/openspec/config.yaml',
+])
+def test_config_carries_the_shipped_rules(config):
+    shipped = _warrant_lines(REPO / 'skills' / 'warrant-setup' / 'rules.yaml')
+
+    assert _warrant_lines(REPO / config) == shipped
 
 
 @pytest.mark.parametrize('name', SKILLS)

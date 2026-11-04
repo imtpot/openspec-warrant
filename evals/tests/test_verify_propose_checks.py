@@ -1,4 +1,3 @@
-import filecmp
 import subprocess
 from pathlib import Path
 
@@ -6,7 +5,6 @@ import pytest
 
 from warrant_evals.checks import CHECKERS
 
-REPO = Path(__file__).resolve().parents[2]
 
 
 def _messages(name, params, workspace, transcript):
@@ -78,16 +76,6 @@ def test_missing_change_fails(repo):
     assert _messages('propose', {'change': 'add-json-report'}, repo, '') == [
         'openspec/changes/add-json-report/proposal.md missing'
     ]
-
-
-def test_fixture_schema_matches_the_shipped_schema():
-    shipped = REPO / 'skills' / 'warrant-setup' / 'schema' / 'warrant'
-    fixture = REPO / 'evals' / 'fixtures' / 'warrant-project' / 'openspec' / 'schemas' / 'warrant'
-    files = [str(p.relative_to(shipped)) for p in shipped.rglob('*') if p.is_file()]
-
-    match, mismatch, errors = filecmp.cmpfiles(shipped, fixture, files, shallow=False)
-
-    assert (mismatch, errors) == ([], [])
 
 
 def test_discovery_needs_every_skill_and_the_contract_command(repo):

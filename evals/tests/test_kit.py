@@ -60,3 +60,21 @@ def test_skill_has_an_eval_scenario(name):
 @pytest.mark.parametrize('name', SKILLS)
 def test_skill_is_in_the_design(name):
     assert name in (REPO / 'docs' / 'design.md').read_text(), f'{name} missing from docs/design.md'
+
+
+
+RULES_FILE = REPO / 'skills' / 'warrant-setup' / 'rules.yaml'
+
+
+def _rule_lines() -> list[str]:
+    return [line.strip() for line in RULES_FILE.read_text().splitlines() if line.strip().startswith('- ')]
+
+
+def test_rules_cover_every_artifact_and_operation():
+    keys = re.findall(r'^ {2}(\w+):$', RULES_FILE.read_text(), re.M)
+
+    assert sorted(keys) == ['apply', 'archive', 'design', 'proposal', 'specs', 'tasks']
+
+
+def test_every_rule_entry_is_one_marked_line():
+    assert [line for line in _rule_lines() if not line.startswith('- "[warrant] ')] == []

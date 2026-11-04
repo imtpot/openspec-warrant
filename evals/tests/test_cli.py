@@ -59,17 +59,6 @@ def test_main_filters_agents_writes_report_and_sets_exit_code(scenario_dir, tmp_
     assert '| echo | codex | fail |' in (out / 'report.md').read_text()
 
 
-def test_loader_reads_not_applicable_agents(scenario_dir):
-    (scenario_dir / 'echo.toml').write_text(
-        'fixture = "demo"\nprompt = "x"\nchecker = "fail-when"\n\n'
-        '[not_applicable]\ncodex = "login shell resets PATH"\n\n[params]\nword = "boom"\n'
-    )
-
-    [scenario] = load_scenarios(scenario_dir, CHECKERS)
-
-    assert scenario.not_applicable == {'codex': 'login shell resets PATH'}
-
-
 def test_loader_reads_setup_script(scenario_dir):
     (scenario_dir / 'echo.toml').write_text(
         'fixture = "demo"\nprompt = "x"\nchecker = "fail-when"\nsetup = "setup.sh"\n\n[params]\nword = "boom"\n'

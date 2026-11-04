@@ -161,18 +161,6 @@ def test_prompt_follows_the_prompt_flag(name):
     assert argv[argv.index('-p') + 1] == 'the prompt'
 
 
-def test_scenario_not_applicable_to_an_agent_is_not_run(tmp_path, fixture_dir, writer):
-    scenario = Scenario(
-        name='demo', fixture=fixture_dir, prompt='x', check=_passes,
-        not_applicable={'writer': 'login shell resets PATH'},
-    )
-
-    [result] = _run(tmp_path, [scenario], [writer])
-
-    assert result.status == 'not run'
-    assert result.messages == ['not applicable: login shell resets PATH']
-
-
 def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
     # codex exec reads stdin when it is open; an inherited pipe would block it.
     import subprocess

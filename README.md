@@ -1,18 +1,18 @@
 # openspec-warrant
 
 An agent-neutral extension of [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-1.16. Every requirement is unambiguous, every changed line is warranted by a
+1.16 and later. Every requirement is unambiguous, every changed line is warranted by a
 requirement, and every completion claim is warranted by verification evidence.
 
 It ships:
 
-- the `warrant` OpenSpec schema: EARS requirements with one outcome each, an
-  Assumptions section in every proposal, a design that records which simpler
-  option failed, and review and verification groups at the end of every task list;
-- `warrant-setup`: installs the schema and creates the project contract;
-- `warrant-design`: settles open design decisions before a proposal, one
-  question at a time with a recommended answer, and records agreed terms and
-  decisions in the project's glossary and decision records;
+- artifact rules for OpenSpec's `spec-driven` schema: EARS requirements with
+  one outcome each, an Assumptions section in every proposal, a design that
+  records which simpler option failed, review and verification groups at the
+  end of every task list, and use of the project glossary; plus apply guidance
+  that routes implementation to the warrant skills;
+- `warrant-setup`: merges the rules into `openspec/config.yaml` and creates the
+  project contract;
 - `warrant-minimal-change`: the smallest complete change, `shortcut:` markers
   and a shortcut ledger;
 - `warrant-tdd`: test first, one requirement scenario at a time - each new
@@ -29,20 +29,31 @@ Community extension; not affiliated with Fission-AI or the OpenSpec project.
 
 ## Install
 
-Requirements: OpenSpec CLI 1.16 and an OpenSpec root (`openspec init`).
+Requirements: OpenSpec CLI 1.16 or later and an OpenSpec root (`openspec init`).
 
 ```sh
 npx skills add imtpot/openspec-warrant
 ```
 
-Then ask your agent to run the `warrant-setup` skill. It installs the schema
-into `openspec/schemas/warrant/`, sets `schema: warrant` in
-`openspec/config.yaml`, proposes a contract for `AGENTS.md` and prints the
-command that installs the OpenSpec workflow skills for 1.16:
+Then ask your agent to run the `warrant-setup` skill. It adds warrant's rules,
+each marked `[warrant] `, to the `rules` and `operations` lists in
+`openspec/config.yaml` without touching your own entries or the `schema` field,
+proposes a contract for `AGENTS.md` and prints the command that installs the
+OpenSpec workflow skills for your OpenSpec version, for example:
 
 ```sh
 npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills
 ```
+
+Run `warrant-setup` again after updating the kit: it replaces only the
+`[warrant] ` entries.
+
+### Migrating from the warrant schema (0.5 and earlier)
+
+Set `schema: spec-driven` in `openspec/config.yaml`, run `warrant-setup`, and
+delete `openspec/schemas/warrant/` once no active change uses it (a change
+records its schema in its `.openspec.yaml`). `warrant-design` is gone; use
+`openspec-explore`.
 
 ## Project contract
 

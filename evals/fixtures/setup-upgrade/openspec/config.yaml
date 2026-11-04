@@ -30,3 +30,13 @@ schema: spec-driven
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+rules:
+  specs:
+  - "[warrant] Write requirements in EARS."
+  tasks:
+  - Keep each task small enough for one session
+  - "[warrant] End with verification."
+operations:
+  apply:
+    guidance:
+    - "[warrant] Verify before claiming completion."

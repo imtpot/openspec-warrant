@@ -1,14 +1,16 @@
-# Quota tool
+# Demo
 
-Reports free cloud capacity.
+A tiny demo project.
 
 ## Warrant contract
 
 ### Verification
 
-- tests: `python3 -m unittest`
+- tests: `make test`
 
 ### Destructive actions
+
+- `make deploy`
 
 ### Glossary
 

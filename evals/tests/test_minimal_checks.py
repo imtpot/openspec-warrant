@@ -72,3 +72,14 @@ def test_ledger_that_changes_files_fails(repo):
     (repo / 'app' / 'report.py').write_text('changed\n')
 
     assert _messages('ledger', PARAMS, repo, LEDGER) == ['files changed: M app/report.py']
+
+
+def test_leftover_file_fails(repo):
+    (repo / 'app' / 'report.py').write_text(
+        'from app.text import slugify\n\n\ndef report(title):\n    return slugify(title)\n'
+    )
+    (repo / 'app' / 'report.py.new').write_text('copy\n')
+
+    assert _messages('minimal-change', {'helper': 'slugify', 'file': 'app/report.py'}, repo) == [
+        'file left in the change: app/report.py.new'
+    ]

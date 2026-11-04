@@ -30,3 +30,6 @@ schema: spec-driven
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+rules:
+  tasks:
+  - Keep each task small enough for one session

@@ -1,0 +1,8 @@
+skills = ["warrant-setup"]
+fixture = "setup-upgrade"
+prompt = "Use the warrant-setup skill to set up openspec-warrant in this project. Nobody can answer questions during this run: I confirm every verification command that the project's own configuration defines, and I confirm no destructive actions."
+checker = "setup"
+
+[params]
+expect = "installed"
+agents_md_unchanged = true

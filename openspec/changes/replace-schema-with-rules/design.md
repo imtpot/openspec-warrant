@@ -40,9 +40,12 @@ include mechanism.
 
 ### 3. Verification of the merge
 
-After editing, setup runs `openspec instructions proposal --json` and checks
-that the `rules` field contains a `[warrant] ` entry; if not, it reports the
-YAML problem instead of claiming success.
+After editing, setup runs `openspec list --json` and reads its error output:
+OpenSpec warns about `rules` or `operations` it cannot use ("must be an array of
+strings, ignoring ..."). Setup also counts the `[warrant] ` entries in the
+configuration against `rules.yaml`. Any warning or a different count is
+reported as a failed setup. Rejected: `openspec instructions`, which needs an
+existing change, so setup would have to create one in the project.
 
 ### 4. Minimum OpenSpec version 1.16
 

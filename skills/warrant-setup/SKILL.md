@@ -1,21 +1,21 @@
 ---
 name: warrant-setup
-description: Use when the user asks to set up, install or upgrade openspec-warrant in a project that uses OpenSpec 1.16.
+description: Use when the user asks to set up, install or upgrade openspec-warrant in a project that uses OpenSpec 1.16 or later.
 license: MIT
 ---
 
 # Set up openspec-warrant
 
-Install the `warrant` OpenSpec schema into this project and declare the project
-contract that the other `warrant-*` skills read. Run the steps in order. Stop at
-the first step that says stop, and write nothing after it.
+Add warrant's rules to the project's OpenSpec configuration and declare the
+project contract that the other `warrant-*` skills read. Run the steps in order.
+Stop at the first step that says stop, and write nothing after it.
 
 ## 1. Check the OpenSpec CLI version
 
 Run `openspec --version`.
 
-- If the version is not `1.16.x`, stop. Report the installed version and that
-  warrant supports OpenSpec 1.16. Do not write any file.
+- If the version is older than `1.16.0`, stop. Report the installed version and
+  that warrant needs OpenSpec 1.16 or later. Do not write any file.
 
 ## 2. Check for an OpenSpec root
 
@@ -27,42 +27,46 @@ directories, so it can report the root of an enclosing repository.
   git), stop. Tell the user to run `openspec init` in this project first. Do
   not write any file and do not run `openspec init` yourself.
 
-## 3. Find the shipped schema
+## 3. Find the shipped rules
 
-The schema ships in this skill's directory under `schema/warrant/`. Look for
-`schema.yaml` in these places, in order, and use the first that exists:
+The rules ship next to this skill as `rules.yaml`. Use the first that exists:
 
-1. `.agents/skills/warrant-setup/schema/warrant/` (project install)
-2. `~/.agents/skills/warrant-setup/schema/warrant/` (global install)
+1. `.agents/skills/warrant-setup/rules.yaml` (project install)
+2. `~/.agents/skills/warrant-setup/rules.yaml` (global install)
 
 - If neither exists, stop. Report both paths and suggest reinstalling with
   `npx skills add imtpot/openspec-warrant`.
 
-## 4. Install the schema
+## 4. Merge the rules into `openspec/config.yaml`
 
-Target: `openspec/schemas/warrant/`.
+`rules.yaml` holds the lists `rules.<artifact>` and
+`operations.<operation>.guidance`. Every entry starts with `[warrant] `.
 
-- Target missing: copy the shipped `warrant/` directory there.
-- Target present and identical (`diff -r` shows nothing): leave it.
-- Target present and different: show the user the `diff -r` output and ask
-  whether to replace it. Replace it only after the user confirms. If the user
-  declines, keep the existing files and continue.
+For each of these lists:
 
-Then run `openspec schema validate warrant`. If it fails, stop and report its output.
+1. In `openspec/config.yaml`, remove every entry of that list that starts with
+   `[warrant] `.
+2. Append the shipped entries to the same list, each as one double-quoted line,
+   exactly as in `rules.yaml`. Create the list, and its parent keys, only if it
+   is missing.
 
-## 5. Select the schema
+Change nothing else: keep `schema`, `context`, comments, the project's own
+entries and their order.
 
-In `openspec/config.yaml`, set the top-level `schema` field to `warrant`.
+Then verify:
 
-- Change only that field. Keep every other line, comment and key as it is.
-- If the file has no `schema` field, add `schema: warrant` as the first key.
+- `openspec list --json` prints no warning about `rules` or `operations`.
+- The number of lines containing `[warrant] ` in `openspec/config.yaml` equals
+  the number in `rules.yaml`.
 
-## 6. Create the project contract
+If either check fails, report the problem and stop.
+
+## 5. Create the project contract
 
 Open the root `AGENTS.md`.
 
 - If it already contains a `## Warrant contract` section, leave the file
-  unchanged and go to step 7.
+  unchanged and go to step 6.
 - If the file does not exist, create it with only the contract section.
 - Otherwise, append the contract section at the end and keep the existing
   content unchanged.
@@ -109,14 +113,14 @@ Write the section in exactly this form:
   project, such as `CONTRIBUTING.md`, a style guide or a `docs/` page about
   conventions. Write only the files the user confirms, or `none`.
 
-## 7. Report
+## 6. Report
 
-Report what you did: schema installed, replaced, unchanged or kept; config
-updated; contract created or unchanged. Then print this command, which installs
-the OpenSpec workflow skills for the supported release:
+Report what you did: rules added or replaced, contract created or unchanged.
+Then print this command with the installed OpenSpec version, which installs the
+OpenSpec workflow skills for that release:
 
 ```sh
-npx skills add https://github.com/Fission-AI/OpenSpec/tree/v1.16.0/skills
+npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills
 ```
 
 Do not run it yourself.

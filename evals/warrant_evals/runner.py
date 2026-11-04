@@ -58,8 +58,6 @@ class Scenario:
     check: Check
     # Workspace-relative directories put first on PATH, e.g. for a fake CLI.
     path: list[str] = field(default_factory=list)
-    # Agent name -> reason the scenario cannot run on that agent.
-    not_applicable: dict[str, str] = field(default_factory=dict)
     # Fixture script run in the workspace after preparation, e.g. to build git history.
     setup: str | None = None
 
@@ -84,9 +82,6 @@ def _run_one(
     scenario: Scenario, agent: Agent, out_dir: Path, workspaces: Path,
     prepare: Callable[[Path], None], timeout: float,
 ) -> Result:
-    if agent.name in scenario.not_applicable:
-        reason = scenario.not_applicable[agent.name]
-        return Result(scenario.name, agent.name, 'not run', [f'not applicable: {reason}'])
     if shutil.which(agent.command[0]) is None:
         return Result(scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'])
     workspace = _workspace(workspaces, scenario, agent)

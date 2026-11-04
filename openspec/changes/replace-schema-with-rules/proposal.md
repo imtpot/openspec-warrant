@@ -68,13 +68,9 @@ Features and options deliberately left out:
 ## Assumptions
 
 Confirmed by the requester: replace the schema with rules written by
-`warrant-setup`; remove `warrant-design`.
+`warrant-setup`; remove `warrant-design`; mark warrant's entries with
+`[warrant] `; support OpenSpec 1.16 and later; add confirmed terms to the
+glossary through an artifact rule and keep decisions in `design.md`, leaving
+the contract's Decision records subsection for a later decision.
 
-- warrant's rule and guidance entries start with `[warrant] ` so that setup can
-  find and replace them. Owner: requester.
-- Setup accepts OpenSpec 1.16 and later, because `operations` guidance exists
-  from 1.16. Owner: requester.
-- Agreed terms are added to the glossary by the agent writing the proposal or
-  design, as an artifact rule; decision records stay in `design.md` (Decisions)
-  and the contract's Decision records subsection is no longer read by any skill.
-  Owner: requester.
+None.

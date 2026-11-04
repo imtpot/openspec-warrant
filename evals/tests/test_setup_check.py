@@ -1,10 +1,15 @@
+import shutil
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from warrant_evals.checks import CHECKERS
 
-CONFIG = 'schema: spec-driven\n\n# keep this comment\n'
+RULES = (Path(__file__).resolve().parents[2] / 'skills' / 'warrant-setup' / 'rules.yaml').read_text()
+pytestmark = pytest.mark.skipif(shutil.which('openspec') is None, reason='openspec CLI not on PATH')
+
+CONFIG = 'schema: spec-driven\n\n# keep this comment\nrules:\n  tasks:\n  - Own project rule\n'
 CONTRACT = """## Warrant contract
 
 ### Verification
@@ -38,10 +43,16 @@ def workspace(tmp_path):
     return tmp_path
 
 
-def _install(workspace, agents_md='# Demo\n\n' + CONTRACT):
-    (workspace / 'openspec' / 'schemas' / 'warrant').mkdir(parents=True)
-    (workspace / 'openspec' / 'schemas' / 'warrant' / 'schema.yaml').write_text('name: warrant\n')
-    (workspace / 'openspec' / 'config.yaml').write_text(CONFIG.replace('spec-driven', 'warrant'))
+def _merged(rules=RULES):
+    """The project config with warrant's entries merged into its own tasks list."""
+    body = rules.split('rules:\n', 1)[1]
+    return CONFIG.replace('  tasks:\n  - Own project rule\n', '') + body.replace(
+        '  tasks:\n', '  tasks:\n  - Own project rule\n', 1
+    )
+
+
+def _install(workspace, agents_md='# Demo\n\n' + CONTRACT, config=None):
+    (workspace / 'openspec' / 'config.yaml').write_text(config or _merged())
     (workspace / 'AGENTS.md').write_text(agents_md)
 
 
@@ -55,11 +66,22 @@ def test_installed_setup_passes(workspace):
     assert _check({'expect': 'installed', 'verification': ['make test']}, workspace) == []
 
 
-def test_config_change_beyond_schema_fails(workspace):
-    _install(workspace)
-    (workspace / 'openspec' / 'config.yaml').write_text('schema: warrant\n')
+def test_outdated_warrant_rule_fails(workspace):
+    _install(workspace, config=_merged(RULES.replace('[warrant] Replace vague', '[warrant] Avoid vague')))
 
-    assert _check({'expect': 'installed'}, workspace) == ['openspec/config.yaml changed beyond the schema field']
+    assert _check({'expect': 'installed'}, workspace) == ['specs: warrant entries differ from rules.yaml']
+
+
+def test_changed_project_rule_fails(workspace):
+    _install(workspace, config=_merged().replace('Own project rule', 'Changed rule'))
+
+    assert _check({'expect': 'installed'}, workspace) == ['tasks: project entries changed']
+
+
+def test_changed_schema_fails(workspace):
+    _install(workspace, config=_merged().replace('schema: spec-driven', 'schema: other'))
+
+    assert 'schema field changed' in _check({'expect': 'installed'}, workspace)
 
 
 def test_missing_verification_command_fails(workspace):

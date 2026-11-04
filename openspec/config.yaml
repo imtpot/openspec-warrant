@@ -1,10 +1,11 @@
 ---
-schema: warrant
+schema: spec-driven
 
 context: |
   This repository builds openspec-warrant: an agent-neutral extension of OpenSpec
-  1.16, published on GitHub under MIT. It ships an OpenSpec schema and agent
-  skills, installed into other projects with the `skills` CLI. Its idea: every
+  1.16 or later, published on GitHub under MIT. It ships agent skills and
+  artifact rules for OpenSpec's spec-driven schema, installed into other
+  projects with the `skills` CLI. Its idea: every
   requirement is unambiguous (EARS), every changed line is warranted by a
   requirement, and every completion claim is warranted by verification evidence.
   Skills must not assume any project, language or agent. Project specifics come
@@ -14,19 +15,32 @@ context: |
   obra/superpowers, DietrichGebert/ponytail) are inspiration only, never copied.
   Write all artifacts in English.
 
-# The warrant schema carries the rules for EARS requirements, assumptions, the
-# option ladder, and the review and verification task groups. Only rules that
-# the schema does not cover belong here.
 rules:
+  proposal:
+  - "[warrant] Add a 'Why code is needed' section: why a configuration change, an existing tool or a documentation change cannot meet the need. If one can, propose that instead."
+  - "[warrant] Add an 'Out of scope' section: one sentence on what the change does not do, then the features and options deliberately left out."
+  - "[warrant] Add an 'Assumptions' section listing every decision the requester has not confirmed, each with an owner. Write None only when the requester confirmed every decision; a decision you made yourself is an assumption."
+  - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md. Add a new term to that glossary only after the requester confirms its meaning; until then list it under Assumptions."
+  specs:
+  - "[warrant] Write each requirement in exactly one EARS pattern: 'The <subject> SHALL <response>.', 'WHEN <trigger>, the <subject> SHALL <response>.', 'WHILE <state>, the <subject> SHALL <response>.', 'IF <condition>, THEN the <subject> SHALL <response>.' or 'WHERE <feature or option>, the <subject> SHALL <response>.' Combine at most two clauses, in the order WHERE, WHILE, WHEN or IF."
+  - "[warrant] Give each requirement exactly one SHALL and one observable response; write one requirement per outcome."
+  - "[warrant] Use WHERE only for an optional feature or option; a state of the environment takes WHILE, or IF when it is a failure."
+  - "[warrant] Name a concrete subject (a command, a component, a rule), never 'the system'."
+  - "[warrant] Add an IF/THEN requirement for each failure that an event or state requirement can actually meet; do not invent failure modes."
+  - "[warrant] Trace every requirement to the request or to an assumption in the proposal; remove a requirement that traces to neither."
+  - "[warrant] Replace vague qualities such as fast, safe or correct with measurable values."
+  - "[warrant] Use the terms of the glossary named in the Warrant contract of AGENTS.md."
+  design:
+  - "[warrant] For each part of the change, record the first option that fully works in the order of warrant-minimal-change's option ladder, and state why each earlier option failed."
   tasks:
   - Map each requirement to at least one test task
   - List every file, fixture and configuration the change must reach
-
+  - "[warrant] End the task list with a Review group (check the diff against the specs; remove speculative generality, unused options, unrequested features and dependencies) followed by a Verification group with one task per command under '### Verification' in the Warrant contract of AGENTS.md."
+  - "[warrant] A verification task that cannot run records 'not run' with the reason, never 'passed'."
 operations:
   apply:
     guidance:
-    - Follow warrant-minimal-change while writing code
-    - Follow warrant-verify before marking a task complete
+    - "[warrant] Follow warrant-tdd to implement each requirement, warrant-minimal-change while writing code, and warrant-verify before marking a task complete."
   archive:
     guidance:
-    - Archive only when every task records the evidence of its verification
+    - "[warrant] Archive only when every verification task records its result."
