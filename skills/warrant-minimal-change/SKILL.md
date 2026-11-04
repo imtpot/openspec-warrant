@@ -50,11 +50,12 @@ for, name it in one line of your report, so the requester can ask for it.
 - Delete every temporary, backup or scratch file you created before you report
   the change.
 
-Never remove, to make a change smaller:
+Never leave out or remove, to make a change smaller, in new or existing code:
 
 - validation at trust boundaries (user input, network input, file input),
 - error handling that prevents data loss,
 - security checks,
+- accessibility of user interfaces,
 - anything the requester asked for.
 
 ## Trace lines to requirements
