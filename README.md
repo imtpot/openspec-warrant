@@ -20,7 +20,8 @@ It ships:
   selection stays with the OpenSpec apply workflow;
 - `warrant-verify`: no completion claim without running the project's
   verification commands and reading their output;
-- `warrant-review`: reviews a diff along three separate axes - Spec
+- `warrant-review`: reviews a change's artifacts before any code (ending with
+  `Artifact review: PASS` or `REVISE`), and reviews a diff along three separate axes - Spec
   (`openspec-verify-change` plus lines no requirement asks for), Standards (the
   project's declared standards and bugs or security problems in connected
   code) and Evidence (the contract's verification) - and addresses review

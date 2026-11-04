@@ -272,6 +272,18 @@ def tdd_check(params: dict):
     return check
 
 
+def artifact_review_check(params: dict):
+    """Each planted flaw is named, the last line is the verdict, and no file changes."""
+    def check(workspace: Path, transcript: str) -> list[Finding]:
+        findings = [Finding('report', f'report lacks: {term}') for term in _missing(transcript, params.get('flaws', []))]
+        lines = [re.sub(r'[*`_#>\s]+', ' ', line).strip() for line in transcript.splitlines() if line.strip()]
+        verdict = f'Artifact review: {params["verdict"]}'
+        if not lines or lines[-1] != verdict:
+            findings.append(Finding('verdict', f'last line is not "{verdict}"'))
+        return findings + _status_findings(workspace)
+    return check
+
+
 CHECKERS: dict[str, CheckerFactory] = {
     'setup': setup_check,
     'minimal-change': minimal_change_check,
@@ -279,6 +291,7 @@ CHECKERS: dict[str, CheckerFactory] = {
     'verify': verify_check,
     'propose': propose_check,
     'review': review_check,
+    'artifact-review': artifact_review_check,
     'tdd': tdd_check,
     # Transcript phrases and an unchanged workspace, without review axes.
     'transcript': review_check,

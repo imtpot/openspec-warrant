@@ -78,7 +78,7 @@ target project
 | `warrant-minimal-change` | how much code a change may add; `shortcut:` markers | choosing tasks |
 | `warrant-tdd` | how one requirement is implemented test first | choosing or checking off tasks |
 | `warrant-verify` | running the contract's commands before any completion claim | deciding what to verify beyond the contract |
-| `warrant-review` | Spec (from `openspec-verify-change` plus untraced lines), Standards (declared standards, protected code, correctness and security of connected code), Evidence, and receiving review comments; Spec and Standards in separate contexts | checking requirements and test coverage itself |
+| `warrant-review` | the artifacts before code (EARS, missing tasks, contradicted decisions, unlisted assumptions; a `PASS`/`REVISE` line CI can parse); Spec (from `openspec-verify-change` plus untraced lines), Standards (declared standards, protected code, correctness and security of connected code), Evidence, and receiving review comments; Spec and Standards in separate contexts | checking requirements and test coverage itself |
 
 ## Map against OpenSpec skills
 
@@ -120,8 +120,6 @@ duplicated OpenSpec (principle 1).
 Remaining drift:
 
 - No brevity rule or closing "skipped / not checked / risk" line (principle 5).
-- The contract's Decision records subsection is no longer read by any skill
-  (principle 4).
 
 ## Success criteria
 
@@ -139,8 +137,8 @@ Remaining drift:
 2. Done: `warrant-review` runs `openspec-verify-change` for the Spec axis and
    checks connected code; axes run in separate contexts.
 3. Economy: brevity and the closing line; decide on the Decision records subsection.
-4. From anvil: an artifact review before implementation and verification
-   results CI can parse.
+4. Done from anvil: an artifact review before implementation with a verdict line
+   CI can parse. Still open: verification results in a line CI can parse.
 5. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
 
 ## Sources

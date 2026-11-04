@@ -21,6 +21,7 @@ rules:
 operations:
   apply:
     guidance:
+    - "[warrant] Before the first task, run warrant-review on the change's artifacts; implement only after the review ends with Artifact review: PASS."
     - "[warrant] Follow warrant-tdd to implement each requirement, warrant-minimal-change while writing code, and warrant-verify before marking a task complete."
   archive:
     guidance:

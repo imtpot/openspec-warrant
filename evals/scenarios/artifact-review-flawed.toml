@@ -1,0 +1,8 @@
+skills = ["warrant-review"]
+fixture = "artifacts-flawed"
+prompt = "Review the planning artifacts of the OpenSpec change add-machine-report with the warrant-review skill, before anything is implemented. Nobody can answer questions during this run."
+checker = "artifact-review"
+
+[params]
+flaws = [["Unserializable value"], ["0001", "JSON"], ["report.yaml", "output path", "output file"], ["verification"]]
+verdict = "REVISE"

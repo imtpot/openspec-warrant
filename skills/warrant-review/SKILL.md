@@ -1,12 +1,13 @@
 ---
 name: warrant-review
-description: Use when asked to review a branch, a diff or a merge request before merge, or to address, answer or apply review comments.
+description: Use when asked to review a branch, a diff or a merge request before merge, to review a change's planning artifacts before implementation, or to address, answer or apply review comments.
 license: MIT
 ---
 
 # Review
 
-Two modes. **Review mode** reports findings and changes no file. **Receive
+Three modes. **Review mode** reports findings on a diff and changes no file.
+**Artifact mode** reviews a change's planning artifacts before code. **Receive
 mode** addresses review comments. Read the `## Warrant contract` section of the
 root `AGENTS.md` first; if it is missing, tell the user to run `warrant-setup`
 and stop.
@@ -86,6 +87,35 @@ Each finding: level (blocking or non-blocking, or verify-change's severity on
 the Spec axis), `file:line` where one exists,
 and the quoted code, requirement or rule. End with one line per axis: number of
 blocking and non-blocking findings. Do not rank the axes against each other.
+
+## Artifact mode
+
+Use this mode for a change's `proposal.md`, `specs/`, `design.md` and
+`tasks.md` before its first task is implemented. Change no file.
+
+Review in a separate, fresh context that gets the artifact files, the
+contract and the recorded decisions, not the conversation that wrote them. If
+you cannot start a separate context, re-read the files from disk and review
+them as written, ignoring your own earlier reasoning about them.
+
+Report as blocking:
+
+- a requirement that does not use exactly one EARS pattern with one `SHALL`;
+- a requirement for which `tasks.md` has no test task, and a task list without
+  a verification group;
+- a design decision that contradicts a recorded decision (the contract's
+  Decision records location, or `design.md` of an archived change); quote both;
+- a decision the specs or design present as settled that the proposal lists
+  neither as confirmed nor under Assumptions.
+
+End the report with exactly one of these lines, as its last line:
+
+```
+Artifact review: REVISE
+Artifact review: PASS
+```
+
+`REVISE` when any blocking finding exists, `PASS` otherwise.
 
 ## Receive mode
 
