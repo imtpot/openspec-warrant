@@ -57,8 +57,16 @@ names the verification commands as plain text. Claude runs with
 - `review-export`: review a branch with 6 planted problems that need the
   spec, the standards or code outside the diff. Score: the share of problems
   the report names.
+- `review-refund`: review a branch whose 6 planted problems show only against
+  the spec, the standards or a caller outside the diff, while the branch's
+  tests pass. On Opus, Sonnet and Haiku every arm named nearly all of them, so
+  the review tasks check that a review misses nothing rather than separate
+  the arms; that needs a diff of realistic size.
 - Every run records the tokens the agent reports. Compare tokens between arms
   of one agent, not between agents.
+- Claude runs with `--output-format stream-json`. The score reads every message
+  of a run, not only the last: a headless Claude session can end with a short
+  note after background sub-agents finish.
 
 ```sh
 uv run python -m warrant_evals.benchmark --agent claude --runs 3

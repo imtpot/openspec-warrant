@@ -60,7 +60,7 @@ MODEL_FLAGS = {'claude': '--model', 'codex': '-m'}
 
 
 def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list[Agent]:
-    """The eval agents; Claude reports usage as JSON and runs without user settings.
+    """The eval agents; Claude streams its events and runs without user settings.
 
     An agent with a model from `models` is named `<agent>:<model>`.
     """
@@ -69,12 +69,8 @@ def bench_agents(usage_file: Path, models: dict[str, str] | None = None) -> list
     for agent in AGENTS:
         command = list(agent.command)
         if agent.name == 'claude':
-            # One JSON object with usage replaces the eval runner's stream.
-            command = [c for c in command if c not in ('stream-json', '--verbose')]
-            command.remove('--output-format')
-            command[command.index('-p') + 1:command.index('-p') + 1] = [
-                '--output-format', 'json', '--setting-sources', 'project,local',
-            ]
+            command.insert(command.index('-p') + 1, '--setting-sources')
+            command.insert(command.index('-p') + 2, 'project,local')
         name = agent.name
         if agent.name in models:
             flag = [MODEL_FLAGS[agent.name], models[agent.name]]
@@ -102,13 +98,26 @@ def continue_agent(agent: Agent) -> Agent:
     return Agent(agent.name, command)
 
 
+def _events(stdout: str) -> list[dict]:
+    """The JSON objects of a Claude output: one object, or one per streamed line."""
+    events = []
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict):
+            events.append(event)
+    return events
+
+
 def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
     """All input (including cache) plus output tokens as the agent reports them."""
     if _base(agent) == 'claude':
-        try:
-            data = json.loads(stdout)
-        except ValueError:
+        results = [e for e in _events(stdout) if e.get('type') == 'result' or 'usage' in e]
+        if not results:
             return None
+        data = results[-1]
         # `usage` covers only the main context; `modelUsage` adds every sub-agent.
         if isinstance(data, dict) and data.get('modelUsage'):
             keys = ['inputTokens', 'cacheCreationInputTokens', 'cacheReadInputTokens', 'outputTokens']
@@ -125,11 +134,15 @@ def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
 
 
 def report_text(agent: str, stdout: str) -> str:
+    """Everything the agent wrote: Claude may end with a short note after its report."""
     if _base(agent) == 'claude':
-        try:
-            return json.loads(stdout)['result']
-        except (ValueError, KeyError, TypeError):
-            return stdout
+        events = _events(stdout)
+        texts = [
+            block['text'] for e in events if e.get('type') == 'assistant'
+            for block in e.get('message', {}).get('content', []) if block.get('type') == 'text'
+        ]
+        texts += [e['result'] for e in events if isinstance(e.get('result'), str) and e['result']]
+        return '\n'.join(texts) if texts else stdout
     return stdout
 
 
@@ -339,7 +352,8 @@ def run_benchmark(
                         name = f'{task["name"]}-{arm}-{n}'
 
                         def check(workspace, stdout, run=run, agent=agent, name=name, usage_file=usage_file):
-                            outputs = [stdout]
+                            # The runner passes the report text; scoring needs the raw output.
+                            outputs = [(out_dir / f'{name}-{agent.name}.log').read_text()]
                             for prompt in prompts[1:]:
                                 done = subprocess.run(
                                     continue_agent(agent).argv(prompt), cwd=workspace, capture_output=True,

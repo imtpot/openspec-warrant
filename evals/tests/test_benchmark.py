@@ -81,7 +81,7 @@ def test_claude_benchmark_command_skips_user_settings(tmp_path):
 
     claude = agents['claude'].argv('go')
     assert claude[claude.index('--setting-sources') + 1] == 'project,local'
-    assert claude[claude.index('--output-format') + 1] == 'json'
+    assert claude[claude.index('--output-format') + 1] == 'stream-json'
     assert sorted(agents) == ['claude', 'codex']
 
 
@@ -442,4 +442,23 @@ def test_benchmark_claude_command_has_one_output_format(tmp_path):
     claude = {a.name: a for a in benchmark.bench_agents(tmp_path / 'usage.json')}['claude'].argv('go')
 
     assert claude.count('--output-format') == 1
-    assert 'stream-json' not in claude
+    assert claude.count('--verbose') == 1
+
+
+STREAM = '\n'.join(json.dumps(e) for e in [
+    {'type': 'system', 'subtype': 'init'},
+    {'type': 'assistant', 'message': {'content': [{'type': 'text', 'text': 'Blocking: round() rounds half to even.'}]}},
+    {'type': 'result', 'result': 'I stopped the loop.', 'modelUsage': {
+        'opus': {'inputTokens': 1, 'outputTokens': 2, 'cacheReadInputTokens': 3, 'cacheCreationInputTokens': 4}}},
+])
+
+
+def test_claude_stream_tokens_come_from_the_result_event(tmp_path):
+    assert benchmark.tokens('claude', STREAM, tmp_path / 'usage.json') == 10
+
+
+def test_claude_stream_report_holds_every_assistant_text():
+    report = benchmark.report_text('claude', STREAM)
+
+    assert 'round() rounds half to even' in report
+    assert 'I stopped the loop.' in report
