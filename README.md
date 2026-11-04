@@ -102,13 +102,10 @@ Results of the eval scenarios (23 per agent) for openspec-warrant 0.8, run on
 |---|---|---|---|
 | Claude Code 2.1 | 23 | 0 | |
 | Codex 0.166 | 23 | 0 | runs commands in a non-login shell (`-c allow_login_shell=false`) so a fixture's fake CLI stays on `PATH` |
-| GitHub Copilot CLI 1.0 | 21 | 2 fail | `verify-no-contract`: runs `make test` from `AGENTS.md` prose without loading `warrant-verify`; `review-branch`: misses one of the planted findings, a different one in each run, and runs the Spec axis in the same context; earlier runs also left a stray `app/report.py.new` in `minimal-change` |
 
-All three agents discover the skills in `.agents/skills/` and read the contract
-from `AGENTS.md` (`discovery` scenario). Antigravity CLI (agy) discovers them
-too, but it is not evaluated: in headless mode it denies commands that its
-permission rules allow and does not name them
-([#548](https://github.com/google-antigravity/antigravity-cli/issues/548)).
+Both agents discover the skills in `.agents/skills/` and read the contract from
+`AGENTS.md` (`discovery` scenario). The skills name no agent, so other agents
+can load them, but only Claude Code and Codex are evaluated.
 
 Global agent configuration (user-level skills and plugins) also loads during
 evals and can change the results; run evals with it disabled.

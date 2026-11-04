@@ -3,7 +3,7 @@
 ## Purpose
 Defines the behavioral evals of openspec-warrant: fixture projects, scenarios,
 an artifact checker and headless runners that test the schema and skills on
-Claude Code, Codex and GitHub Copilot CLI.
+Claude Code and Codex.
 
 ## Requirements
 

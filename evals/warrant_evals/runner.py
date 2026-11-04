@@ -35,16 +35,11 @@ CLAUDE_TOOLS = [
     'Bash(git grep*)', 'Bash(git log*)', 'Bash(git rev-parse*)',
     'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)', 'Skill',
 ]
-COPILOT_TOOLS = [
-    'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(python3:*)', 'shell(diff:*)',
-    'shell(cp:*)', 'shell(mkdir:*)', 'shell(git:*)',
-]
 AGENTS = [
     Agent('claude', ['claude', '-p', '--permission-mode', 'acceptEdits', '--allowedTools', *CLAUDE_TOOLS, '--', '{prompt}']),
     # A non-login shell keeps the PATH the runner sets; a login shell would
     # re-read the user's profile and hide a fixture's fake CLI.
     Agent('codex', ['codex', 'exec', '-s', 'workspace-write', '-c', 'allow_login_shell=false']),
-    Agent('copilot', ['copilot', '-p', '{prompt}', '-s', '--allow-tool', *COPILOT_TOOLS, '--deny-tool', 'shell(git push)']),
 ]
 
 Check = Callable[[Path, str], list[Finding]]

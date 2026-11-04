@@ -58,7 +58,7 @@ them checkable.
    ask for a separate, fresh context (a sub-agent), which all three supported
    agents offer, and then says what to do when none is available.
 7. **Evidence over claims, also for warrant itself.** Every skill has behavioral
-   eval scenarios that pass on Claude Code, Codex and GitHub Copilot CLI.
+   eval scenarios that pass on Claude Code and Codex.
    Checkers test behavior, not wording, and the harness stays small.
 
 ## Architecture
@@ -105,7 +105,7 @@ test, red-green-refactor tasks and a `verify` artifact with a `DECISION:` line
 that CI can parse. It forks the workflow into seven artifacts and relies on
 sub-agents or a second model for the review. warrant stays on `spec-driven`,
 adds no artifacts and names no agent, and adds what anvil lacks: EARS,
-assumptions, minimal change, the project contract and evals on three agents.
+assumptions, minimal change, the project contract and evals on two agents.
 
 Ideas from anvil worth taking, without an agent-specific mechanism: a review of
 the artifacts before implementation, verification results in a line CI can
@@ -115,7 +115,7 @@ parse, and a bound on review rounds.
 
 Built: the artifact rules, the contract, `warrant-setup`, `warrant-minimal-change`,
 `warrant-tdd`, `warrant-verify` and `warrant-review`, with eval scenarios on
-three agents. The schema fork and `warrant-design` were removed because they
+Claude Code and Codex. The schema fork and `warrant-design` were removed because they
 duplicated OpenSpec (principle 1).
 
 Remaining drift:
@@ -129,7 +129,7 @@ Remaining drift:
   one `warrant-setup` run.
 - Every principle above that can be checked mechanically has a test in
   `uv run pytest`.
-- Every skill's scenarios pass on Claude Code, Codex and Copilot CLI, with each
+- Every skill's scenarios pass on Claude Code and Codex, with each
   remaining failure explained in the README.
 
 ## Order of work

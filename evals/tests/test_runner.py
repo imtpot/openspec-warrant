@@ -152,15 +152,6 @@ def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, w
     assert str(result.workspace) in write_report([result], tmp_path / 'out' / 'r.md').read_text()
 
 
-@pytest.mark.parametrize('name', ['copilot'])
-def test_prompt_follows_the_prompt_flag(name):
-    [agent] = [a for a in AGENTS if a.name == name]
-
-    argv = agent.argv('the prompt')
-
-    assert argv[argv.index('-p') + 1] == 'the prompt'
-
-
 def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
     # codex exec reads stdin when it is open; an inherited pipe would block it.
     import subprocess
@@ -194,4 +185,4 @@ def test_setup_script_runs_in_the_workspace_after_preparation(tmp_path, fixture_
 
 
 def test_supported_agents():
-    assert [agent.name for agent in AGENTS] == ['claude', 'codex', 'copilot']
+    assert [agent.name for agent in AGENTS] == ['claude', 'codex']

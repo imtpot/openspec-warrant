@@ -1,13 +1,12 @@
 # Tasks
 
 Files this change reaches: `evals/warrant_evals/runner.py`,
-`evals/warrant_evals/__main__.py`, `evals/tests/test_runner.py`,
-`evals/tests/test_cli.py`, `README.md`, `docs/design.md`,
+`evals/tests/test_runner.py`, `README.md`, `docs/design.md`,
 `openspec/config.yaml`.
 
-## 1. Default agents
+## 1. Runner
 
-- [ ] 1.1 Write failing tests, then run Claude Code and Codex without a filter and Copilot only when named (specs: "Supported agents", "Copilot on request"); verify the tests pass
+- [ ] 1.1 Change the supported-agents test to Claude Code and Codex and see it fail, then remove the Copilot command and allowlist (specs: "Supported agents"); verify the tests pass
 
 ## 2. Documentation
 
