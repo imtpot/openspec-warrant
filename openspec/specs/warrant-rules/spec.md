@@ -122,8 +122,8 @@ requirement names and the paths of the change's artifacts.
 ### Requirement: Verify before checking off
 
 The warrant apply guidance SHALL direct the orchestrating agent to run
-`warrant-verify` after a sub-agent reports and before it checks off the
-group's tasks.
+`warrant-verify` after a sub-agent reports and to check off the group's tasks
+only when every verification command exited with 0.
 
 #### Scenario: Group finished
 - **WHEN** a sub-agent reports a finished group
@@ -149,3 +149,13 @@ session's model.
 #### Scenario: Settled group
 - **WHEN** a task group's requirements and design leave no point open
 - **THEN** the guidance asks for a smaller, faster model for its sub-agent
+
+### Requirement: Path after REVISE
+
+WHEN the artifact review ends with `Artifact review: REVISE`, the warrant apply
+guidance SHALL direct the agent to revise the artifacts and run the artifact
+review again.
+
+#### Scenario: Blocking finding
+- **WHEN** the artifact review reports a requirement without a test task
+- **THEN** the guidance asks to revise the tasks and review again before the first task

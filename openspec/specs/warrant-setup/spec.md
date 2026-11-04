@@ -138,3 +138,12 @@ leave it unchanged.
 #### Scenario: Context written by the team
 - **WHEN** `context` already holds the team's text
 - **THEN** after setup OpenSpec renders the same context
+
+### Requirement: No confirmed destructive actions
+
+IF the user confirms no destructive action, THEN the setup skill SHALL leave
+the Destructive actions subsection empty.
+
+#### Scenario: Nothing confirmed
+- **WHEN** setup proposes `make deploy` and the user confirms none
+- **THEN** `### Destructive actions` has no entry
