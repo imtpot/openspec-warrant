@@ -47,24 +47,15 @@ SHALL leave the contract unchanged.
 - **WHEN** setup runs twice in the same project
 - **THEN** the second run does not change `AGENTS.md`
 
-### Requirement: Report the OpenSpec skills command
-
-WHEN setup completes, the setup skill SHALL print the `skills add` command that
-installs the Fission-AI/OpenSpec workflow skills at the release tag matching the
-installed OpenSpec version.
-
-#### Scenario: Completion message
-- **WHEN** setup completes with OpenSpec 1.16.0 installed
-- **THEN** the output contains a `skills add` command with the `v1.16.0` tag
-
 ### Requirement: No OpenSpec root
 
-IF the project has no OpenSpec root, THEN the setup skill SHALL stop without
-writing files and tell the user to run `openspec init`.
+IF the project has no OpenSpec root and the user does not confirm
+`openspec init --tools agents --profile core`, THEN the setup skill SHALL stop
+without writing files and name that command.
 
 #### Scenario: Plain repository
-- **WHEN** setup runs in a repository without `openspec/`
-- **THEN** no file is created and the output names `openspec init`
+- **WHEN** setup runs in a repository without `openspec/` and nobody confirms
+- **THEN** no file is created and the output names `openspec init --tools agents`
 
 #### Scenario: Root of an enclosing repository
 - **WHEN** setup runs in a project without `openspec/` inside a directory tree
@@ -73,12 +64,13 @@ writing files and tell the user to run `openspec init`.
 
 ### Requirement: Unsupported OpenSpec version
 
-IF the installed OpenSpec CLI is older than 1.16, THEN the setup skill SHALL
-stop without writing files and report the installed and supported versions.
+IF the OpenSpec CLI is missing or older than 1.16 and the user does not confirm
+an install command, THEN the setup skill SHALL stop without writing files and
+report the installed version, the supported version and the install command.
 
 #### Scenario: Older CLI
-- **WHEN** `openspec --version` prints `1.15.0`
-- **THEN** setup reports `1.15.0` and `1.16` and writes nothing
+- **WHEN** `openspec --version` prints `1.15.0` and nobody confirms
+- **THEN** setup reports `1.15.0`, `1.16` and an install command, and writes nothing
 
 ### Requirement: Install the rules
 
@@ -147,3 +139,31 @@ the Destructive actions subsection empty.
 #### Scenario: Nothing confirmed
 - **WHEN** setup proposes `make deploy` and the user confirms none
 - **THEN** `### Destructive actions` has no entry
+
+### Requirement: Confirmed install and init
+
+WHEN the user confirms the install command or the init command, the setup
+skill SHALL run it and continue the setup.
+
+#### Scenario: Init confirmed
+- **WHEN** a repository has no `openspec/` and the user confirms the init command
+- **THEN** setup runs it, merges the rules and creates the contract
+
+### Requirement: OpenSpec skills for every agent directory
+
+WHEN `.agents/skills/` holds `openspec-*` skills, the setup skill SHALL link
+each one into every existing `.<agent>/skills/` directory that lacks it.
+
+#### Scenario: Agent directory without OpenSpec skills
+- **WHEN** `.claude/skills/` exists and holds no `openspec-propose`
+- **THEN** setup creates `.claude/skills/openspec-propose` as a link to `../../.agents/skills/openspec-propose`
+
+### Requirement: Missing verify skill
+
+IF `.agents/skills/openspec-verify-change` does not exist after setup, THEN the
+setup skill SHALL report that the Spec axis of `warrant-review` needs it and
+name `openspec config profile`.
+
+#### Scenario: Core profile
+- **WHEN** init installed the core workflows only
+- **THEN** the report names the missing verify skill and `openspec config profile`
