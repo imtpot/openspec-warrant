@@ -59,7 +59,9 @@ them checkable.
    one, so skills describe no fallback.
 7. **Evidence over claims, also for warrant itself.** Every skill has behavioral
    eval scenarios that pass on Claude Code and Codex.
-   Checkers test behavior, not wording, and the harness stays small.
+   Checkers test behavior, not wording, and the harness stays small. A
+   benchmark compares the same tasks with no kit, with plain OpenSpec and with
+   warrant, so the kit's value is measured, not assumed.
 
 ## Architecture
 
@@ -120,8 +122,9 @@ duplicated OpenSpec (principle 1).
 
 Remaining drift:
 
-- No skill asks for short replies, and evals do not measure reply length
-  (principle 5). Decide after real use whether replies are too long.
+- No skill asks for short replies (principle 5). The benchmark records
+  tokens per arm; decide from its results and real use whether replies are too
+  long.
 
 ## Success criteria
 

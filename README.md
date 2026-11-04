@@ -130,6 +130,29 @@ therefore check the report (a failing result before a passing one, the
 narrowed and full test commands) together with the tests and code in the
 workspace; they cannot prove that each run happened.
 
+## Benchmark
+
+The benchmark runs the same tasks in three arms on each agent: `bare` (no
+skills), `openspec` (OpenSpec skills) and `warrant` (OpenSpec skills plus
+warrant's skills, rules and contract). In `bare` and `openspec`, `AGENTS.md`
+names the verification commands as plain text. Claude runs with
+`--setting-sources project,local`, so user plugins stay out of every arm.
+
+- `implement-split`: implement a ready OpenSpec change. Scores: hidden
+  acceptance tests passed (of 8), the share of 7 faulty implementations that
+  the agent's own tests reject, and non-test lines added.
+- `review-branch`: review a branch with 6 planted problems. Score: the share
+  of problems the report names.
+- Every run records the tokens the agent reports. Compare tokens between arms
+  of one agent, not between agents.
+
+```sh
+uv run python -m warrant_evals.benchmark --agent claude --runs 3
+```
+
+The table is written to `evals/out/benchmark/benchmark.md`; `(k)` after a mean
+is the number of runs that measured it.
+
 ## Inspired by
 
 The skills are written from scratch. Their ideas come from:

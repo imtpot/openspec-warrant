@@ -4,7 +4,7 @@ setup = "setup-feature.sh"
 prompt = "Review the current branch before merge. Nobody can answer questions during this run."
 # Planted problems; each group lists terms of which one must appear in the report.
 problems = [
-  ["--json", "JSON option"],
+  ["--json", "JSON option", "cli.py"],
   ["Negative input", "negative"],
   ["Shortfall verdict", "shortfall", "\"short\"", "Not enough free"],
   ["formatReport"],
