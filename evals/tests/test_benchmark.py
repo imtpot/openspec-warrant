@@ -306,7 +306,7 @@ def test_implement_task_change_follows_warrant_rules():
 def test_tasks_load_with_fixtures_and_kinds():
     tasks = {t['name']: t for t in benchmark.load_tasks()}
 
-    assert sorted(tasks) == ['implement-proration', 'plan-implement-allocation', 'review-export']
+    assert sorted(tasks) == ['implement-proration', 'plan-implement-allocation', 'review-export', 'review-refund']
     assert all(t['fixture'].is_dir() for t in tasks.values())
     assert len(tasks['review-export']['problems']) == 6
     assert (tasks['review-export']['fixture'] / tasks['review-export']['setup']).is_file()

@@ -1,0 +1,13 @@
+kind = "review"
+fixture = "review-refund/fixture"
+setup = "setup.sh"
+prompt = "Review the current branch before merge. Nobody can answer questions during this run."
+# Planted problems; each group lists terms of which one must appear in the report.
+problems = [
+  ["round(", "half to even", "banker", "half-even", "round half up", "ROUND_HALF_UP"],
+  ["negative", "after the period end", "after the end", "Cancel after the end"],
+  ["billed_days", "report.py"],
+  ["path traversal", "traversal", "../", "os.path.join", "outside the export"],
+  ["tautolog", "same function", "computes the expected", "expected value", "compares the function with itself", "always pass"],
+  ["currency"],
+]
