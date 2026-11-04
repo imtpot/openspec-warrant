@@ -47,9 +47,16 @@ so OpenSpec updates reach you unchanged. The principles behind it are in
 
 ```sh
 npm install -g @fission-ai/openspec@latest   # or: brew install openspec
-openspec init --tools agents --profile core   # skip if the project has openspec/
+openspec config set profile custom
+openspec config set workflows '["propose","explore","apply","update","sync","archive","verify"]'
+openspec init --tools agents --profile custom   # in a project with openspec/: openspec update
 npx skills add imtpot/openspec-warrant
 ```
+
+The two `config set` commands add the `verify` workflow, which the Spec axis
+of `warrant-review` uses, to OpenSpec's default ones. They replace your global
+workflow list for every project: if you already chose workflows, add `verify`
+with `openspec config profile` instead.
 
 `openspec init --tools agents` writes the OpenSpec workflow skills to
 `.agents/skills/`, where any agent can load them. Then ask your agent to run
@@ -70,9 +77,6 @@ names the command. Run it again after updating the kit: it replaces only the
 ### Dependencies
 
 - Node.js 22.12 or later for the OpenSpec CLI and `npx skills`.
-- The `verify` workflow for the Spec axis of `warrant-review`. The `core`
-  profile does not include it: add it with `openspec config profile`, then
-  `openspec update`.
 
 ### Migrating from the warrant schema (0.5 and earlier)
 
