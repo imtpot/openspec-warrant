@@ -43,6 +43,15 @@ def test_claude_tokens_sum_input_cache_and_output(tmp_path):
     assert benchmark.tokens('claude', stdout, tmp_path / 'usage.json') == 116
 
 
+def test_claude_tokens_include_sub_agents_from_model_usage(tmp_path):
+    stdout = json.dumps({'result': 'ok', 'usage': {'input_tokens': 1, 'output_tokens': 1}, 'modelUsage': {
+        'opus': {'inputTokens': 10, 'outputTokens': 5, 'cacheReadInputTokens': 100, 'cacheCreationInputTokens': 20},
+        'haiku': {'inputTokens': 1, 'outputTokens': 1, 'cacheReadInputTokens': 0, 'cacheCreationInputTokens': 0},
+    }})
+
+    assert benchmark.tokens('claude', stdout, tmp_path / 'usage.json') == 137
+
+
 def test_codex_tokens_from_usage_line(tmp_path):
     assert benchmark.tokens('codex', 'done\ntokens used\n21,806\n', tmp_path / 'usage.json') == 21806
 

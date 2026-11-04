@@ -62,8 +62,15 @@ def tokens(agent: str, stdout: str, usage_file: Path) -> int | None:
     """All input (including cache) plus output tokens as the agent reports them."""
     if agent == 'claude':
         try:
-            usage = json.loads(stdout)['usage']
-        except (ValueError, KeyError, TypeError):
+            data = json.loads(stdout)
+        except ValueError:
+            return None
+        # `usage` covers only the main context; `modelUsage` adds every sub-agent.
+        if isinstance(data, dict) and data.get('modelUsage'):
+            keys = ['inputTokens', 'cacheCreationInputTokens', 'cacheReadInputTokens', 'outputTokens']
+            return sum(m.get(key, 0) for m in data['modelUsage'].values() for key in keys)
+        usage = data.get('usage') if isinstance(data, dict) else None
+        if not usage:
             return None
         keys = ['input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens']
         return sum(usage.get(key, 0) for key in keys)
