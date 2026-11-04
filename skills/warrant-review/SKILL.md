@@ -33,10 +33,9 @@ Run `openspec list --json`.
 - More than one and none named: ask the user which one, before the Spec axis.
 - None: the Spec section reads "no OpenSpec change"; continue with Standards.
 
-Run steps 3 and 4 each in a separate, fresh context, so that one axis does not
-shape the other; give each context the range, the change and only its own
-step. If you cannot start a separate context, run step 3, write its findings
-down, then run step 4 without reusing step 3's conclusions.
+Run steps 3 and 4 each in a separate, fresh context (a sub-agent), so that one
+axis does not shape the other; give each context the range, the change and
+only its own step.
 
 ### 3. Spec axis
 
@@ -93,10 +92,9 @@ blocking and non-blocking findings. Do not rank the axes against each other.
 Use this mode for a change's `proposal.md`, `specs/`, `design.md` and
 `tasks.md` before its first task is implemented. Change no file.
 
-Review in a separate, fresh context that gets the artifact files, the
-contract and the recorded decisions, not the conversation that wrote them. If
-you cannot start a separate context, re-read the files from disk and review
-them as written, ignoring your own earlier reasoning about them.
+Review in a separate, fresh context (a sub-agent) that gets the artifact
+files, the contract and the recorded decisions, not the conversation that
+wrote them.
 
 Report as blocking:
 

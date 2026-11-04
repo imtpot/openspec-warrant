@@ -12,16 +12,12 @@ AGENT_WORDS = [
     'Claude', 'Codex', 'Copilot', 'Cursor', 'Gemini', 'agy',
     'Skill tool', 'Task tool', 'TodoWrite',
 ]
-FRESH_CONTEXT = re.compile(r'fresh context|separate context|sub-?agent', re.I)
+# Every supported agent starts sub-agents; skills ask for one without a fallback.
 FALLBACK = 'If you cannot start a separate context'
 
 
 def _skill(name: str) -> str:
     return (REPO / 'skills' / name / 'SKILL.md').read_text()
-
-
-def fresh_context_without_fallback(text: str) -> bool:
-    return bool(FRESH_CONTEXT.search(text)) and FALLBACK not in text
 
 
 def _frontmatter(name: str) -> dict[str, str]:
@@ -101,13 +97,6 @@ def test_verification_results_have_a_parsable_format():
     assert "'Result:' line" in text[text.index('  archive:'):]
 
 
-def test_fallback_rule_detects_a_missing_fallback():
-    assert fresh_context_without_fallback('Run the review in a fresh context.')
-    assert not fresh_context_without_fallback(
-        'Run the review in a fresh context. If you cannot start a separate context, review it yourself.'
-    )
-
-
 @pytest.mark.parametrize('name', SKILLS)
-def test_fresh_context_has_a_fallback(name):
-    assert not fresh_context_without_fallback(_skill(name)), f'{name} asks for a fresh context without a fallback'
+def test_fresh_context_has_no_fallback(name):
+    assert FALLBACK not in _skill(name), f'{name} still describes an agent without sub-agents'

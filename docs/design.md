@@ -55,8 +55,8 @@ them checkable.
    use the skill.
    (Ponytail: "Lower cost and latency are a side effect.")
 6. **Agent-neutral.** No skill names an agent or an agent's tools. A skill may
-   ask for a separate, fresh context (a sub-agent), which all three supported
-   agents offer, and then says what to do when none is available.
+   require a separate, fresh context (a sub-agent); all supported agents offer
+   one, so skills describe no fallback.
 7. **Evidence over claims, also for warrant itself.** Every skill has behavioral
    eval scenarios that pass on Claude Code and Codex.
    Checkers test behavior, not wording, and the harness stays small.
