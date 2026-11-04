@@ -46,12 +46,14 @@ rules:
   - "[warrant] For each part of the change, record the first option that fully works in the order of warrant-minimal-change's option ladder, and state why each earlier option failed."
   tasks:
   - "[warrant] End the task list with a Review group (check the diff against the specs; remove speculative generality, unused options, unrequested features and dependencies) followed by a Verification group with one task per command under '### Verification' in the Warrant contract of AGENTS.md."
+  - "[warrant] Make each implementation group implementable from the artifacts and the code alone, without another group's unfinished work; order the groups so that each builds only on finished groups."
   - "[warrant] Each verification task records its result on its own line as 'Result: exit <code>, <result line>', or as 'Result: not run, <reason>' when it cannot run; never 'passed'."
 operations:
   apply:
     guidance:
     - "[warrant] Before the first task, run warrant-review on the change's artifacts; implement only after the review ends with Artifact review: PASS."
-    - "[warrant] Follow warrant-tdd to implement each requirement, warrant-minimal-change while writing code, and warrant-verify before marking a task complete."
+    - "[warrant] Implement each task group in a separate, fresh context (a sub-agent). Give it the group's tasks, the names of their requirements and the paths of the change's artifacts; it follows warrant-tdd and warrant-minimal-change and reports the scenarios, the red and green results and the changed files."
+    - "[warrant] After each sub-agent reports, run warrant-verify, then check off the group's tasks."
   archive:
     guidance:
     - "[warrant] Archive only when every verification task has a 'Result:' line."

@@ -10,7 +10,8 @@ It ships:
   one outcome each, an Assumptions section in every proposal, a design that
   records which simpler option failed, review and verification groups at the
   end of every task list, and use of the project glossary; plus apply guidance
-  that routes implementation to the warrant skills;
+  that implements each task group in a fresh sub-agent with the warrant skills
+  and verifies before checking tasks off;
 - `warrant-setup`: merges the rules into `openspec/config.yaml`, drafts an
   empty OpenSpec `context` from the project's documents and creates the
   project contract;

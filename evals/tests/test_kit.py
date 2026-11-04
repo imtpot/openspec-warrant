@@ -88,6 +88,25 @@ def test_rules_leave_openspec_spec_guidance_to_openspec():
     assert duplicated == []
 
 
+def _section(text: str, start: str, end: str | None = None) -> str:
+    tail = text[text.index(start):]
+    return tail[:tail.index(end)] if end else tail
+
+
+def test_apply_guidance_implements_each_group_in_a_sub_agent():
+    apply = _section(RULES_FILE.read_text(), '  apply:', '  archive:')
+
+    assert 'fresh context (a sub-agent)' in apply
+    assert 'task group' in apply
+    assert apply.index('warrant-verify') < apply.index('check off')
+
+
+def test_tasks_rules_ask_for_independent_groups():
+    tasks = _section(RULES_FILE.read_text(), '  tasks:', 'operations:')
+
+    assert "without another group's unfinished work" in tasks
+
+
 def test_verification_results_have_a_parsable_format():
     text = RULES_FILE.read_text()
     tasks = text[text.index('  tasks:'):text.index('operations:')]

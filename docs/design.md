@@ -91,7 +91,7 @@ target project
 |---|---|---|
 | `openspec-explore` | interview before a change: one question at a time, a recommendation, facts looked up, decisions kept in the conversation | nothing separate; glossary use is an artifact rule for proposal and specs |
 | `openspec-propose`, `-new-change`, `-continue-change`, `-ff-change` | write the artifacts | the `[warrant] ` artifact rules |
-| `openspec-apply-change` | pick tasks, implement, check off | apply guidance routing to `warrant-tdd`, `warrant-minimal-change`, `warrant-verify` |
+| `openspec-apply-change` | pick tasks, implement, check off | apply guidance: one fresh sub-agent per task group with `warrant-tdd` and `warrant-minimal-change`; `warrant-verify` before check-off |
 | `openspec-verify-change` | completeness, correctness (requirements and scenario coverage), coherence against artifacts; runs nothing | `warrant-review` runs it for the Spec axis and adds untraced lines; `warrant-verify` runs the commands; `warrant-review` covers standards and connected code |
 | `openspec-archive-change`, `-sync-specs`, `-update-change` | finish and sync | nothing |
 
