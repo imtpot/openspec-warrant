@@ -168,6 +168,17 @@ def test_tests_failing_on_reference_are_not_measured(task):
     assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == (None, [])
 
 
+def test_tests_failing_on_reference_are_ignored(task):
+    workspace, hidden = task
+    (workspace / 'tests' / 'test_calc.py').write_text(
+        'import unittest\nfrom app.calc import double\n\nclass T(unittest.TestCase):\n'
+        '    def test_other_choice(self):\n        self.assertEqual(double(3), 7)\n'
+        '    def test_three(self):\n        self.assertEqual(double(3), 6)\n'
+    )
+
+    assert benchmark.fault_detection(workspace, hidden, 'app/calc.py') == (pytest.approx(1 / 2), ['same.py'])
+
+
 def test_no_agent_tests_detect_nothing(task):
     workspace, hidden = task
 
@@ -295,7 +306,7 @@ def test_implement_task_change_follows_warrant_rules():
 def test_tasks_load_with_fixtures_and_kinds():
     tasks = {t['name']: t for t in benchmark.load_tasks()}
 
-    assert sorted(tasks) == ['implement-proration', 'review-export']
+    assert sorted(tasks) == ['implement-proration', 'plan-implement-allocation', 'review-export']
     assert all(t['fixture'].is_dir() for t in tasks.values())
     assert len(tasks['review-export']['problems']) == 6
     assert (tasks['review-export']['fixture'] / tasks['review-export']['setup']).is_file()
@@ -321,3 +332,78 @@ def test_arm_filter_runs_only_named_arms(tmp_path, monkeypatch):
 
     rows = [line for line in (tmp_path / 'out' / 'benchmark.md').read_text().splitlines() if line.startswith('| review')]
     assert [row.split('|')[3].strip() for row in rows] == ['warrant']
+
+
+AMBIGUITIES = [['add up to 100', 'sum to 100'], ['leftover', 'remainder'], ['empty']]
+PROPOSAL = """# Proposal
+
+## Why
+
+Split invoices. An empty list is handled.
+
+## Assumptions
+
+- Leftover cents go to the largest remainder. Owner: requester.
+
+## Impact
+
+Percentages that do not add up to 100 are rejected.
+"""
+
+
+def test_ambiguity_in_assumptions_or_marked_sentence_counts():
+    report = 'Done. I assumed that percentages must add up to 100; please confirm.'
+
+    assert benchmark.marked_ambiguities([PROPOSAL], [report], AMBIGUITIES) == (pytest.approx(2 / 3), ['empty'])
+
+
+def test_silent_decision_does_not_count():
+    assert benchmark.marked_ambiguities([], ['An empty list returns an empty list.'], AMBIGUITIES) == (
+        0, ['add up to 100', 'leftover', 'empty'],
+    )
+
+
+def test_plan_implement_run_scores_planning_and_code(task, monkeypatch):
+    workspace, hidden = task
+    _agent_test(workspace, 'self.assertEqual(double(3), 6)')
+    change = workspace / 'openspec' / 'changes' / 'add-double'
+    change.mkdir(parents=True)
+    (change / 'proposal.md').write_text('## Assumptions\n\n- Doubling of negatives is assumed.\n')
+    for args in (['init', '-q'], ['add', '-A'], ['-c', 'user.name=t', '-c', 'user.email=t@invalid', 'commit', '-qm', 'f']):
+        subprocess.run(['git', *args], cwd=workspace, check=True)
+    task_def = {'kind': 'plan-implement', 'dir': hidden.parent, 'module': 'app/calc.py',
+                'ambiguities': [['negative'], ['overflow']]}
+    monkeypatch.setattr(benchmark, 'acceptance', lambda workspace, hidden: 2)
+    run = Run('t', 'codex', 'warrant')
+
+    benchmark._score(task_def, run, workspace, 'ok\ntokens used\n10\n', workspace / 'usage.json')
+
+    assert run.scores['ambiguities'] == pytest.approx(1 / 2)
+    assert run.scores['faults'] == pytest.approx(1 / 2)
+    assert run.scores['acceptance_count'] == 2
+    assert run.missed == ['ambiguity: overflow', 'fault: same.py']
+
+
+ALLOCATION = benchmark.TASKS / 'plan-implement-allocation'
+
+
+def _allocation_failures(tmp_path, code):
+    workspace = tmp_path / 'workspace'
+    shutil.rmtree(workspace, ignore_errors=True)
+    shutil.copytree(ALLOCATION / 'fixture', workspace)
+    (workspace / 'app' / 'allocation.py').write_text(code)
+    return 6 - benchmark.acceptance(workspace, ALLOCATION / 'hidden')
+
+
+def test_allocation_reference_passes_every_acceptance_test(tmp_path):
+    assert _allocation_failures(tmp_path, (ALLOCATION / 'hidden' / 'reference.py').read_text()) == 0
+
+
+@pytest.mark.parametrize('fault', sorted(p.name for p in (ALLOCATION / 'hidden' / 'faults').glob('*.py')))
+def test_every_allocation_fault_fails_an_acceptance_test(tmp_path, fault):
+    assert _allocation_failures(tmp_path, (ALLOCATION / 'hidden' / 'faults' / fault).read_text()) > 0
+
+
+def test_allocation_fixture_has_no_change_yet():
+    changes = ALLOCATION / 'fixture' / 'openspec' / 'changes'
+    assert [p.name for p in changes.iterdir() if p.name != 'archive'] == []

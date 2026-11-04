@@ -142,6 +142,16 @@ names the verification commands as plain text. Claude runs with
   billing module. Scores: hidden acceptance tests passed (of 11), the share of
   8 faulty implementations that the agent's own tests reject (3 of them break
   a requirement that no example scenario shows), and non-test lines added.
+- `plan-implement-allocation`: plan a short request as an OpenSpec change and
+  implement it in the same run. The request leaves three things open:
+  percentages that do not add up to 100, where leftover cents go, and an empty
+  list or a zero percentage. Scores: the share of these the agent marks as
+  assumed or open (in a proposal's Assumptions, or in a sentence that says
+  assume, question, confirm, unclear, ambiguous, decided or chose), hidden
+  acceptance tests on the unambiguous behavior (of 6), and the share of 6
+  faulty implementations its tests reject. A fault counts as caught when a
+  test that passes on the reference implementation fails on it, so tests that
+  settle an open point differently are ignored.
 - `review-export`: review a branch with 6 planted problems that need the
   spec, the standards or code outside the diff. Score: the share of problems
   the report names.

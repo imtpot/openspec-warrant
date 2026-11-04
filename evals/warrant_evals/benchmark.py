@@ -27,15 +27,20 @@ RULES_FILE = REPO / 'skills' / 'warrant-setup' / 'rules.yaml'
 ARMS = ['bare', 'openspec', 'warrant']
 CODEX_TOKENS = re.compile(r'tokens used\s*\n\s*([\d,]+)')
 CONTRACT_SECTION = re.compile(r'^## Warrant contract\s*$.*?(?=^## |\Z)', re.M | re.S)
-# Counts tests run and tests failed or errored, so that "no tests" differs from "all passed".
+# Prints the tests run and the ids of tests that failed or errored, so that
+# "no tests" differs from "all passed" and failures can be compared per test.
 COUNT_TESTS = (
     'import json, sys, unittest\n'
     'suite = unittest.defaultTestLoader.discover(sys.argv[1], top_level_dir=".")\n'
     'result = unittest.TestResult()\n'
     'suite.run(result)\n'
-    'print(json.dumps([result.testsRun, len(result.failures) + len(result.errors)]))\n'
+    'print(json.dumps([result.testsRun, [t.id() for t, _ in result.failures + result.errors]]))\n'
 )
 TEST_TIMEOUT = 120
+# A sentence that names an ambiguity marks it only with one of these words.
+MARKER = re.compile(r'assum|question|confirm|unclear|ambigu|decid|chose|choose', re.I)
+SENTENCE = re.compile(r'(?<=[.!?])\s+|\n')
+ASSUMPTIONS = re.compile(r'^## Assumptions\s*$(.*?)(?=^## |\Z)', re.M | re.S)
 
 
 @dataclass
@@ -135,7 +140,7 @@ def prepare_arm(workspace: Path, arm: str) -> None:
         commit_fixture(workspace)
 
 
-def _count_tests(workspace: Path, directory: str) -> tuple[int, int]:
+def _count_tests(workspace: Path, directory: str) -> tuple[int, set[str]]:
     # A fresh bytecode cache per run: a swapped module of the same size within
     # one second would otherwise run from stale bytecode.
     with tempfile.TemporaryDirectory() as cache:
@@ -147,29 +152,31 @@ def _count_tests(workspace: Path, directory: str) -> tuple[int, int]:
     try:
         run, failed = json.loads(done.stdout.strip().splitlines()[-1])
     except (ValueError, IndexError):
-        return 0, 0
-    return run, failed
+        return 0, set()
+    return run, set(failed)
 
 
 def fault_detection(workspace: Path, hidden: Path, module: str, tests: str = 'tests') -> tuple[float | None, list[str]]:
     """Share of faulty implementations the agent's tests reject, and the faults they let through.
 
-    The share is None when the tests reject the reference implementation.
+    A fault is caught when a test that passes on the reference fails on it, so
+    tests that settle an ambiguity differently from the reference are ignored.
+    The share is None when no test passes on the reference implementation.
     """
     target = workspace / module
     original = target.read_text() if target.exists() else None
     try:
         target.write_text((hidden / 'reference.py').read_text())
-        run, failed = _count_tests(workspace, tests)
+        run, reference_failed = _count_tests(workspace, tests)
         faults = sorted((hidden / 'faults').glob('*.py'))
         if run == 0:
             return 0.0, [f.name for f in faults]
-        if failed:
+        if len(reference_failed) == run:
             return None, []
         missed = []
         for fault in faults:
             target.write_text(fault.read_text())
-            if not _count_tests(workspace, tests)[1]:
+            if not _count_tests(workspace, tests)[1] - reference_failed:
                 missed.append(fault.name)
         return 1 - len(missed) / len(faults), missed
     finally:
@@ -188,7 +195,7 @@ def acceptance(workspace: Path, hidden: Path) -> int:
         run, failed = _count_tests(workspace, 'acceptance')
     finally:
         shutil.rmtree(copy)
-    return run - failed
+    return run - len(failed)
 
 
 def added_lines(workspace: Path) -> int:
@@ -230,13 +237,41 @@ def summary(runs: Sequence[Run]) -> str:
 
 def _score(task: dict, run: Run, workspace: Path, stdout: str, usage_file: Path) -> None:
     run.scores['tokens'] = tokens(run.agent, stdout, usage_file)
-    if task['kind'] == 'implement':
+    if task['kind'] == 'plan-implement':
+        changes = workspace / 'openspec' / 'changes'
+        proposals = [p.read_text() for p in sorted(changes.glob('**/proposal.md'))]
+        artifacts = [p.read_text() for p in sorted(changes.glob('**/*.md')) if p.name != 'proposal.md']
+        run.scores['ambiguities'], unmarked = marked_ambiguities(
+            proposals, [report_text(run.agent, stdout), *artifacts], task['ambiguities'],
+        )
+        hidden = task['dir'] / 'hidden'
+        run.scores['acceptance_count'] = acceptance(workspace, hidden)
+        run.scores['faults'], let_through = fault_detection(workspace, hidden, task['module'])
+        run.scores['added_lines_count'] = added_lines(workspace)
+        run.missed = [f'ambiguity: {a}' for a in unmarked] + [f'fault: {f}' for f in let_through]
+    elif task['kind'] == 'implement':
         hidden = task['dir'] / 'hidden'
         run.scores['acceptance_count'] = acceptance(workspace, hidden)
         run.scores['faults'], run.missed = fault_detection(workspace, hidden, task['module'])
         run.scores['added_lines_count'] = added_lines(workspace)
     else:
         run.scores['problems'], run.missed = review_score(report_text(run.agent, stdout), task['problems'])
+
+
+def marked_ambiguities(
+    proposals: Sequence[str], texts: Sequence[str], ambiguities: list[list[str]],
+) -> tuple[float, list[str]]:
+    """Share of ambiguities named under a proposal's Assumptions or in a sentence that marks them as open."""
+    assumed = '\n'.join(m.group(1) for text in proposals for m in ASSUMPTIONS.finditer(text)).lower()
+    marked = [
+        sentence.lower() for text in [*proposals, *texts]
+        for sentence in SENTENCE.split(text) if MARKER.search(sentence)
+    ]
+    missed = [
+        group[0] for group in ambiguities
+        if not any(term.lower() in assumed or any(term.lower() in m for m in marked) for term in group)
+    ]
+    return 1 - len(missed) / len(ambiguities), missed
 
 
 def run_list(runs: Sequence[Run]) -> str:

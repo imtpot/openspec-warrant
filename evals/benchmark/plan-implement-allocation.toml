@@ -1,0 +1,11 @@
+kind = "plan-implement"
+fixture = "plan-implement-allocation/fixture"
+module = "app/allocation.py"
+prompt = "Add allocate(total_cents, percents) to app/allocation.py. It splits an invoice total in cents between cost centers by integer percentages and returns one share in cents per cost center, in the order of the percentages. Plan it as an OpenSpec change, then implement it. Nobody can answer questions during this run."
+# Hidden ambiguities the request leaves open; each group lists terms of which
+# one must be marked as assumed or open.
+ambiguities = [
+  ["add up to 100", "sum to 100", "sums to 100", "total 100", "not 100", "other than 100", "100%", "100 percent"],
+  ["leftover", "remainder", "remaining cent", "extra cent", "rounding"],
+  ["empty", "zero percent", "0 percent", "0%", "no cost center"],
+]
