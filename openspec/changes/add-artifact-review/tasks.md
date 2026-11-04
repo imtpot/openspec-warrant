@@ -32,4 +32,4 @@ Files this change reaches: `skills/warrant-review/SKILL.md`,
 
 - [x] 6.1 Run `uv run pytest` and record its result. Result: `147 passed`, exit 0
 - [x] 6.2 Run `openspec validate --all --strict` and record its result. Result: `Totals: 10 passed, 0 failed`, exit 0
-- [ ] 6.3 Run both artifact scenarios on `claude`, `codex` and `copilot`; record each result and update the README agent table
+- [x] 6.3 Run both artifact scenarios on `claude`, `codex` and `copilot`; record each result and update the README agent table. Result: both pass on Claude, Codex and Copilot. Codex and Copilot named the compound requirement by file, line and quote instead of by name; the checker accepts those
