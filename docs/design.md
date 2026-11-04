@@ -53,7 +53,9 @@ them checkable.
    person understands in one read, a closing line with what was skipped, not
    checked or risky, and skill descriptions that say only when to use the skill.
    (Ponytail: "Lower cost and latency are a side effect.")
-6. **Agent-neutral.** No skill names an agent, an agent's tools or sub-agents.
+6. **Agent-neutral.** No skill names an agent or an agent's tools. A skill may
+   ask for a separate, fresh context (a sub-agent), which all three supported
+   agents offer, and then says what to do when none is available.
 7. **Evidence over claims, also for warrant itself.** Every skill has behavioral
    eval scenarios that pass on Claude Code, Codex and GitHub Copilot CLI.
    Checkers test behavior, not wording, and the harness stays small.

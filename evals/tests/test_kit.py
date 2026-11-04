@@ -10,12 +10,18 @@ REPO = Path(__file__).resolve().parents[2]
 SKILLS = sorted(p.parent.name for p in (REPO / 'skills').glob('*/SKILL.md'))
 AGENT_WORDS = [
     'Claude', 'Codex', 'Copilot', 'Cursor', 'Gemini', 'agy',
-    'Skill tool', 'Task tool', 'TodoWrite', 'subagent',
+    'Skill tool', 'Task tool', 'TodoWrite',
 ]
+FRESH_CONTEXT = re.compile(r'fresh context|separate context|sub-?agent', re.I)
+FALLBACK = 'If you cannot start a separate context'
 
 
 def _skill(name: str) -> str:
     return (REPO / 'skills' / name / 'SKILL.md').read_text()
+
+
+def fresh_context_without_fallback(text: str) -> bool:
+    return bool(FRESH_CONTEXT.search(text)) and FALLBACK not in text
 
 
 def _frontmatter(name: str) -> dict[str, str]:
@@ -84,3 +90,15 @@ def test_rules_leave_openspec_spec_guidance_to_openspec():
     duplicated = [line for line in _rule_lines() if re.search(r'one SHALL|observable response', line)]
 
     assert duplicated == []
+
+
+def test_fallback_rule_detects_a_missing_fallback():
+    assert fresh_context_without_fallback('Run the review in a fresh context.')
+    assert not fresh_context_without_fallback(
+        'Run the review in a fresh context. If you cannot start a separate context, review it yourself.'
+    )
+
+
+@pytest.mark.parametrize('name', SKILLS)
+def test_fresh_context_has_a_fallback(name):
+    assert not fresh_context_without_fallback(_skill(name)), f'{name} asks for a fresh context without a fallback'
