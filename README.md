@@ -207,6 +207,26 @@ scenario shows (before: 0.67 on Opus). warrant costs 1.3 to 1.7 times plain
 OpenSpec on Opus and Sonnet. On `review-export`, every arm named all 6 planted
 problems in a single Opus run, so that task does not separate the arms yet.
 
+### Spending less
+
+warrant's apply guidance implements each task group in a fresh sub-agent and,
+where the agent can choose its model, gives a group whose requirements and
+design leave nothing open to a smaller, faster model. On Opus, with
+`plan-implement-allocation`, the agent chose Sonnet for its sub-agents in
+every run: same scores, fewer lines added (15 against 19) and about 10% lower
+cost ($2.08 against $2.30 per run). Most of the remaining cost is the
+orchestrating agent, which carries the planning conversation.
+
+The larger saving is yours to make: plan with a strong model, then start a new
+session on a cheaper model for apply. With warrant, Haiku matched Opus on that
+task (every open point marked, 6 of 6 acceptance, every fault caught) at $0.19
+against $2.30 per run; on `implement-proration` its tests caught fewer faults
+(0.75 against 0.96).
+
+Codex can set a sub-agent's model, but this was not measured: the benchmark
+ran Claude Code only, and a reported Codex regression makes sub-agents inherit
+the parent's model.
+
 ## Inspired by
 
 The skills are written from scratch. Their ideas come from:
