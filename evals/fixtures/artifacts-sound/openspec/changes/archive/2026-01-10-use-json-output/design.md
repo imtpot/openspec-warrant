@@ -1,4 +1,4 @@
-# Use JSON for machine output
+# Design: use JSON for machine output
 
 ## Context
 

@@ -22,9 +22,6 @@ CONTRACT = """## Warrant contract
 
 none
 
-### Decision records
-
-none
 """
 
 

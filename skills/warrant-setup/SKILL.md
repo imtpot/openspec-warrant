@@ -95,20 +95,16 @@ Write the section in exactly this form:
 
 <relative path to the glossary, or none>
 
-### Decision records
-
-<relative path to the decision records, or none>
-
 ### Standards
 
 - `<relative path to a file with coding standards>`
 ```
 
-- Keep the five subsections in this order, even when one is empty.
+- Keep the four subsections in this order, even when one is empty.
 - Under Destructive actions, propose deploy, publish, delete and migration
   commands found in the project, and write only the confirmed ones.
-- Under Glossary and Decision records, write a path only if that file or
-  directory exists; otherwise write `none`.
+- Under Glossary, write a path only if that file exists; otherwise write
+  `none`.
 - Under Standards, propose existing files that state coding rules for this
   project, such as `CONTRIBUTING.md`, a style guide or a `docs/` page about
   conventions. Write only the files the user confirms, or `none`.

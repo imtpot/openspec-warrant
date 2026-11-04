@@ -78,10 +78,6 @@ Keep the subsections in this order.
 
 docs/glossary.md
 
-### Decision records
-
-none
-
 ### Standards
 
 - `CONTRIBUTING.md`
@@ -89,7 +85,7 @@ none
 
 - **Verification**: `- <name>: \`<exact command>\``, one per line.
 - **Destructive actions**: commands or prefixes an agent runs only with approval.
-- **Glossary**, **Decision records**: a relative path or `none`.
+- **Glossary**: a relative path or `none`.
 - **Standards** (optional, last): files with coding standards that
   `warrant-review` checks, as backticked paths, or `none`. A missing
   subsection means `none`.

@@ -33,7 +33,3 @@ Run the second command again after editing anything under `skills/`.
 ### Glossary
 
 none
-
-### Decision records
-
-none

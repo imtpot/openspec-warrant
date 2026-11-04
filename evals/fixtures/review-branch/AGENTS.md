@@ -12,10 +12,6 @@
 
 none
 
-### Decision records
-
-none
-
 ### Standards
 
 - `docs/standards.md`

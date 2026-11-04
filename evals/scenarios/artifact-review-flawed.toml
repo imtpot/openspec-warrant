@@ -4,5 +4,5 @@ prompt = "Review the planning artifacts of the OpenSpec change add-machine-repor
 checker = "artifact-review"
 
 [params]
-flaws = [["Unserializable value", "spec.md:19", "SHALL NOT print partial"], ["0001", "JSON"], ["report.yaml", "output path", "output file"], ["verification"]]
+flaws = [["Unserializable value", "spec.md:19", "SHALL NOT print partial"], ["use-json-output", "JSON"], ["report.yaml", "output path", "output file"], ["verification"]]
 verdict = "REVISE"

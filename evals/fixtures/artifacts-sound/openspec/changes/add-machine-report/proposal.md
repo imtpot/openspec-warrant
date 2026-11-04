@@ -27,6 +27,6 @@ This change adds one machine format; it does not change the text output.
 
 ## Assumptions
 
-Confirmed by the requester: machine mode prints JSON to stdout, following decision 0001.
+Confirmed by the requester: machine mode prints JSON to stdout, following the archived change use-json-output.
 
 None.

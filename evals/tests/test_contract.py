@@ -22,10 +22,6 @@ Intro text.
 
 docs/glossary.md
 
-### Decision records
-
-none
-
 ## Other section
 
 - not: `part of the contract`
@@ -45,11 +41,9 @@ def test_reads_destructive_actions():
     assert parse_contract(CONTRACT).destructive == ['pulumi up', 'kubectl delete']
 
 
-def test_reads_locations_and_none():
-    contract = parse_contract(CONTRACT)
-
-    assert contract.glossary == 'docs/glossary.md'
-    assert contract.decision_records is None
+def test_reads_glossary_and_none():
+    assert parse_contract(CONTRACT).glossary == 'docs/glossary.md'
+    assert parse_contract(CONTRACT.replace('docs/glossary.md\n', 'none\n')).glossary is None
 
 
 def test_missing_section_returns_none():
@@ -74,9 +68,9 @@ def test_subsections_out_of_order_are_rejected():
 
 
 def test_missing_subsection_is_rejected():
-    text = CONTRACT.replace('### Decision records\n\nnone\n', '')
+    text = CONTRACT.replace('### Glossary\n\ndocs/glossary.md\n', '')
 
-    with pytest.raises(ContractError, match='Decision records'):
+    with pytest.raises(ContractError, match='Glossary'):
         parse_contract(text)
 
 
@@ -88,8 +82,8 @@ def test_verification_bullet_without_backticked_command_is_rejected():
 
 
 STANDARDS = CONTRACT.replace(
-    '### Decision records\n\nnone\n',
-    '### Decision records\n\nnone\n\n### Standards\n\n- `docs/standards.md`\n- `CONTRIBUTING.md`\n',
+    'docs/glossary.md\n',
+    'docs/glossary.md\n\n### Standards\n\n- `docs/standards.md`\n- `CONTRIBUTING.md`\n',
 )
 
 
@@ -107,8 +101,17 @@ def test_contract_without_standards_has_no_standards():
     assert parse_contract(CONTRACT).standards == []
 
 
-def test_standards_before_decision_records_is_rejected():
-    text = CONTRACT.replace('### Decision records', '### Standards\n\nnone\n\n### Decision records')
+def test_standards_before_glossary_is_rejected():
+    text = CONTRACT.replace('### Glossary', '### Standards\n\nnone\n\n### Glossary')
 
     with pytest.raises(ContractError, match='order'):
         parse_contract(text)
+
+
+def test_former_decision_records_subsection_is_ignored():
+    text = STANDARDS.replace('### Standards', '### Decision records\n\ndocs/adr/\n\n### Standards')
+
+    contract = parse_contract(text)
+
+    assert contract.glossary == 'docs/glossary.md'
+    assert contract.standards == ['docs/standards.md', 'CONTRIBUTING.md']

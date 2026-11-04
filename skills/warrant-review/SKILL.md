@@ -103,8 +103,8 @@ Report as blocking:
 - a requirement that does not use exactly one EARS pattern with one `SHALL`;
 - a requirement for which `tasks.md` has no test task, and a task list without
   a verification group;
-- a design decision that contradicts a recorded decision (the contract's
-  Decision records location, or `design.md` of an archived change); quote both;
+- a design decision that contradicts a decision in `design.md` of an archived
+  change (`openspec/changes/archive/`); quote both;
 - a decision the specs or design present as settled that the proposal lists
   neither as confirmed nor under Assumptions.
 

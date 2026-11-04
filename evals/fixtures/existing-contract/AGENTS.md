@@ -15,7 +15,3 @@ A tiny demo project.
 ### Glossary
 
 none
-
-### Decision records
-
-none

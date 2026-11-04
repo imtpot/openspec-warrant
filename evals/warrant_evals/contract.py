@@ -4,9 +4,11 @@ import re
 from dataclasses import dataclass
 
 SECTION = 'Warrant contract'
-SUBSECTIONS = ['Verification', 'Destructive actions', 'Glossary', 'Decision records']
+SUBSECTIONS = ['Verification', 'Destructive actions', 'Glossary']
 # Optional and last; a contract without it declares no standards.
 OPTIONAL = 'Standards'
+# Written by earlier setups; ignored wherever it appears.
+FORMER = 'Decision records'
 VERIFICATION_BULLET = re.compile(r'^- ([^:]+): `([^`]+)`$')
 COMMAND_BULLET = re.compile(r'^- `([^`]+)`$')
 
@@ -20,7 +22,6 @@ class Contract:
     verification: list[tuple[str, str]]
     destructive: list[str]
     glossary: str | None
-    decision_records: str | None
     standards: list[str]
 
 
@@ -32,6 +33,8 @@ def _section_body(text: str) -> str | None:
 def _subsections(body: str) -> dict[str, list[str]]:
     parts = re.split(r'^### (.+?)\s*$', body, flags=re.M)
     names = [name.strip() for name in parts[1::2]]
+    contents = [content for name, content in zip(names, parts[2::2], strict=True) if name != FORMER]
+    names = [name for name in names if name != FORMER]
     for name in SUBSECTIONS:
         if name not in names:
             raise ContractError(f'missing subsection: {name}')
@@ -40,7 +43,7 @@ def _subsections(body: str) -> dict[str, list[str]]:
         raise ContractError(f'subsections out of order: {names}')
     return {
         name: [line.strip() for line in content.splitlines() if line.strip()]
-        for name, content in zip(names, parts[2::2], strict=True)
+        for name, content in zip(names, contents, strict=True)
     }
 
 
@@ -74,6 +77,5 @@ def parse_contract(text: str) -> Contract | None:
         verification=_verification(parts['Verification']),
         destructive=_commands(parts['Destructive actions']),
         glossary=_location(parts['Glossary']),
-        decision_records=_location(parts['Decision records']),
         standards=_commands(parts.get(OPTIONAL, [])),
     )

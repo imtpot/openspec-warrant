@@ -11,7 +11,3 @@
 ### Glossary
 
 none
-
-### Decision records
-
-none

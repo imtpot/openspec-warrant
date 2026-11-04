@@ -5,11 +5,11 @@ import pytest
 from warrant_evals.checks import CHECKERS
 
 FLAWED = {
-    'flaws': [['Unserializable value'], ['0001', 'JSON'], ['report.yaml', 'output path'], ['verification']],
+    'flaws': [['Unserializable value'], ['use-json-output', 'JSON'], ['report.yaml', 'output path'], ['verification']],
     'verdict': 'REVISE',
 }
 REPORT = """- blocking: "Unserializable value" has two SHALL clauses.
-- blocking: design chooses YAML; decision 0001 says machine output is JSON.
+- blocking: design chooses YAML; archived change use-json-output says machine output is JSON.
 - blocking: `reports/report.yaml` is not in the proposal.
 - blocking: tasks.md has no verification group.
 

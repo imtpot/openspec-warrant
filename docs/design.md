@@ -45,8 +45,9 @@ them checkable.
    rules; `warrant-setup` writes apply guidance that points to the warrant
    skills; nothing relies on agent-specific hooks or commands.
 3. **Project facts come only from the contract.** Commands, destructive
-   actions, glossary, decision records and standards are declared once in the
-   `## Warrant contract` section of `AGENTS.md`.
+   actions, glossary and standards are declared once in the
+   `## Warrant contract` section of `AGENTS.md`. Decisions live in OpenSpec:
+   each change's `design.md`, kept by the archive.
 4. **One rule, one place.** A rule lives in `rules.yaml` or in one skill, and
    other parts refer to it by name.
 5. **Spend the reader's tokens carefully.** Short skills, fixed report endings
@@ -138,8 +139,9 @@ Remaining drift:
 2. Done: `warrant-review` runs `openspec-verify-change` for the Spec axis and
    checks connected code; axes run in separate contexts.
 3. Economy: a brevity rule was tried in `warrant-verify` only and dropped so
-   that no skill is an exception; revisit with data from real use. Still open:
-   remove the Decision records subsection.
+   that no skill is an exception; revisit with data from real use. Done: the
+   Decision records subsection was removed, because archived `design.md`
+   files already record decisions.
 4. Done from anvil: an artifact review before implementation with a verdict line
    CI can parse, and verification results as `Result:` lines.
 5. Next skills only where no OpenSpec skill covers the work (`warrant-diagnose`).
