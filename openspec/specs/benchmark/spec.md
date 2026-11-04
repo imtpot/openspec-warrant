@@ -1,7 +1,9 @@
 # benchmark Specification
 
 ## Purpose
-TBD - created by archiving change add-benchmark. Update Purpose after archive.
+Defines the benchmark that runs the same tasks with no kit, with plain OpenSpec
+and with OpenSpec plus warrant, and scores hidden acceptance tests, faults the
+agent's tests reject, planted review problems and tokens.
 
 ## Requirements
 
