@@ -20,7 +20,13 @@ This skill works on the requirement it is given. Do not pick tasks from
 ## 1. List the scenarios
 
 - Inside an OpenSpec change: take the scenarios of the requirement you were
-  given from its spec.
+  given from its spec. Then read the requirement's text and add one boundary
+  case for each condition it states that no scenario shows: each side of a
+  comparison ("before", "after", "not after", "at least"), an exact rounding
+  point, an empty or zero input, and the case just outside a stated condition.
+  Example: "an exact half cent is rounded up" with only a two-thirds scenario
+  needs a case with exactly half a cent; "not after" needs the equal case.
+  Treat each boundary case as a scenario in step 2.
 - Without a change: derive the scenarios from the request and list them to the
   user before you write the first test.
 
@@ -58,12 +64,14 @@ Run the contract's verification following `warrant-verify`.
 ## Report
 
 Start with the list of scenarios: the spec's, or the ones you derived from the
-request. Then, for each scenario: the narrowed command, the failing result line of the red run
-and the passing result line of the green run, or "already exists" with the
-passing line. Then the verification commands with their exit codes.
+request. Then list the boundary cases. Then, for each scenario and boundary
+case: the narrowed command, the failing result line of the red run and the
+passing result line of the green run, or "already exists" with the passing
+line. Then the verification commands with their exit codes.
 
 ```
 Scenarios: Not enough free; Negative request
+Boundary cases: free equals needed
 Not enough free: `python3 -m unittest tests.test_quota.QuotaTest.test_not_enough_free`
   red: FAIL - AssertionError: None != 'short'
   green: OK

@@ -278,3 +278,18 @@ def test_review_task_change_follows_warrant_rules():
 
     assert check_proposal((change / 'proposal.md').read_text()) == []
     assert check_spec((change / 'specs' / 'order-export' / 'spec.md').read_text()) == []
+
+
+def test_arm_filter_runs_only_named_arms(tmp_path, monkeypatch):
+    fixture = tmp_path / 'fixture'
+    fixture.mkdir()
+    (fixture / 'AGENTS.md').write_text('# Demo\n')
+    task = {'name': 'review', 'kind': 'review', 'fixture': fixture, 'prompt': 'Review.', 'problems': [['x']]}
+    monkeypatch.setattr(benchmark, 'load_tasks', lambda: [task])
+    monkeypatch.setattr(benchmark, 'bench_agents', lambda usage_file: [benchmark.Agent('fake', ['python3', '-c', 'print(1)'])])
+    monkeypatch.setattr(benchmark, 'prepare_arm', lambda workspace, arm: benchmark.commit_fixture(workspace))
+
+    benchmark.main(['--runs', '1', '--arm', 'warrant', '--out', str(tmp_path / 'out')])
+
+    rows = [line for line in (tmp_path / 'out' / 'benchmark.md').read_text().splitlines() if line.startswith('| review')]
+    assert [row.split('|')[3].strip() for row in rows] == ['warrant']

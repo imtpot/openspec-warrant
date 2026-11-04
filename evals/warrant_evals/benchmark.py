@@ -242,6 +242,7 @@ def load_tasks(directory: Path = TASKS) -> list[dict]:
 
 def run_benchmark(
     tasks: Sequence[dict], agents: Sequence[str] | None, runs: int, out_dir: Path, keep: bool = False,
+    arms: Sequence[str] = ARMS,
 ) -> list[Run]:
     out_dir.mkdir(parents=True, exist_ok=True)
     results = []
@@ -249,7 +250,7 @@ def run_benchmark(
         # Kept workspaces stay outside any repository, like the temporary ones.
         root = Path(tempfile.mkdtemp(prefix='warrant-bench-')) if keep else Path(tmp)
         for task in tasks:
-            for arm in ARMS:
+            for arm in arms:
                 for n in range(1, runs + 1):
                     usage_file = out_dir / f'{task["name"]}-{arm}-{n}.usage.json'
                     for agent in bench_agents(usage_file):
@@ -278,9 +279,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument('--runs', type=int, default=3)
     parser.add_argument('--out', type=Path, default=REPO / 'evals' / 'out' / 'benchmark')
     parser.add_argument('--keep', action='store_true', help='keep workspaces and list them in runs.md')
+    parser.add_argument('--arm', action='append', choices=ARMS, help='run only these arms')
     args = parser.parse_args(argv)
     tasks = [t for t in load_tasks() if not args.task or t['name'] in args.task]
-    runs = run_benchmark(tasks, args.agent, args.runs, args.out, keep=args.keep)
+    runs = run_benchmark(tasks, args.agent, args.runs, args.out, keep=args.keep, arms=args.arm or ARMS)
     table = summary(runs)
     (args.out / 'benchmark.md').write_text(table)
     (args.out / 'runs.md').write_text(run_list(runs))
