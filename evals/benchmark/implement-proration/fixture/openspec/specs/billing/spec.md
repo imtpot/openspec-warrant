@@ -1,7 +1,7 @@
 # billing Specification
 
 ## Purpose
-Monthly subscription prices in integer cents.
+Prices and charges of monthly subscriptions, in integer cents per seat and month.
 
 ## Requirements
 
