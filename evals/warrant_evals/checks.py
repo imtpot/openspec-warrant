@@ -170,7 +170,8 @@ def _sections(transcript: str) -> dict[str, str] | None:
 
 def _missing(text: str, expected: list[list[str]]) -> list[str]:
     """First term of each alternative group that has no term in the text."""
-    return [group[0] for group in expected if not any(term in text for term in group)]
+    lower = text.lower()
+    return [group[0] for group in expected if not any(term.lower() in lower for term in group)]
 
 
 def review_check(params: dict):

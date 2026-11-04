@@ -82,3 +82,9 @@ def test_axis_name_inside_another_word_is_not_a_heading(repo):
     report = REPORT.replace('## Spec\n', '## Specification notes\n')
 
     assert _messages(PARAMS, repo, report) == ['sections Spec, Standards, Evidence missing or out of order']
+
+
+def test_terms_match_case_insensitively(repo):
+    params = {'transcript': [['negative input']]}
+
+    assert _messages(params, repo, 'Negative Input is not implemented.') == []

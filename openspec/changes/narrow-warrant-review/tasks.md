@@ -30,4 +30,4 @@ Files this change reaches: `skills/warrant-review/SKILL.md`,
 
 - [x] 6.1 Run `uv run pytest` and record its result. Result: `141 passed`, exit 0
 - [x] 6.2 Run `openspec validate --all --strict` and record its result. Result: `Totals: 10 passed, 0 failed`, exit 0
-- [ ] 6.3 Run the review and receive scenarios on `claude`, `codex` and `copilot`; record each result and update the README agent table
+- [x] 6.3 Run the review and receive scenarios on `claude`, `codex` and `copilot`; record each result and update the README agent table. Result: all six pass on Claude, Codex and Copilot. First run: Claude could not invoke openspec-verify-change because the eval allowlist lacked the skill tool (it reported the Spec axis as not run and checked the requirements itself); after allowing it, verify-change ran and both review scenarios passed. Codex failed twice on checker wording (case and phrasing); term matching is now case-insensitive with more alternatives

@@ -33,7 +33,7 @@ CLAUDE_TOOLS = [
     'Bash(openspec *)', 'Bash(uv run *)', 'Bash(make *)', 'Bash(python3 *)', 'Bash(diff *)',
     'Bash(cp *)', 'Bash(mkdir *)', 'Bash(git status*)', 'Bash(git diff*)',
     'Bash(git grep*)', 'Bash(git log*)', 'Bash(git rev-parse*)',
-    'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)',
+    'Bash(git merge-base*)', 'Bash(git ls-files*)', 'Bash(git show*)', 'Skill',
 ]
 COPILOT_TOOLS = [
     'write', 'shell(openspec:*)', 'shell(uv:*)', 'shell(make:*)', 'shell(python3:*)', 'shell(diff:*)',
