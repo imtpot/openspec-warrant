@@ -1,0 +1,9 @@
+skills = ["warrant-review"]
+fixture = "review-branch"
+setup = "setup-protected.sh"
+prompt = "Review the current branch with the warrant-review skill. Nobody can answer questions during this run."
+checker = "review"
+
+[params]
+spec = [["--json", "JSON option"]]
+untraced_absent = ["free < 0", "parser.error"]

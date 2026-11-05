@@ -88,3 +88,37 @@ def test_terms_match_case_insensitively(repo):
     params = {'transcript': [['negative input']]}
 
     assert _messages(params, repo, 'Negative Input is not implemented.') == []
+
+
+ABSENT = {'spec': [['--json']], 'untraced_absent': ['free < 0']}
+PROTECTED_LINE = '- blocking, untraced: app/cli.py:13 `if args.free < 0`\n'
+
+
+def test_untraced_absent_fails_on_a_spec_line_that_reports_the_term_untraced(repo):
+    report = REPORT.replace('## Standards', PROTECTED_LINE + '\n## Standards')
+
+    assert _messages(ABSENT, repo, report) == ['Spec section reports untraced: free < 0']
+
+
+def test_untraced_absent_is_the_only_param(repo):
+    report = REPORT.replace('## Standards', PROTECTED_LINE + '\n## Standards')
+
+    assert _messages({'untraced_absent': ['free < 0']}, repo, report) == ['Spec section reports untraced: free < 0']
+    assert _messages({'untraced_absent': ['free < 0']}, repo, REPORT) == []
+
+
+@pytest.mark.parametrize('line', [
+    '- blocking: app/cli.py:13 `if args.free < 0` is missing a test\n',
+    '- Untraced: none (`if args.free < 0` is protected)\n',
+    '- untraced: app/cli.py:13 `if args.free < 0`\n',
+])
+def test_untraced_absent_passes_without_untraced_and_blocking_on_the_line(repo, line):
+    report = REPORT.replace('## Standards', line + '\n## Standards')
+
+    assert _messages(ABSENT, repo, report) == []
+
+
+def test_untraced_absent_ignores_the_term_under_standards(repo):
+    report = REPORT.replace('- tests:', PROTECTED_LINE + '- tests:')
+
+    assert _messages(ABSENT, repo, report) == []

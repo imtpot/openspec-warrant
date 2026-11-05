@@ -1,5 +1,5 @@
 # Sourced by the setup-*.sh scripts with VARIANT set to feature, empty,
-# no-change or two-changes. Builds main, a bare origin and a feature branch.
+# no-change, two-changes or protected. Builds main, a bare origin and a feature branch.
 set -e
 G='git -c user.name=fixture -c user.email=fixture@invalid'
 git branch -M main
@@ -41,6 +41,14 @@ def main(argv=None):
     parser.add_argument('needed', type=int)
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args(argv)
+PY
+if [ "$VARIANT" = protected ]; then
+  cat >> app/cli.py <<'PY'
+    if args.free < 0:
+        parser.error('free must not be negative')
+PY
+fi
+cat >> app/cli.py <<'PY'
     result = check(args.needed, args.free)
     print(json.dumps({'verdict': result}) if args.json else formatReport(result))
 PY

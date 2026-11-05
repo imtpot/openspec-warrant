@@ -48,6 +48,8 @@ picks the tasks in `tasks.md` and checks them off.
    selection (a file path, a test id, `-k`, `--grep`, `-run`). Example: the
    contract says `python3 -m unittest discover -s tests -t .`, so run
    `python3 -m unittest tests.test_quota.QuotaTest.test_not_enough_free`.
+   This run shows this scenario only and is not evidence that the work is
+   complete.
 3. Read the result:
    - It fails because the behavior is missing: go to Green.
    - It fails for another reason (import, syntax, wrong fixture): fix the test

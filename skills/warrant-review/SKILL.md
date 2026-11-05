@@ -46,9 +46,10 @@ that skill is not installed, write "Spec axis not run" and give the command
 `npx skills add https://github.com/Fission-AI/OpenSpec/tree/v<installed version>/skills`.
 
 Then add what that workflow does not check: trace each added line of the diff
-as `warrant-minimal-change` describes under "Trace lines to requirements". A
-line that serves no requirement is a blocking finding "untraced", with file and
-line.
+as `warrant-minimal-change` describes under "Trace every line". Read its
+Protected code list and the files under `### Standards` to check a `protected:`
+or `standard:` basis. A line with none of these bases is a blocking finding
+"untraced", with file and line.
 
 ### 4. Standards axis
 

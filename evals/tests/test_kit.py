@@ -149,3 +149,44 @@ def test_verification_results_have_a_parsable_format():
 @pytest.mark.parametrize('name', SKILLS)
 def test_fresh_context_has_no_fallback(name):
     assert FALLBACK not in _skill(name), f'{name} still describes an agent without sub-agents'
+
+
+def _prose(name: str, start: str, end: str) -> str:
+    return ' '.join(_section(_skill(name), start, end).split())
+
+
+# verification-evidence: Development runs allowed; Only contract commands are evidence
+def test_verify_allows_narrowed_runs_that_are_not_evidence():
+    step = _prose('warrant-verify', '## 3.', '## 4.')
+
+    assert 'narrowed or diagnostic run' in step
+    assert 'while you work' in step
+    assert 'Only the Verification commands' in step
+    assert 'are evidence' in step
+
+
+# test-first: Narrowed runs are not evidence
+def test_tdd_narrowed_runs_are_not_evidence():
+    red = _prose('warrant-tdd', '### Red', '### Green')
+
+    assert 'not evidence that the work is complete' in red
+
+
+# minimal-change: Every line traces to a requirement; Named trace basis
+def test_minimal_change_traces_every_line_to_a_named_basis():
+    trace = _prose('warrant-minimal-change', '## Trace every line', '## Mark')
+
+    for label in ('requirement: <name>', 'protected: <item>', 'standard: <file>'):
+        assert label in trace
+    assert '### Standards' in trace
+    assert 'Anything the requester asked for' in trace
+
+
+# code-review: Untraced line
+def test_review_untraced_line_has_none_of_the_bases():
+    spec = _prose('warrant-review', '### 3. Spec axis', '### 4.')
+
+    assert '"Trace every line"' in spec
+    assert 'none of these bases' in spec
+    assert 'Protected code' in spec
+    assert '### Standards' in spec

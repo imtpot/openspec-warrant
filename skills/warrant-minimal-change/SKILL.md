@@ -6,16 +6,17 @@ license: MIT
 
 # Minimal change
 
-A change is warranted line by line: each added or changed line exists because
-the task or a requirement needs it. Be economical with the solution and
-complete with its reach.
+A change is warranted line by line. Each added or changed line exists because
+the task, a requirement, Protected code or a declared standard needs it. Be
+economical with the solution and complete with its reach.
 
 ## Before you write code
 
 1. List every place the change must reach: callers, tests, fixtures,
    configuration, exports, documentation that names the changed behavior.
-2. If the work belongs to an OpenSpec change, read its specs. Only the specs
-   define what is required.
+2. If the work belongs to an OpenSpec change, read its specs. The specs define
+   the required behavior. Protected code and the files under `### Standards` of
+   the Warrant contract add what every change keeps.
 
 ## Option ladder
 
@@ -61,13 +62,21 @@ change smaller:
 - accessibility of user interfaces,
 - anything the requester asked for.
 
-## Trace lines to requirements
+## Trace every line
 
 When the work belongs to an OpenSpec change, review your diff before you report
-completion. For each added line, name the requirement it serves. Imports, test
-code and formatting count for the requirement they support. Remove every line
-that serves none. If the line is needed but no requirement covers it, stop and
-tell the user that the specs are missing a requirement.
+completion. For each added line, name its basis:
+
+- `requirement: <name>`: a requirement of the change,
+- `protected: <item>`: an item of the Protected code list,
+- `standard: <file>`: a rule in a file under `### Standards` of the Warrant
+  contract.
+
+"Anything the requester asked for" is not a basis of its own. Such a line
+serves a requirement, or the specs are missing one. Imports, test code and
+formatting count for the line they support. Remove every line that has no
+basis. If the change needs a line that has no basis, stop and tell the user that
+the specs are missing a requirement.
 
 ## Mark deliberate limitations
 

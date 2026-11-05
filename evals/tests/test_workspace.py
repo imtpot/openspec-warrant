@@ -1,9 +1,10 @@
 import shutil
 import subprocess
+from pathlib import Path
 
 import pytest
 
-from warrant_evals.workspace import prepare_workspace
+from warrant_evals.workspace import commit_fixture, prepare_workspace
 
 pytestmark = pytest.mark.skipif(shutil.which('skills') is None, reason='skills CLI not on PATH')
 
@@ -44,3 +45,17 @@ def test_prepare_installs_extra_skill_sources(tmp_path):
 
     assert (workspace / '.agents' / 'skills' / 'main-skill' / 'SKILL.md').is_file()
     assert (workspace / '.agents' / 'skills' / 'extra-skill' / 'SKILL.md').is_file()
+
+
+@pytest.mark.parametrize(('setup', 'present'), [('setup-protected.sh', True), ('setup-feature.sh', False)])
+def test_review_branch_protected_variant_adds_the_input_check(tmp_path, setup, present):
+    fixture = tmp_path / 'review-branch'
+    shutil.copytree(Path(__file__).parent.parent / 'fixtures' / 'review-branch', fixture)
+    commit_fixture(fixture)
+
+    subprocess.run(['sh', setup], cwd=fixture, check=True, capture_output=True)
+
+    branch = subprocess.run(['git', 'branch', '--show-current'], cwd=fixture, capture_output=True, text=True)
+    cli = (fixture / 'app' / 'cli.py').read_text()
+    assert branch.stdout.strip() == 'feature'
+    assert ('if args.free < 0:' in cli) is present

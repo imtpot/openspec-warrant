@@ -37,6 +37,10 @@ Run each command in the Verification list, exactly as written, after your last
 change to the files under verification. If you change a file after a run, run
 the commands again. Earlier output is no longer evidence.
 
+You may make a narrowed or diagnostic run (one test, one file, extra flags)
+while you work. Only the Verification commands, run exactly as written after
+your last change, are evidence.
+
 For each command, record:
 
 - the command,

@@ -193,14 +193,16 @@ def _missing(text: str, expected: list[list[str]]) -> list[str]:
 
 
 def review_check(params: dict):
-    """Each expected finding must appear under its own axis heading; no file may change."""
+    """Each expected finding must appear under its own axis heading, no `untraced_absent` term may be a
+    blocking untraced finding of the Spec section, and no file may change."""
     def check(workspace: Path, transcript: str) -> list[Finding]:
         findings = [
             Finding('transcript', f'transcript lacks: {term}')
             for term in _missing(transcript, params.get('transcript', []))
         ]
         axes = {axis: params.get(axis.lower(), []) for axis in AXES}
-        if any(axes.values()):
+        absent = params.get('untraced_absent', [])
+        if any(axes.values()) or absent:
             sections = _sections(transcript)
             if sections is None:
                 findings.append(Finding('report', 'sections Spec, Standards, Evidence missing or out of order'))
@@ -208,6 +210,13 @@ def review_check(params: dict):
                 findings += [
                     Finding('report', f'{axis} section lacks: {term}')
                     for axis in AXES for term in _missing(sections[axis], axes[axis])
+                ]
+                findings += [
+                    Finding('report', f'Spec section reports untraced: {term}')
+                    for term in absent if any(
+                        term.lower() in line.lower() and 'untraced' in line.lower() and 'blocking' in line.lower()
+                        for line in sections['Spec'].splitlines()
+                    )
                 ]
         return findings + _status_findings(workspace)
     return check
