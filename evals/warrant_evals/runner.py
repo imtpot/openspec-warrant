@@ -10,6 +10,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from warrant_evals.record import install_shims
 from warrant_evals.requirements import Finding
 
 TIMEOUT_SECONDS = 15 * 60
@@ -62,6 +63,8 @@ class Scenario:
     setup: str | None = None
     # Skills the agent must load itself, because the prompt names none.
     loaded: list[str] = field(default_factory=list)
+    # Tools whose runs are logged through shims on PATH, e.g. a test runner.
+    record: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -136,6 +139,8 @@ def _run_one(
     transcript = out_dir / f'{scenario.name}-{agent.name}.log'
     env = dict(os.environ)
     env['PATH'] = os.pathsep.join([*(str(workspace / d) for d in scenario.path), env['PATH']])
+    if scenario.record:
+        env.update(install_shims(workspace, scenario.record, env['PATH']))
     try:
         done = subprocess.run(
             agent.argv(scenario.prompt), cwd=workspace, capture_output=True,

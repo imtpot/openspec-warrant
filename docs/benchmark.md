@@ -23,10 +23,12 @@ Codex run counts a skill as loaded when it reads its `SKILL.md`. A scenario's
 `loaded` list names skills the agent must load by itself because the prompt
 names none; a run that does not load them fails.
 
-Evals see an agent's final report, not the commands it ran. TDD scenarios
-therefore check the report (a failing result before a passing one, the
-narrowed and full test commands) together with the tests and code in the
-workspace; they cannot prove that each run happened.
+The TDD and verify scenarios also record the runs of their test tools: a
+shim on PATH runs the real tool and logs its arguments, exit code and the
+workspace files it started on. The checkers then require a failing run of each
+scenario's test before a passing one on changed files, and a full run on the
+final files, besides the report that shows them. Codex's sandbox keeps `.git`
+read-only, so its runs are not logged and these checks fail there.
 
 Global agent configuration (user-level skills and plugins) also loads during
 evals and can change the results; run evals with it disabled.

@@ -1,9 +1,19 @@
+import json
 import subprocess
 
 import pytest
 
 from warrant_evals.checks import CHECKERS
+from warrant_evals.record import workspace_state
 
+
+def _run(repo, args, code, tool='python3'):
+    """Append a run to the log, with the workspace state as it is now."""
+    log = repo / '.git' / 'warrant' / 'runs.jsonl'
+    log.parent.mkdir(exist_ok=True)
+    runs = log.read_text().splitlines() if log.exists() else []
+    line = json.dumps({'seq': len(runs), 'tool': tool, 'args': args.split(), 'cwd': str(repo), 'exit': code, 'state': workspace_state(repo)})
+    log.write_text('\n'.join([*runs, line]) + '\n')
 
 
 def _messages(name, params, workspace, transcript):
@@ -83,3 +93,54 @@ def test_discovery_needs_every_skill_and_the_contract_command(repo):
     assert _messages('discovery', params, repo, 'warrant-setup, warrant-verify; contract runs `make test`') == [
         'transcript lacks: warrant-minimal-change'
     ]
+
+
+FULL_MESSAGE = 'full verification not run on the final files'
+FAILURE_REPORT = 'Verification failed: `make test` exited with 1'
+
+
+def test_full_run_on_final_files_passes(repo):
+    (repo / 'a.py').write_text('x = 1\n')
+    _run(repo, 'test', 1, tool='make')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == []
+
+
+def test_edit_after_full_run_fails(repo):
+    (repo / 'a.py').write_text('x = 1\n')
+    _run(repo, 'test', 1, tool='make')
+    (repo / 'a.py').write_text('x = 2\n')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
+
+
+def test_new_file_after_full_run_fails(repo):
+    _run(repo, 'test', 1, tool='make')
+    (repo / 'notes.md').write_text('x\n')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
+
+
+def test_full_run_never_made_fails(repo):
+    _run(repo, '-m unittest', 1)
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
+
+
+def test_empty_log_fails(repo):
+    (repo / '.git' / 'warrant').mkdir()
+    (repo / '.git' / 'warrant' / 'runs.jsonl').write_text('')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
+
+
+def test_last_full_run_counts(repo):
+    _run(repo, 'test', 1, tool='make')
+    (repo / 'a.py').write_text('x = 1\n')
+    _run(repo, 'test', 1, tool='make')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == []
+
+
+def test_without_log_full_is_not_checked(repo):
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == []

@@ -24,5 +24,6 @@ def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> l
             path=data.get('path', []),
             setup=data.get('setup'),
             loaded=data.get('loaded', []),
+            record=data.get('record', []),
         ))
     return scenarios

@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pytest
 
+from warrant_evals.record import recorded_runs
 from warrant_evals.requirements import Finding
 from warrant_evals.runner import AGENTS, Agent, Result, Scenario, parse_output, run_evals, write_report
+from warrant_evals.workspace import commit_fixture
 
 
 def _script(path: Path, body: str) -> Path:
@@ -249,3 +251,25 @@ def test_report_lists_loaded_skills(tmp_path):
     result = Result('s', 'claude', 'pass', tools=['skill:warrant-verify', 'agent:sonnet'])
 
     assert '| skill:warrant-verify, agent:sonnet |' in write_report([result], tmp_path / 'r.md').read_text()
+
+
+# Recorded command runs: Piped failing test
+def test_recorded_tool_run_is_logged_in_the_workspace(tmp_path, fixture_dir):
+    (fixture_dir / 'bin').mkdir()
+    _script(fixture_dir / 'bin' / 'tool', 'exit 2')
+    caller = Agent('caller', [str(_script(tmp_path / 'caller', 'tool x'))])
+    scenario = Scenario(
+        name='demo', fixture=fixture_dir, prompt='x', check=_passes, path=['bin'], record=['tool'],
+    )
+
+    [result] = _run(tmp_path, [scenario], [caller], prepare=commit_fixture, keep=True)
+
+    [run] = recorded_runs(result.workspace)
+    assert (run['tool'], run['args'], run['exit']) == ('tool', ['x'], 2)
+
+
+# Recorded command runs: a scenario without `record` leaves no log
+def test_scenario_without_record_leaves_no_log(tmp_path, fixture_dir, writer):
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], prepare=commit_fixture, keep=True)
+
+    assert not (result.workspace / '.git' / 'warrant').exists()
