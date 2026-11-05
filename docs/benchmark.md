@@ -110,7 +110,8 @@ open-point shares may be too high until a re-run:
 
 Every arm writes correct code. warrant's clear gain is in planning: on every
 model, every warrant run named all three points the request left open, while
-plain OpenSpec named 11 to 67% and no kit almost none. warrant also adds about
+plain OpenSpec named 11 to 67% and no kit almost none (by the old marker list;
+see the note above the table). warrant also adds about
 half as many lines. Its tests catch faults about as well as plain OpenSpec's,
 after `warrant-tdd` started testing the boundaries a requirement states but no
 scenario shows (before: 0.67 on Opus). warrant costs 1.3 to 1.7 times plain
@@ -129,7 +130,7 @@ orchestrating agent, which carries the planning conversation.
 
 The larger saving is yours to make: plan with a strong model, then start a new
 session on a cheaper model for apply. With warrant, Haiku matched Opus on that
-task (every open point marked, 6 of 6 acceptance, every fault caught) at $0.19
+task (every open point marked by the old marker list, 6 of 6 acceptance, every fault caught) at $0.19
 against $2.30 per run; on `implement-proration` its tests caught fewer faults
 (0.75 against 0.96).
 

@@ -3,10 +3,10 @@
 OpenSpec rules and skills that make coding agents surface open questions, test boundaries and prove their claims.
 
 openspec-warrant extends [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-1.16 and later for any coding agent. In a benchmark on Claude Code, every
-warrant run listed all the points a request left open, where plain OpenSpec
-listed 11 to 67% and an agent without a kit almost none, with code half the
-size and tests that catch as many faults. Every requirement is unambiguous,
+1.16 and later for any coding agent. In a benchmark on Claude Code, warrant
+wrote code half the size of plain OpenSpec's with tests that catch as many
+faults; how many of a request's open points each kit lists is being measured
+again ([Results](#results)). Every requirement is unambiguous,
 every changed line is warranted by a requirement, and every completion claim
 is warranted by verification evidence.
 
@@ -94,7 +94,8 @@ Show me the shortcut ledger.
 Plan in one request and implement in the next: OpenSpec's propose workflow
 stops after planning. To spend less, plan with a strong model and run apply in
 a new session on a cheaper one; with warrant, Claude Haiku matched Claude Opus
-on the benchmark's plan-and-implement task at a twelfth of the cost.
+in acceptance tests and faults caught on the benchmark's plan-and-implement
+task at a twelfth of the cost.
 
 ## Project contract
 
@@ -154,6 +155,8 @@ Claude Code, three runs per cell, plan a request and then implement it:
 | Haiku 5.5 | plain OpenSpec | 11% | 100% | 34 | $0.04 |
 | | warrant | 100% | 100% | 18 | $0.19 |
 
+The open-point shares were measured when a sentence with "decided" or "chose"
+also counted as listing an open point, so they may be too high until a re-run.
 Every arm passed all hidden acceptance tests. Method, all arms and the other
 tasks: [docs/benchmark.md](docs/benchmark.md).
 
