@@ -27,8 +27,9 @@ The TDD and verify scenarios also record the runs of their test tools: a
 shim on PATH runs the real tool and logs its arguments, exit code and the
 workspace files it started on. The checkers then require a failing run of each
 scenario's test before a passing one on changed files, and a full run on the
-final files, besides the report that shows them. Codex's sandbox keeps `.git`
-read-only, so its runs are not logged and these checks fail there.
+final files, besides the report that shows them. The shims and the log live in
+`<workspace>.warrant/`, next to the workspace, because Codex's sandbox keeps
+`.git` read-only.
 
 Global agent configuration (user-level skills and plugins) also loads during
 evals and can change the results; run evals with it disabled.

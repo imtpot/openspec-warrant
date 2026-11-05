@@ -16,7 +16,7 @@ SHIM = '#!{python}\nimport sys\nsys.path.insert(0, {root!r})\nfrom warrant_evals
 
 def run_log(workspace: Path) -> Path:
     """Where the shims log the runs of a workspace."""
-    return workspace / '.git' / 'warrant' / 'runs.jsonl'
+    return workspace.parent / f'{workspace.name}.warrant' / 'runs.jsonl'
 
 
 def install_shims(workspace: Path, tools: Sequence[str], path: str) -> dict[str, str]:
@@ -29,7 +29,8 @@ def install_shims(workspace: Path, tools: Sequence[str], path: str) -> dict[str,
         (bin_dir / tool).write_text(shim)
         (bin_dir / tool).chmod(0o755)
     log.write_text('')
-    return {'PATH': f'{bin_dir}{os.pathsep}{path}', 'WARRANT_RUN_LOG': str(log), 'WARRANT_REAL_PATH': path}
+    return {'PATH': f'{bin_dir}{os.pathsep}{path}', 'WARRANT_RUN_LOG': str(log),
+            'WARRANT_WORKSPACE': str(workspace), 'WARRANT_REAL_PATH': path}
 
 
 def workspace_state(workspace: Path) -> str:
@@ -62,7 +63,7 @@ def main() -> None:
         print(f'{tool}: command not found', file=sys.stderr)
         sys.exit(127)
     log = Path(os.environ['WARRANT_RUN_LOG'])
-    state = workspace_state(log.parents[2])
+    state = workspace_state(Path(os.environ['WARRANT_WORKSPACE']))
     seq = time.time_ns()
     code = subprocess.run([real, *args]).returncode
     if code < 0:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from warrant_evals.record import install_shims, recorded_runs, workspace_state
+from warrant_evals.record import install_shims, recorded_runs, run_log, workspace_state
 from warrant_evals.workspace import commit_fixture
 
 
@@ -112,15 +112,35 @@ def test_state_skips_ignored_and_deleted_files(workspace):
     assert workspace_state(workspace) != before
 
 
-# Recorded command runs: the log starts empty and stays out of `git status`
-def test_log_starts_empty_and_is_not_in_git_status(workspace):
+# Run log outside the workspace: Agent's view
+def test_log_starts_empty_next_to_the_workspace_and_not_in_it(workspace):
     env = install_shims(workspace, ['fake'], os.environ['PATH'])
     assert recorded_runs(workspace) == []
 
     _shell(workspace, env, 'fake')
 
+    log = workspace.parent / 'ws.warrant' / 'runs.jsonl'
+    assert run_log(workspace) == log and len(log.read_text().splitlines()) == 1
+    assert (workspace.parent / 'ws.warrant' / 'bin' / 'fake').is_file()
     status = subprocess.run(['git', 'status', '--porcelain'], cwd=workspace, capture_output=True, text=True)
     assert status.stdout == ''
+    assert sorted(path.name for path in workspace.rglob('*') if '.git' not in path.parts) == ['README.md']
+
+
+# Run log outside the workspace: Codex sandbox
+@pytest.mark.skipif(os.geteuid() == 0, reason='root writes to a read-only directory')
+def test_run_is_logged_when_git_is_read_only(workspace):
+    env = install_shims(workspace, ['fake'], os.environ['PATH'])
+    git = workspace / '.git'
+    subprocess.run(['chmod', '-R', 'a-w', git], check=True)
+    try:
+        result = _shell(workspace, env, 'fake x')
+    finally:
+        subprocess.run(['chmod', '-R', 'u+w', git], check=True)
+
+    assert 'warrant recorder' not in result.stderr
+    [run] = recorded_runs(workspace)
+    assert run['args'] == ['x']
 
 
 # Recorded command runs: the working directory of the run is logged

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from warrant_evals.checks import CHECKERS
-from warrant_evals.record import workspace_state
+from warrant_evals.record import run_log, workspace_state
 
 FIXTURE = Path(__file__).resolve().parents[1] / 'fixtures' / 'tdd-project'
 PARAMS = {
@@ -34,7 +34,7 @@ def repo(tmp_path):
 
 def _run(repo, args, code, tool='python3'):
     """Append a run to the log, with the workspace state as it is now."""
-    log = repo / '.git' / 'warrant' / 'runs.jsonl'
+    log = run_log(repo)
     log.parent.mkdir(exist_ok=True)
     runs = log.read_text().splitlines() if log.exists() else []
     line = json.dumps({'seq': len(runs), 'tool': tool, 'args': args.split(), 'cwd': str(repo), 'exit': code, 'state': workspace_state(repo)})
@@ -239,7 +239,7 @@ def test_full_run_before_the_last_edit_fails(repo):
 
 def test_empty_log_fails_with_both_findings(repo):
     _named(repo)
-    (repo / '.git' / 'warrant').mkdir()
-    (repo / '.git' / 'warrant' / 'runs.jsonl').write_text('')
+    run_log(repo).parent.mkdir()
+    run_log(repo).write_text('')
 
     assert _messages(repo) == [RED_GREEN, FULL_MESSAGE]

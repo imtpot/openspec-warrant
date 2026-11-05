@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from warrant_evals.record import recorded_runs
+from warrant_evals.record import recorded_runs, run_log
 from warrant_evals.requirements import Finding
 from warrant_evals.runner import AGENTS, Agent, Result, Scenario, parse_output, run_evals, write_report
 from warrant_evals.workspace import commit_fixture
@@ -272,4 +272,4 @@ def test_recorded_tool_run_is_logged_in_the_workspace(tmp_path, fixture_dir):
 def test_scenario_without_record_leaves_no_log(tmp_path, fixture_dir, writer):
     [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], prepare=commit_fixture, keep=True)
 
-    assert not (result.workspace / '.git' / 'warrant').exists()
+    assert not run_log(result.workspace).parent.exists()

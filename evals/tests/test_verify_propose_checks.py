@@ -4,12 +4,12 @@ import subprocess
 import pytest
 
 from warrant_evals.checks import CHECKERS
-from warrant_evals.record import workspace_state
+from warrant_evals.record import run_log, workspace_state
 
 
 def _run(repo, args, code, tool='python3'):
     """Append a run to the log, with the workspace state as it is now."""
-    log = repo / '.git' / 'warrant' / 'runs.jsonl'
+    log = run_log(repo)
     log.parent.mkdir(exist_ok=True)
     runs = log.read_text().splitlines() if log.exists() else []
     line = json.dumps({'seq': len(runs), 'tool': tool, 'args': args.split(), 'cwd': str(repo), 'exit': code, 'state': workspace_state(repo)})
@@ -128,8 +128,8 @@ def test_full_run_never_made_fails(repo):
 
 
 def test_empty_log_fails(repo):
-    (repo / '.git' / 'warrant').mkdir()
-    (repo / '.git' / 'warrant' / 'runs.jsonl').write_text('')
+    run_log(repo).parent.mkdir()
+    run_log(repo).write_text('')
 
     assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
 
