@@ -153,6 +153,8 @@ def _run_one(
         # Codex prints the commands it runs on stderr.
         tools = parse_output(agent.name, output)[1]
     messages = [f'{f.requirement}: {f.message}' for f in scenario.check(workspace, report)]
+    if done.returncode != 0:
+        messages.append(f'agent exited {done.returncode}')
     messages += [f'skills: skill not loaded: {name}' for name in scenario.loaded if f'skill:{name}' not in tools]
     status = 'fail' if messages else 'pass'
     return Result(scenario.name, agent.name, status, messages, transcript, workspace, tools)

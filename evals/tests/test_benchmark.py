@@ -363,6 +363,13 @@ def test_silent_decision_does_not_count():
     )
 
 
+# Marked ambiguity: Decision reported as made
+def test_decision_reported_as_made_does_not_count():
+    assert benchmark.marked_ambiguities([], ['I decided that an empty list returns an empty list.'], AMBIGUITIES) == (
+        0, ['add up to 100', 'leftover', 'empty'],
+    )
+
+
 def test_plan_implement_run_scores_planning_and_code(task, monkeypatch):
     workspace, hidden = task
     _agent_test(workspace, 'self.assertEqual(double(3), 6)')

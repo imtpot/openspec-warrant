@@ -49,7 +49,7 @@ names the verification commands as plain text. Claude runs with
   percentages that do not add up to 100, where leftover cents go, and an empty
   list or a zero percentage. Scores: the share of these the agent marks as
   assumed or open (in a proposal's Assumptions, or in a sentence that says
-  assume, question, confirm, unclear, ambiguous, decided or chose), hidden
+  assume, question, confirm, unclear or ambiguous), hidden
   acceptance tests on the unambiguous behavior (of 6), and the share of 6
   faulty implementations its tests reject. A fault counts as caught when a
   test that passes on the reference implementation fails on it, so tests that
@@ -84,7 +84,9 @@ it also names each run's kept workspace.
 Results on Claude Code, three runs per cell, 2026-11-04. Faults are the share
 of faulty implementations the agent's own tests reject.
 
-`plan-implement-allocation` (plan, then implement in the same session):
+`plan-implement-allocation` (plan, then implement in the same session). This
+table was measured when decided and chose also counted as markers, so its
+open-point shares may be too high until a re-run:
 
 | Model | Arm | Open points marked | Acceptance | Faults | Lines added | Cost per run |
 |---|---|---|---|---|---|---|

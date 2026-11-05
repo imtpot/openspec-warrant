@@ -28,5 +28,5 @@ operations:
     - "[warrant] After each sub-agent reports, run warrant-verify. Check off the group's tasks only when every verification command exited with 0."
   archive:
     guidance:
-    - "[warrant] Archive only when every verification task has a 'Result:' line."
+    - "[warrant] Archive only when every verification task records 'Result: exit 0'."
     - "[warrant] After the archive, replace the placeholder Purpose of every main spec it created with what the capability is for, then run warrant-verify."

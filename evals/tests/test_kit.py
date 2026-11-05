@@ -143,7 +143,7 @@ def test_verification_results_have_a_parsable_format():
 
     assert "'Result: exit <code>, <result line>'" in tasks
     assert "'Result: not run, <reason>'" in tasks
-    assert "'Result:' line" in text[text.index('  archive:'):]
+    assert "'Result: exit 0'" in text[text.index('  archive:'):]
 
 
 @pytest.mark.parametrize('name', SKILLS)

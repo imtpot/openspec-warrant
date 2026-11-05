@@ -98,6 +98,17 @@ def test_unauthenticated_agent_is_not_run(tmp_path, fixture_dir):
     assert 'not authenticated' in result.messages[0]
 
 
+# Agent error: Crashed agent with a clean workspace
+@pytest.mark.parametrize('code', [1, 3])
+def test_crashed_agent_with_clean_workspace_fails(tmp_path, fixture_dir, code):
+    crashed = Agent('crashed', [str(_script(tmp_path / 'crashed', f'echo done > out.txt; exit {code}'))])
+
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [crashed])
+
+    assert result.status == 'fail'
+    assert result.messages == [f'agent exited {code}']
+
+
 def test_timeout_fails_the_entry(tmp_path, fixture_dir):
     sleeper = Agent('sleeper', [str(_script(tmp_path / 'sleeper', 'sleep 5'))])
 

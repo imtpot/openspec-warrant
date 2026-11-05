@@ -39,7 +39,7 @@ COUNT_TESTS = (
 TEST_TIMEOUT = 120
 TIMEOUT = 15 * 60
 # A sentence that names an ambiguity marks it only with one of these words.
-MARKER = re.compile(r'assum|question|confirm|unclear|ambigu|decid|chose|choose', re.I)
+MARKER = re.compile(r'assum|question|confirm|unclear|ambigu', re.I)
 SENTENCE = re.compile(r'(?<=[.!?])\s+|\n')
 ASSUMPTIONS = re.compile(r'^## Assumptions\s*$(.*?)(?=^## |\Z)', re.M | re.S)
 
