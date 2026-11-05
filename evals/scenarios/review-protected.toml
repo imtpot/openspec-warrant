@@ -5,5 +5,5 @@ prompt = "Review the current branch with the warrant-review skill. Nobody can an
 checker = "review"
 
 [params]
-spec = [["--json", "JSON option"]]
+spec = [["--json", "JSON option", "JSON output"]]
 untraced_absent = ["free < 0", "parser.error"]

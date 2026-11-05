@@ -85,3 +85,11 @@ def test_review_protected_scenario_loads_with_the_review_checker(tmp_path):
         'Spec section lacks: --json',
         'Spec section reports untraced: free < 0',
     ]
+
+
+def test_review_protected_accepts_the_option_named_as_json_output(tmp_path):
+    subprocess.run(['git', 'init', '-q'], cwd=tmp_path, check=True)
+    scenarios = {s.name: s for s in load_scenarios(Path(__file__).parent.parent / 'scenarios', CHECKERS_REAL)}
+    report = '## Spec\n- Blocking, untraced: app/cli.py:2-7: CLI dispatch and JSON output\n## Standards\n## Evidence\n'
+
+    assert scenarios['review-protected'].check(tmp_path, report) == []
