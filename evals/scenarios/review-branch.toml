@@ -5,6 +5,14 @@ prompt = "Review the current branch with the warrant-review skill. Nobody can an
 checker = "review"
 
 [params]
-spec = [["--json", "JSON option", "cli.py"], ["Negative input", "negative"], ["Shortfall verdict", "shortfall", "\"short\"", "Not enough free"]]
-standards = [["formatReport"], ["retries"], ["swap", "order", "revers", "contract", "args.free"]]
+spec = [
+  { terms = ["--json", "JSON option", "cli.py"], description = "The branch adds app/cli.py, a command line with a --json option, and no requirement of the OpenSpec change add-quota-check asks for it, so this added code is untraced." },
+  { terms = ["Negative input", "negative"], description = "The branch removes the check `if needed < 0: raise ValueError` from check() in app/quota.py, so the requirement \"Negative input\" (a negative needed amount raises ValueError) is not implemented." },
+  { terms = ["Shortfall verdict", "shortfall", "\"short\"", "Not enough free"], description = "The requirement \"Shortfall verdict\" (check() in app/quota.py returns \"short\" when free is less than needed, scenario \"Not enough free\") has no test: tests/test_quota.py tests only the \"fits\" verdict." },
+]
+standards = [
+  { terms = ["formatReport"], description = "The branch adds the function formatReport to app/quota.py; its camelCase name breaks the rule \"Name functions in snake_case\" in docs/standards.md." },
+  { terms = ["retries"], description = "The branch adds the parameter retries=3 to check() in app/quota.py, and no code uses it: an unused parameter (speculative generality)." },
+  { terms = ["swap", "order", "revers", "contract", "args.free"], description = "main() in app/cli.py calls check(args.needed, args.free), but check() takes (free, needed), so the two arguments are in the wrong order and the command line gives the wrong verdict (\"short\" for free 10 and needed 4)." },
+]
 evidence = [["make test"]]

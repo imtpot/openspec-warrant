@@ -4,10 +4,10 @@ setup = "setup.sh"
 prompt = "Review the current branch before merge. Nobody can answer questions during this run."
 # Planted problems; each group lists terms of which one must appear in the report.
 problems = [
-  ["round(", "half to even", "banker", "half-even", "round half up", "ROUND_HALF_UP"],
-  ["negative", "after the period end", "after the end", "Cancel after the end"],
-  ["billed_days", "report.py"],
-  ["path traversal", "traversal", "../", "os.path.join", "outside the export"],
-  ["tautolog", "same function", "computes the expected", "expected value", "compares the function with itself", "always pass"],
-  ["currency"],
+  { terms = ["round(", "half to even", "banker", "half-even", "round half up", "ROUND_HALF_UP"], description = "refund_amount() in app/refund.py rounds with Python's round(), which rounds an exact half to the even number, but the requirement \"Refund amount\" says an exact half cent is rounded up." },
+  { terms = ["negative", "after the period end", "after the end", "Cancel after the end"], description = "refund_amount() in app/refund.py has no case for a cancel date after the period end: the unused days become negative and it returns a negative refund, but the requirement \"Cancel after the end\" says it returns 0." },
+  { terms = ["billed_days", "report.py"], description = "The branch changes the default of include_end in days_between() in app/dates.py from False to True, so billed_days() in app/report.py, which uses the default, now also bills the end day of [start, end)." },
+  { terms = ["path traversal", "traversal", "../", "os.path.join", "outside the export"], description = "export_refund() in app/refund.py builds the file path from the name argument with os.path.join instead of safe_path() from app/files.py, against docs/standards.md; a name such as \"../x\" writes outside exports/ (path traversal)." },
+  { terms = ["tautolog", "same function", "computes the expected", "expected value", "compares the function with itself", "always pass"], description = "test_half_of_april in tests/test_refund.py computes its expected value by calling refund_amount() itself, so the test always passes; docs/standards.md says expected values are literals worked out by hand (1500 in the spec)." },
+  { terms = ["currency"], description = "refund_amount() in app/refund.py gets a parameter currency='EUR' that nothing uses; the proposal leaves currencies other than integer cents out of scope." },
 ]

@@ -1,8 +1,10 @@
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
 
+from warrant_evals import benchmark, judge
 from warrant_evals.__main__ import main
 from warrant_evals.checks import CHECKERS as CHECKERS_REAL
 from warrant_evals.requirements import Finding
@@ -187,3 +189,20 @@ def test_report_ends_with_totals_per_suite(scenario_dir, tmp_path, monkeypatch):
 
     assert report.splitlines()[-2:] == ['regression: 2/3', 'capability: 1/1']
     assert '| d | capability | claude | pass |' in report
+
+
+def _described(groups):
+    return [group for group in groups if isinstance(group, dict)]
+
+
+def test_described_items_and_calibration_cases_are_complete():
+    params = []
+    checkers = {name: lambda p, make=make: params.append(p) or make(p) for name, make in CHECKERS_REAL.items()}
+    load_scenarios(Path(__file__).parent.parent / 'scenarios', checkers)
+    items = [item for p in params for axis in ('spec', 'standards', 'evidence') for item in _described(p.get(axis, []))]
+    items += [item for task in benchmark.load_tasks() for item in _described(task.get('problems', []))]
+    cases = tomllib.loads(judge.CALIBRATION.read_text())['case']
+
+    assert all(item['description'].strip() and item['terms'] for item in items)
+    assert all(case['name'].strip() and case['description'].strip() and case['text'].strip() for case in cases)
+    assert {case['label'] for case in cases} <= {'yes', 'no'}

@@ -6,5 +6,7 @@ checker = "review"
 
 [params]
 spec = [["no OpenSpec change", "No OpenSpec change"]]
-standards = [["formatReport"]]
+standards = [
+  { terms = ["formatReport"], description = "The branch adds the function formatReport to app/quota.py; its camelCase name breaks the rule \"Name functions in snake_case\" in docs/standards.md." },
+]
 evidence = [["make test"]]

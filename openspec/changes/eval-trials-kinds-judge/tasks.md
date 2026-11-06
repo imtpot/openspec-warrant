@@ -33,10 +33,10 @@
 
 ## 5. Descriptions
 
-- [ ] 5.1 Add a description to each Spec and Standards group of `evals/scenarios/review-branch.toml` and `review-named-base.toml`, to the Spec group of `review-protected.toml`, and to the Standards group of `review-no-change.toml`, written from the `review-branch` fixture and the scenario's setup script; keep the terms, the evidence groups and the `review-no-change` Spec item unchanged
-- [ ] 5.2 Add a description to each planted problem of `evals/benchmark/review-refund.toml` and `evals/benchmark/review-export.toml`, written from each task's fixture and setup; keep the terms unchanged
-- [ ] 5.3 Create `evals/judge/calibration.toml` with about 20 cases per design.md Decision 5, using the descriptions from 5.1 and 5.2: report excerpts from eval transcripts labeled `yes` or `no`, and written `no` cases that mention the code without reporting the defect
-- [ ] 5.4 Add a test to `evals/tests/test_cli.py` that loads every scenario and benchmark task and checks that each described item has a non-empty `description` and at least one term, and that every calibration case has a name, description, text and a `yes` or `no` label; verify the existing `review-protected` load tests still pass with the conftest fake
+- [x] 5.1 Add a description to each Spec and Standards group of `evals/scenarios/review-branch.toml` and `review-named-base.toml`, to the Spec group of `review-protected.toml`, and to the Standards group of `review-no-change.toml`, written from the `review-branch` fixture and the scenario's setup script; keep the terms, the evidence groups and the `review-no-change` Spec item unchanged
+- [x] 5.2 Add a description to each planted problem of `evals/benchmark/review-refund.toml` and `evals/benchmark/review-export.toml`, written from each task's fixture and setup; keep the terms unchanged
+- [x] 5.3 Create `evals/judge/calibration.toml` with about 20 cases per design.md Decision 5, using the descriptions from 5.1 and 5.2: report excerpts from eval transcripts labeled `yes` or `no`, and written `no` cases that mention the code without reporting the defect
+- [x] 5.4 Add a test to `evals/tests/test_cli.py` that loads every scenario and benchmark task and checks that each described item has a non-empty `description` and at least one term, and that every calibration case has a name, description, text and a `yes` or `no` label; verify the existing `review-protected` load tests still pass with the conftest fake
 
 ## 6. Documentation
 

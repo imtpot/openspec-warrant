@@ -1,0 +1,194 @@
+# Calibration set for the model judge (warrant_evals/judge.py).
+# Run `uv run python -m warrant_evals.judge` from evals/ to print the judge's
+# agreement with these labels. Each case pairs the description of one planted
+# problem (copied from evals/scenarios/review-*.toml or
+# evals/benchmark/review-*.toml) with a short report excerpt. `label` is the
+# answer a careful human reader gives: `yes` if the excerpt reports that
+# problem as a defect, `no` if it does not. Most excerpts are copied from saved
+# eval and benchmark transcripts; the `written-` cases mention the planted code
+# or a term without reporting the defect, which is the false-pass risk.
+# Add each judge error found in a transcript as a new case.
+
+# yes: the excerpt reports the problem, often in words no term matches.
+
+[[case]]
+name = "protected-cli-json-output"
+description = "The branch adds app/cli.py, a command line with a --json option, and no requirement of the OpenSpec change add-quota-check asks for it, so this added code is untraced."
+text = '''
+- **Blocking, untraced — `app/quota.py:6–9`:** `formatReport` and its formatting have no specified basis.
+- **Blocking, untraced — `app/cli.py:2–7,11,15–16`:** CLI dispatch, JSON output, and report formatting introduce an unspecified interface.
+'''
+label = "yes"
+
+[[case]]
+name = "written-machine-readable-output-flag"
+description = "The branch adds app/cli.py, a command line with a --json option, and no requirement of the OpenSpec change add-quota-check asks for it, so this added code is untraced."
+text = '''
+- **Blocking, untraced** `app/cli.py:11`: the machine-readable output flag serves no requirement of `add-quota-check`. Remove it or add a requirement.
+'''
+label = "yes"
+
+[[case]]
+name = "swap-breaks-calling-contract"
+description = "main() in app/cli.py calls check(args.needed, args.free), but check() takes (free, needed), so the two arguments are in the wrong order and the command line gives the wrong verdict (\"short\" for free 10 and needed 4)."
+text = '''
+- **Blocking — `app/cli.py:13`:** `check(args.needed, args.free)` breaks the `check(free, needed, ...)` calling contract. Pass `args.free, args.needed`.
+'''
+label = "yes"
+
+[[case]]
+name = "negative-input-validation-removed"
+description = "The branch removes the check `if needed < 0: raise ValueError` from check() in app/quota.py, so the requirement \"Negative input\" (a negative needed amount raises ValueError) is not implemented."
+text = '''
+- **Blocking**, `app/quota.py:3`: Removed input validation, `if needed < 0: raise ValueError(...)`, allows invalid quota requests.
+'''
+label = "yes"
+
+[[case]]
+name = "shortfall-implemented-without-test"
+description = "The requirement \"Shortfall verdict\" (check() in app/quota.py returns \"short\" when free is less than needed, scenario \"Not enough free\") has no test: tests/test_quota.py tests only the \"fits\" verdict."
+text = '''
+- **Blocking — untested**, `app/quota.py:5`: “Shortfall verdict” is implemented by `return 'short'`, but has no test.
+- **Blocking — untested**, `tests/test_quota.py:7`: “Negative input” has no test. The only test exercises “Fits verdict.”
+'''
+label = "yes"
+
+[[case]]
+name = "refund-test-compares-output-with-itself"
+description = "test_half_of_april in tests/test_refund.py computes its expected value by calling refund_amount() itself, so the test always passes; docs/standards.md says expected values are literals worked out by hand (1500 in the spec)."
+text = '''
+5. **The tests don't test anything** (`tests/test_refund.py`). `expected` is calculated by calling `refund_amount` itself, which breaks the "literals worked out by hand" standard. It should assert `1500`.
+'''
+label = "yes"
+
+[[case]]
+name = "refund-half-cents-round-the-wrong-way"
+description = "refund_amount() in app/refund.py rounds with Python's round(), which rounds an exact half to the even number, but the requirement \"Refund amount\" says an exact half cent is rounded up."
+text = '''
+3. **Half cents round the wrong way** (`app/refund.py:14`). The spec says an exact half cent rounds up. For example, `refund_amount(1, Apr 16, Apr 1, May 1)` should give 0.5 → 1 but returns **0**.
+'''
+label = "yes"
+
+[[case]]
+name = "refund-billed-days-regression"
+description = "The branch changes the default of include_end in days_between() in app/dates.py from False to True, so billed_days() in app/report.py, which uses the default, now also bills the end day of [start, end)."
+text = '''
+**1. Regression in `billed_days` (`app/dates.py:4`, `app/report.py:6`)**
+The change to `days_between` flips the default `include_end` from `False` to `True`. `billed_days` calls it with no argument, so its behavior changes. Its docstring says "the end day is not billed".
+'''
+label = "yes"
+
+[[case]]
+name = "export-slice-ends-one-order-early"
+description = "export_page() in app/export.py slices rows[start:start + size - 1], so each page holds one order less than size and drops the last order of the page; the requirement \"Page content\" asks for positions (number - 1) * size to number * size - 1."
+text = '''
+5. **blocking**: `app/export.py:11`: the slice ends one order early, so every `size`-th order is never exported on any page. That is data loss.
+'''
+label = "yes"
+
+[[case]]
+name = "export-seen-list-shared-across-calls"
+description = "export_page() in app/export.py has the mutable default argument seen=[], which keeps ids between calls, so a later export skips rows; docs/standards.md forbids mutable default arguments."
+text = '''
+6. **WARNING**: `app/export.py:16`: `if row['id'] not in seen:` uses a list shared across calls. A second export in the same process drops orders, so the page no longer holds the orders at the required positions.
+'''
+label = "yes"
+
+[[case]]
+name = "export-report-total-crashes"
+description = "The branch changes find() in app/store.py from find(orders, customer) to find(customer, orders), but total() in app/report.py still calls find(orders, customer), so that caller now passes the arguments in the wrong order."
+text = '''
+1. **`find`'s arguments were swapped, which breaks `app/report.py:6`.** `store.find` is now `find(customer, orders)`, but `report.total` still calls `find(orders, customer)`. It now loops over the characters of the customer string and indexes each one with `['customer']`, so it raises `TypeError`.
+'''
+label = "yes"
+
+# no: the excerpt names the code, the file or a term, or reports a different
+# problem, but does not report this problem.
+
+[[case]]
+name = "format-report-untraced-not-naming"
+description = "The branch adds the function formatReport to app/quota.py; its camelCase name breaks the rule \"Name functions in snake_case\" in docs/standards.md."
+text = '''
+- **Blocking — untraced**, `app/quota.py:8–9`: `formatReport()` serves no declared requirement.
+'''
+label = "no"
+
+[[case]]
+name = "shortfall-traced-without-test-finding"
+description = "The requirement \"Shortfall verdict\" (check() in app/quota.py returns \"short\" when free is less than needed, scenario \"Not enough free\") has no test: tests/test_quota.py tests only the \"fits\" verdict."
+text = '''
+- Traced: `app/quota.py:3-5` — `return 'fits'` / `return 'short'` serves the "Fits verdict" and "Shortfall verdict" requirements.
+'''
+label = "no"
+
+[[case]]
+name = "swap-other-cli-finding"
+description = "main() in app/cli.py calls check(args.needed, args.free), but check() takes (free, needed), so the two arguments are in the wrong order and the command line gives the wrong verdict (\"short\" for free 10 and needed 4)."
+text = '''
+- **Blocking** `app/cli.py:10` — `main` has no `if __name__ == '__main__'` entry point, so the CLI can't run as a script. It also returns nothing and is untested.
+'''
+label = "no"
+
+[[case]]
+name = "negative-fits-verdict-no-findings"
+description = "The branch removes the check `if needed < 0: raise ValueError` from check() in app/quota.py, so the requirement \"Negative input\" (a negative needed amount raises ValueError) is not implemented."
+text = '''
+Requirement "Fits verdict" has no findings. `app/quota.py:3-4` implements it and `tests/test_quota.py:8` (`test_fits`) tests it.
+'''
+label = "no"
+
+[[case]]
+name = "protected-guard-checks-wrong-value"
+description = "The branch adds app/cli.py, a command line with a --json option, and no requirement of the OpenSpec change add-quota-check asks for it, so this added code is untraced."
+text = '''
+- **blocking** `app/cli.py:13-14`: the command line guards `free < 0` instead of `needed < 0`. Together with the removed check above, nothing rejects a negative `needed` any more, so `needed=-1` returns a verdict instead of an error.
+'''
+label = "no"
+
+[[case]]
+name = "refund-divide-by-zero-not-negative"
+description = "refund_amount() in app/refund.py has no case for a cancel date after the period end: the unused days become negative and it returns a negative refund, but the requirement \"Cancel after the end\" says it returns 0."
+text = '''
+- If `period_start == period_end`, the function divides by zero. The spec doesn't cover that case, so this is just worth knowing.
+'''
+label = "no"
+
+[[case]]
+name = "refund-default-flip-untraced-only"
+description = "The branch changes the default of include_end in days_between() in app/dates.py from False to True, so billed_days() in app/report.py, which uses the default, now also bills the end day of [start, end)."
+text = '''
+- **blocking, untraced**: `app/dates.py:4`. The default of `include_end` changed from `False` to `True`. `refund_amount` passes `include_end=False` explicitly, so no requirement needs this change.
+'''
+label = "no"
+
+[[case]]
+name = "export-find-swap-untraced-only"
+description = "The branch changes find() in app/store.py from find(orders, customer) to find(customer, orders), but total() in app/report.py still calls find(orders, customer), so that caller now passes the arguments in the wrong order."
+text = '''
+9. **blocking, untraced**: `app/store.py:9`: `def find(customer, orders):` swaps the arguments, and no requirement asks for that. The matching edit at `tests/test_store.py:9`, `find('a', orders)`, is untraced as well.
+'''
+label = "no"
+
+[[case]]
+name = "written-refund-note-traced"
+description = "export_refund() in app/refund.py builds the file path from the name argument with os.path.join instead of safe_path() from app/files.py, against docs/standards.md; a name such as \"../x\" writes outside exports/ (path traversal)."
+text = '''
+- Traced: `app/refund.py:18-21`: `export_refund` writes the note with `os.path.join(EXPORTS, name)` and serves the requirement "Refund note".
+'''
+label = "no"
+
+[[case]]
+name = "written-gzip-call-as-proposed"
+description = "export_page() in app/export.py runs subprocess.run(f'gzip -f {path}', shell=True), so the path goes to a shell (command injection), against the rule in docs/standards.md never to pass user input to a shell."
+text = '''
+- Traced: `app/export.py:20`: `subprocess.run(f'gzip -f {path}', shell=True, check=True)` compresses the page with gzip, as the proposal asks.
+'''
+label = "no"
+
+[[case]]
+name = "written-round-matches-the-example"
+description = "refund_amount() in app/refund.py rounds with Python's round(), which rounds an exact half to the even number, but the requirement \"Refund amount\" says an exact half cent is rounded up."
+text = '''
+- `app/refund.py:15`: `round(amount * unused / period)` gives 1500 for the "Half of April" scenario, as the spec says. No finding.
+'''
+label = "no"
