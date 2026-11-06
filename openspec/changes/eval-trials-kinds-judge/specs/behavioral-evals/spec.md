@@ -107,7 +107,7 @@ description and the report text, and return `yes`, `no` or `unknown`.
 
 #### Scenario: Judge command
 - **WHEN** the judge decides a finding
-- **THEN** the command runs `claude -p` with `--model sonnet` and `--tools ""`
+- **THEN** the command runs `claude -p` with `--model sonnet` and `--tools ""`, with the prompt on stdin
 
 ### Requirement: Judge failure
 

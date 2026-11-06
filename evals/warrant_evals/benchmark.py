@@ -239,7 +239,7 @@ def added_lines(workspace: Path) -> int:
     return sum(int(line.split('\t')[0]) for line in numstat.splitlines() if line.split('\t')[0].isdigit())
 
 
-def review_score(report: str, problems: list[list[str]]) -> tuple[float, list[str]]:
+def review_score(report: str, problems: list[list[str] | dict]) -> tuple[float, list[str]]:
     """Share of planted problems the report names, and the first term of each missed one."""
     missed = _missing(report, problems)
     return 1 - len(missed) / len(problems), missed

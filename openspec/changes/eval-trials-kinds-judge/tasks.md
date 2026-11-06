@@ -18,7 +18,7 @@
 
 ## 3. Judge
 
-- [x] 3.1 Create `evals/tests/test_judge.py`, which imports `ask`, `calibrate` and `main` by name from `warrant_evals.judge` and replaces `subprocess.run` and `shutil.which` in that module: the command is `claude -p --model sonnet --tools "" --setting-sources project,local --no-session-persistence --output-format json -- <prompt>` run in a temporary directory, and the prompt holds the description and the text inside `<report>` tags (Judge call: Judge command); a `result` of `Yes\nThe report names it.` gives `('yes', ...)`; `no` and `unknown` map likewise
+- [x] 3.1 Create `evals/tests/test_judge.py`, which imports `ask`, `calibrate` and `main` by name from `warrant_evals.judge` and replaces `subprocess.run` and `shutil.which` in that module: the command is `claude -p --model sonnet --tools "" --setting-sources project,local --no-session-persistence --output-format json` run in a temporary directory with the prompt on stdin, and the prompt holds the description and the text inside `<report>` tags (Judge call: Judge command); a `result` of `Yes\nThe report names it.` gives `('yes', ...)`; `no` and `unknown` map likewise
 - [x] 3.2 Add failure tests: no `claude` on PATH gives `('unknown', 'claude not installed')` (Judge failure: No claude CLI); a non-zero exit, a timeout, output that is not JSON, and a `result` whose first word is not a verdict each give `unknown` with a reason
 - [x] 3.3 Create `evals/warrant_evals/judge.py` with `JUDGE_MODEL`, `ask(description, text)` and the rubric prompt from design.md Decision 3; verify 3.1 and 3.2 pass
 - [x] 3.4 Add tests for `calibrate` with a fake `ask`: three cases with a `yes` verdict on a `no` label give `agreement: 2/3` and a line naming that case, its verdict and reason (Judge calibration: One disagreement); an `unknown` verdict on a `yes` label is a disagreement (Judge calibration: Unknown verdict); `main(path, ask=<fake>)` on a temporary calibration file prints the same output and returns 0; `main` on a missing path and on a file that is not valid TOML raises `SystemExit` with a message naming the path (Calibration file failure: Missing file)
@@ -48,15 +48,16 @@
   Result: first run agreement: 21/22; disagreement refund-default-flip-untraced-only: label no, verdict yes ("flags the include_end default change ... though it doesn't name the billed_days() effect"). Rubric revised: the problem is the defect, not only the change; a named effect must be stated; flagging the change as untraced does not report it. Then agreement: 22/22 on three runs in a row.
 - [x] 7.2 Run `uv run python -m warrant_evals --agent claude --agent codex --scenario review-branch --scenario review-protected --runs 2`; verify the report shows `k/2` per entry, the Suite column and the totals; read the transcript of every finding the judge decided and record whether each verdict is right
   Result: exit 0; review-branch claude 2/2, codex 2/2; review-protected claude 2/2, codex 2/2; Suite column shown; `regression: 4/4`. The judge decided one finding in 8 runs: review-protected codex-1 Spec `--json`, reported as "No requirement supports the CLI/JSON/reporting additions (`app/cli.py:1–8,11–12,15–16`)"; no term matched; verdict yes, re-asked: yes. Right: the report flags the JSON CLI as untraced and leaves lines 13–14 out.
-- [ ] 7.3 Run `uv run python -m warrant_evals.benchmark --agent claude --arm warrant --runs 1 --task review-refund --task review-export`; verify the run list shows judged and missed problems as expected
+- [x] 7.3 Run `uv run python -m warrant_evals.benchmark --agent claude --arm warrant --runs 1 --task review-refund --task review-export`; verify the run list shows judged and missed problems as expected
+  Result: exit 0; review-export problems 1.00, review-refund problems 1.00; run list: nothing missed. Every planted problem matched a term, so the judge was not called; judged problems in the run list stay covered by the 4.3 tests and the 7.1 calibration only.
 
 ## 8. Review
 
-- [ ] 8.1 Check the diff against the delta specs; remove speculative generality, unused options, unrequested features and dependencies
+- [x] 8.1 Check the diff against the delta specs; remove speculative generality, unused options, unrequested features and dependencies
 
 ## 9. Verification
 
-- [ ] 9.1 Run `uv run pytest`
-  Result:
-- [ ] 9.2 Run `openspec validate --all --strict`
-  Result:
+- [x] 9.1 Run `uv run pytest`
+  Result: exit 0, 376 passed in 114.89s (0:01:54)
+- [x] 9.2 Run `openspec validate --all --strict`
+  Result: exit 0, Totals: 11 passed, 0 failed (11 items)

@@ -247,7 +247,7 @@ def _sections(transcript: str) -> dict[str, str] | None:
     return {axis: transcript[m.end():end] for axis, m, end in zip(AXES, marks, ends, strict=True)}
 
 
-def _missing(text: str, expected: list[list[str | dict]]) -> list[str]:
+def _missing(text: str, expected: list[list[str] | dict]) -> list[str]:
     """First term of each alternative group that has no term in the text.
 
     A `{terms, description}` item without a term in the text is put to the judge."""

@@ -41,17 +41,21 @@ def ask(description: str, text: str) -> tuple[str, str]:
         return 'unknown', 'claude not installed'
     argv = [
         'claude', '-p', '--model', JUDGE_MODEL, '--tools', '', '--setting-sources', 'project,local',
-        '--no-session-persistence', '--output-format', 'json', '--',
-        PROMPT.format(description=description, text=text),
+        '--no-session-persistence', '--output-format', 'json',
     ]
+    # The prompt goes on stdin: a Codex report can exceed one command-line argument.
+    # The report may not close its own tag.
+    prompt = PROMPT.format(description=description, text=text.replace('</report>', ''))
     with tempfile.TemporaryDirectory(prefix='warrant-judge-') as tmp:
         try:
             done = subprocess.run(
-                argv, cwd=tmp, capture_output=True, stdin=subprocess.DEVNULL,
+                argv, cwd=tmp, capture_output=True, input=prompt,
                 text=True, timeout=TIMEOUT_SECONDS, check=False,
             )
         except subprocess.TimeoutExpired:
             return 'unknown', f'judge timeout after {TIMEOUT_SECONDS} s'
+        except OSError as error:
+            return 'unknown', f'judge did not start: {error}'
     if done.returncode != 0:
         return 'unknown', f'judge exited {done.returncode}: {done.stderr.strip()}'
     try:
