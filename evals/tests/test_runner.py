@@ -6,7 +6,7 @@ import pytest
 
 from warrant_evals.record import recorded_runs, run_log
 from warrant_evals.requirements import Finding
-from warrant_evals.runner import AGENTS, Agent, Result, Scenario, parse_output, run_evals, write_report
+from warrant_evals.runner import AGENTS, Agent, Result, Scenario, combine, parse_output, run_evals, write_report
 from warrant_evals.workspace import commit_fixture
 
 
@@ -65,7 +65,7 @@ def test_agent_filter(tmp_path, fixture_dir, writer):
 def test_each_run_uses_a_fresh_copy_and_keeps_the_fixture(tmp_path, fixture_dir, writer):
     results = _run(tmp_path, [_scenario(fixture_dir, 'a'), _scenario(fixture_dir, 'b')], [writer])
 
-    workspaces = {Path(r.transcript.read_text().splitlines()[0]).resolve() for r in results}
+    workspaces = {Path(r.transcripts[0].read_text().splitlines()[0]).resolve() for r in results}
     assert len(workspaces) == 2
     assert fixture_dir.resolve() not in workspaces
     assert not (fixture_dir / 'out.txt').exists()
@@ -126,9 +126,9 @@ def test_report_lists_every_entry_with_transcript(tmp_path, fixture_dir, writer)
 
     report = write_report(results, tmp_path / 'out' / 'report.md').read_text()
 
-    assert '| demo | writer | pass |' in report
-    assert '| demo | idle | fail | demo: no out.txt |' in report
-    assert all(str(r.transcript) in report for r in results)
+    assert '| demo | writer | pass | 1/1 |' in report
+    assert '| demo | idle | fail | 0/1 | demo: no out.txt |' in report
+    assert all(str(t) in report for r in results for t in r.transcripts)
 
 
 def test_prompt_is_passed_to_the_agent(tmp_path, fixture_dir):
@@ -136,7 +136,7 @@ def test_prompt_is_passed_to_the_agent(tmp_path, fixture_dir):
 
     [result] = _run(tmp_path, [_scenario(fixture_dir)], [echo], keep=True)
 
-    assert (result.workspace / 'out.txt').read_text().strip() == 'do it'
+    assert (result.workspaces[0] / 'out.txt').read_text().strip() == 'do it'
 
 
 def test_no_agent_runs_with_a_permission_bypass_flag():
@@ -153,7 +153,7 @@ def test_scenario_path_dirs_come_first_on_path(tmp_path, fixture_dir):
 
     [result] = _run(tmp_path, [scenario], [caller], keep=True)
 
-    assert (result.workspace / 'out.txt').read_text().strip() == 'fixture-tool'
+    assert (result.workspaces[0] / 'out.txt').read_text().strip() == 'fixture-tool'
 
 
 def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, writer):
@@ -161,9 +161,9 @@ def test_kept_workspace_is_outside_the_output_directory(tmp_path, fixture_dir, w
     # files by searching parent directories.
     [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], keep=True)
 
-    assert result.workspace.exists()
-    assert not result.workspace.resolve().is_relative_to((tmp_path / 'out').resolve())
-    assert str(result.workspace) in write_report([result], tmp_path / 'out' / 'r.md').read_text()
+    assert result.workspaces[0].exists()
+    assert not result.workspaces[0].resolve().is_relative_to((tmp_path / 'out').resolve())
+    assert str(result.workspaces[0]) in write_report([result], tmp_path / 'out' / 'r.md').read_text()
 
 
 def test_agent_gets_an_empty_stdin(tmp_path, fixture_dir, writer, monkeypatch):
@@ -195,7 +195,7 @@ def test_setup_script_runs_in_the_workspace_after_preparation(tmp_path, fixture_
 
     [result] = _run(tmp_path, [scenario], [writer], prepare=prepare, keep=True)
 
-    assert (result.workspace / 'setup-saw.txt').read_text() == 'prepared\n'
+    assert (result.workspaces[0] / 'setup-saw.txt').read_text() == 'prepared\n'
 
 
 def test_supported_agents():
@@ -264,7 +264,7 @@ def test_recorded_tool_run_is_logged_in_the_workspace(tmp_path, fixture_dir):
 
     [result] = _run(tmp_path, [scenario], [caller], prepare=commit_fixture, keep=True)
 
-    [run] = recorded_runs(result.workspace)
+    [run] = recorded_runs(result.workspaces[0])
     assert (run['tool'], run['args'], run['exit']) == ('tool', ['x'], 2)
 
 
@@ -272,4 +272,75 @@ def test_recorded_tool_run_is_logged_in_the_workspace(tmp_path, fixture_dir):
 def test_scenario_without_record_leaves_no_log(tmp_path, fixture_dir, writer):
     [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], prepare=commit_fixture, keep=True)
 
-    assert not run_log(result.workspace).parent.exists()
+    assert not run_log(result.workspaces[0]).parent.exists()
+
+
+# Repeated runs: Three runs
+def test_three_runs_give_one_combined_result(tmp_path, fixture_dir, writer):
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer], runs=3, keep=True)
+
+    assert (result.status, result.passed, result.runs) == ('pass', 3, 3)
+    assert [t.name for t in result.transcripts] == [f'demo-writer-{n}.log' for n in (1, 2, 3)]
+    assert len(set(result.workspaces)) == 3
+    assert all(w.exists() for w in result.workspaces)
+
+
+# Repeated runs: Default
+def test_one_run_keeps_the_plain_transcript_name(tmp_path, fixture_dir, writer):
+    [result] = _run(tmp_path, [_scenario(fixture_dir)], [writer])
+
+    assert result.runs == 1
+    assert [t.name for t in result.transcripts] == ['demo-writer.log']
+
+
+def _result(status, messages=(), tools=(), transcript=None, workspace=None):
+    return Result('s', 'a', status, list(messages), transcript, workspace, list(tools))
+
+
+# Entry status from runs: One of three fails
+def test_combine_one_failure_of_three_fails_with_prefixed_messages():
+    results = [_result('pass'), _result('pass'), _result('fail', ['demo: no out.txt'])]
+
+    combined = combine(results)
+
+    assert (combined.status, combined.passed, combined.runs) == ('fail', 2, 3)
+    assert combined.messages == ['run 3: demo: no out.txt']
+
+
+# Entry status from runs: Agent not installed
+def test_combine_not_run_results_without_transcripts():
+    combined = combine([_result('not run', ['codex not installed'])] * 3)
+
+    assert combined.status == 'not run'
+    assert combined.messages == ['run 1: codex not installed', 'run 2: codex not installed', 'run 3: codex not installed']
+    assert combined.transcripts == []
+    assert combined.workspaces == []
+
+
+# Entry status from runs: Not run and pass
+def test_combine_not_run_beats_pass():
+    assert combine([_result('pass'), _result('not run', ['x'])]).status == 'not run'
+
+
+def test_combine_fail_beats_not_run():
+    assert combine([_result('not run', ['x']), _result('fail', ['y'])]).status == 'fail'
+
+
+def test_combine_single_result_keeps_messages_unprefixed_and_joins_tools():
+    one = combine([_result('fail', ['demo: no out.txt'], ['skill:a'])])
+    two = combine([_result('pass', tools=['skill:a']), _result('pass', tools=['skill:b', 'skill:a'])])
+
+    assert one.messages == ['demo: no out.txt']
+    assert two.tools == ['skill:a', 'skill:b']
+
+
+# Result report: runs count and every transcript
+def test_report_shows_runs_count_and_every_transcript(tmp_path):
+    paths = [tmp_path / f't{n}.log' for n in (1, 2, 3)]
+    combined = combine([_result('pass', transcript=paths[0]), _result('pass', transcript=paths[1]),
+                        _result('fail', ['x'], transcript=paths[2])])
+
+    report = write_report([combined], tmp_path / 'r.md').read_text()
+
+    assert '| fail | 2/3 |' in report
+    assert all(str(p) in report for p in paths)

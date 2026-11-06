@@ -77,6 +77,11 @@ class Result:
     workspace: Path | None = None
     # Skill loads (`skill:<name>`) and sub-agents (`agent:<model>`) seen in the output.
     tools: list[str] = field(default_factory=list)
+    # Set by `combine`: passed runs out of all runs, and the files of every run.
+    passed: int = 0
+    runs: int = 1
+    transcripts: list[Path] = field(default_factory=list)
+    workspaces: list[Path] = field(default_factory=list)
 
 
 SKILL_FILE = re.compile(r'skills/([\w-]+)/SKILL\.md')
@@ -128,7 +133,7 @@ def _workspace(root: Path, scenario: Scenario, agent: Agent) -> Path:
 
 def _run_one(
     scenario: Scenario, agent: Agent, out_dir: Path, workspaces: Path,
-    prepare: Callable[[Path], None], timeout: float,
+    prepare: Callable[[Path], None], timeout: float, number: int | None = None,
 ) -> Result:
     if shutil.which(agent.command[0]) is None:
         return Result(scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'])
@@ -136,7 +141,8 @@ def _run_one(
     prepare(workspace)
     if scenario.setup:
         subprocess.run(['sh', scenario.setup], cwd=workspace, check=True, capture_output=True)
-    transcript = out_dir / f'{scenario.name}-{agent.name}.log'
+    suffix = '' if number is None else f'-{number}'
+    transcript = out_dir / f'{scenario.name}-{agent.name}{suffix}.log'
     env = dict(os.environ)
     env['PATH'] = os.pathsep.join([*(str(workspace / d) for d in scenario.path), env['PATH']])
     if scenario.record:
@@ -165,33 +171,52 @@ def _run_one(
     return Result(scenario.name, agent.name, status, messages, transcript, workspace, tools)
 
 
+def combine(results: Sequence[Result]) -> Result:
+    """One entry from the runs of a scenario on an agent: its worst status wins."""
+    first = results[0]
+    status = next(s for s in ('fail', 'not run', 'pass') if any(r.status == s for r in results))
+    prefix = (lambda n: f'run {n}: ') if len(results) > 1 else (lambda n: '')
+    return Result(
+        first.scenario, first.agent, status,
+        [prefix(n) + m for n, r in enumerate(results, 1) if r.status != 'pass' for m in r.messages],
+        tools=list(dict.fromkeys(t for r in results for t in r.tools)),
+        passed=sum(r.status == 'pass' for r in results), runs=len(results),
+        transcripts=[r.transcript for r in results if r.transcript],
+        workspaces=[r.workspace for r in results if r.workspace],
+    )
+
+
 def run_evals(
     scenarios: Sequence[Scenario], agents: Sequence[Agent], out_dir: Path, *,
     only: Sequence[str] | None = None, prepare: Callable[[Path], None],
-    timeout: float = TIMEOUT_SECONDS, keep: bool = False,
+    timeout: float = TIMEOUT_SECONDS, keep: bool = False, runs: int = 1,
 ) -> list[Result]:
     out_dir.mkdir(parents=True, exist_ok=True)
     selected = [agent for agent in agents if not only or agent.name in only]
+
+    def entries(workspaces: Path) -> list[Result]:
+        return [
+            combine([
+                _run_one(s, a, out_dir, workspaces, prepare, timeout, n if runs > 1 else None)
+                for n in range(1, runs + 1)
+            ])
+            for s in scenarios for a in selected
+        ]
+
     if keep:
         # Kept workspaces stay outside any repository, like the temporary ones,
         # so tools that search parent directories find nothing but the fixture.
-        workspaces = Path(tempfile.mkdtemp(prefix='warrant-evals-'))
-        return [
-            _run_one(s, a, out_dir, workspaces, prepare, timeout)
-            for s in scenarios for a in selected
-        ]
+        return entries(Path(tempfile.mkdtemp(prefix='warrant-evals-')))
     with tempfile.TemporaryDirectory(prefix='warrant-evals-') as tmp:
-        return [
-            _run_one(s, a, out_dir, Path(tmp), prepare, timeout)
-            for s in scenarios for a in selected
-        ]
+        return entries(Path(tmp))
 
 
 def write_report(results: Sequence[Result], path: Path) -> Path:
-    lines = ['| Scenario | Agent | Status | Messages | Loaded | Transcript | Workspace |', '|---|---|---|---|---|---|---|']
+    lines = ['| Scenario | Agent | Status | Runs | Messages | Loaded | Transcripts | Workspaces |', '|---|---|---|---|---|---|---|---|']
     lines += [
-        f'| {r.scenario} | {r.agent} | {r.status} | {"; ".join(r.messages)} | {", ".join(r.tools)} '
-        f'| {r.transcript or ""} | {r.workspace if r.workspace and r.workspace.exists() else ""} |'
+        f'| {r.scenario} | {r.agent} | {r.status} | {r.passed}/{r.runs} | {"; ".join(r.messages)} '
+        f'| {", ".join(r.tools)} | {", ".join(map(str, r.transcripts))} '
+        f'| {", ".join(str(w) for w in r.workspaces if w.exists())} |'
         for r in results
     ]
     path.parent.mkdir(parents=True, exist_ok=True)

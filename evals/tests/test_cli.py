@@ -94,3 +94,33 @@ def test_review_protected_accepts_the_option_named_as_json_output(tmp_path):
     report = '## Spec\n- Blocking, untraced: app/cli.py:2-7: CLI dispatch and JSON output\n## Standards\n## Evidence\n'
 
     assert scenarios['review-protected'].check(tmp_path, report) == []
+
+
+def _spy_run(calls):
+    def fake_run(scenarios, agents, out_dir, **kwargs):
+        calls.append(kwargs)
+        return []
+    return fake_run
+
+
+# Repeated runs: Default
+@pytest.mark.parametrize(('extra', 'expected'), [(['--runs', '3'], 3), ([], 1)])
+def test_runs_option_reaches_run_evals(scenario_dir, tmp_path, monkeypatch, extra, expected):
+    calls = []
+    monkeypatch.setattr('warrant_evals.__main__.run_evals', _spy_run(calls))
+
+    main(['--scenarios', str(scenario_dir), '--out', str(tmp_path / 'out'), *extra], CHECKERS)
+
+    assert calls[0]['runs'] == expected
+
+
+# Invalid run count: Zero runs
+def test_zero_runs_is_a_usage_error_before_any_run(scenario_dir, tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr('warrant_evals.__main__.run_evals', _spy_run(calls))
+
+    with pytest.raises(SystemExit) as stop:
+        main(['--runs', '0', '--scenarios', str(scenario_dir), '--out', str(tmp_path / 'out')], CHECKERS)
+
+    assert stop.value.code == 2
+    assert calls == []
