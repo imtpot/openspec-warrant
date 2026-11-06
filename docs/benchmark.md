@@ -14,9 +14,21 @@ quota, so they run manually, not in CI.
 uv run pytest                                          # checker tests, no agent needed
 uv run python -m warrant_evals --agent claude          # every scenario on one agent
 uv run python -m warrant_evals --scenario verify --keep  # one scenario, keep its workspace
+uv run python -m warrant_evals --agent claude --runs 3  # three runs per scenario
 ```
 
-The report is written to `evals/out/report.md`. Its Loaded column lists the
+The report is written to `evals/out/report.md`. `--runs N` runs each scenario
+N times per agent; the entry shows `k/N` passed runs and passes only when all
+N pass. With more than one run, transcripts are named
+`<scenario>-<agent>-<n>.log`, and the messages of a failed run start with
+`run <n>: `.
+
+A scenario sets `suite = "capability"` when it measures behavior agents do not
+yet show reliably; the default is `regression`. The report shows each entry's
+suite and ends with passed entries per suite, for example `regression: 24/25`.
+Only a failed regression entry sets exit code 1.
+
+The report's Loaded column lists the
 skills each run loaded and the sub-agents it started: Claude Code runs with
 `--output-format stream-json --verbose`, so its tool calls are visible, and a
 Codex run counts a skill as loaded when it reads its `SKILL.md`. A scenario's
@@ -30,6 +42,23 @@ scenario's test before a passing one on changed files, and a full run on the
 final files, besides the report that shows them. The shims and the log live in
 `<workspace>.warrant/`, next to the workspace, because Codex's sandbox keeps
 `.git` read-only.
+
+An expected review finding can be written as `{ terms = [...], description =
+"..." }`. When none of its terms appears in the report section, a model judge
+decides whether the section reports the described problem: `claude -p --model
+sonnet` with no tools, answering `yes`, `no` or `unknown`. Only `yes` counts;
+`unknown` and any judge failure count as missing, and the message reads
+`(judge: unknown, <reason>)`. Codex reports are judged through `claude` too, so
+judging them needs an authenticated `claude`. `uv run pytest` replaces the
+judge with a fake and never calls it.
+
+`evals/judge/calibration.toml` holds labeled report excerpts, including ones
+that mention the code without reporting the defect. Check the judge against
+them after changing its prompt or model:
+
+```sh
+uv run python -m warrant_evals.judge   # prints agreement: k/N and each disagreement
+```
 
 Global agent configuration (user-level skills and plugins) also loads during
 evals and can change the results; run evals with it disabled.
@@ -59,7 +88,8 @@ names the verification commands as plain text. Claude runs with
   settle an open point differently are ignored.
 - `review-export`: review a branch with 6 planted problems that need the
   spec, the standards or code outside the diff. Score: the share of problems
-  the report names.
+  the report names. In both review tasks, a described problem that no term
+  matches counts as named only when the judge (see Evals) answers `yes`.
 - `review-refund`: review a branch whose 6 planted problems show only against
   the spec, the standards or a caller outside the diff, while the branch's
   tests pass. On Opus, Sonnet and Haiku every arm named nearly all of them, so

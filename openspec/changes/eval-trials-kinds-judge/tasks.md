@@ -40,7 +40,7 @@
 
 ## 6. Documentation
 
-- [ ] 6.1 Update the Evals section of `docs/benchmark.md`: `--runs N` and `k/N`, the per-run transcript names, `suite` with the exit rule and the totals, described items and the judge (model, no tools, the calibration command, `unknown`, `claude` needed for Codex runs too); update the Benchmark section for the judged review problems
+- [x] 6.1 Update the Evals section of `docs/benchmark.md`: `--runs N` and `k/N`, the per-run transcript names, `suite` with the exit rule and the totals, described items and the judge (model, no tools, the calibration command, `unknown`, `claude` needed for Codex runs too); update the Benchmark section for the judged review problems
 
 ## 7. Eval runs
 
