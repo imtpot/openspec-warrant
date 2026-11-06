@@ -27,7 +27,7 @@ The project's top directory is `git rev-parse --show-toplevel`, or the current
 directory outside git.
 
 - If `root` is `null`, or `root.path` is not this project's top directory,
-  stop. Tell the user to run `openspec init --tools agents --profile core`,
+  stop. Tell the user to run `openspec init --tools agents`,
   which also writes the OpenSpec skills to `.agents/skills/`, and then this
   skill again.
 
@@ -43,12 +43,13 @@ profile`, then `openspec update`, adds it.
 
 ## 4. Find the shipped rules
 
-The rules ship next to this skill as `rules.yaml`. Use the first that exists:
+The rules ship with this skill as `rules.yaml`. Use the first that exists:
 
-1. `.agents/skills/warrant-setup/rules.yaml` (project install)
-2. `~/.agents/skills/warrant-setup/rules.yaml` (global install)
+1. `rules.yaml` in the directory of this `SKILL.md` (the skill you are running)
+2. `.agents/skills/warrant-setup/rules.yaml` (project install)
+3. `~/.agents/skills/warrant-setup/rules.yaml` (global install)
 
-- If neither exists, stop. Report both paths and suggest reinstalling with
+- If none exists, stop. Report the paths you tried and suggest reinstalling with
   `npx skills add imtpot/openspec-warrant`.
 
 ## 5. Merge the rules into `openspec/config.yaml`

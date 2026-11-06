@@ -95,7 +95,7 @@ permanent without anyone deciding it.
 When the user asks for the shortcut ledger, list the shortcuts without changing
 any file:
 
-1. Run `git grep -nE '(#|//|--|;|/\*) ?shortcut:' -- ':!.agents'`.
+1. Run `git grep -nE '(#|//|--|;|/\*) ?shortcut:' -- ':(exclude,glob).*/skills/**'`.
    This covers files tracked by git, skips installed skills (whose examples
    use the convention) and requires a comment prefix, so prose that only
    mentions the convention is not listed.

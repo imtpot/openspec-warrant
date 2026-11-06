@@ -49,11 +49,13 @@ picks the tasks in `tasks.md` and checks them off.
    contract says `python3 -m unittest discover -s tests -t .`, so run
    `python3 -m unittest tests.test_quota.QuotaTest.test_not_enough_free`.
    This run shows this scenario only and is not evidence that the work is
-   complete.
+   complete. Check the narrowed command against Destructive actions as
+   `warrant-verify` step 2 says.
 3. Read the result:
-   - It fails because the behavior is missing: go to Green.
-   - It fails for another reason (import, syntax, wrong fixture): fix the test
-     and run it again. Production code changes only in Green.
+   - It fails because the behavior, or the function, module or attribute under
+     test, does not exist yet: go to Green.
+   - It fails because of an error in the test (import, syntax, wrong fixture):
+     fix the test and run it again. Production code changes only in Green.
    - It passes: the behavior already exists. Keep the test, write no code for
      this scenario, and say so in the report.
 
@@ -70,8 +72,9 @@ picks the tasks in `tasks.md` and checks them off.
 List the realistic mutations of the code you changed: a wrong constant or
 comparison (`<` for `<=`), the other branch, a missing check for zero, empty or
 invalid input, a missing side effect, an empty or default return. For each
-mutation, name a test that fails on it. If no test fails on it, add one and run
-red and green as in step 2.
+mutation, apply it, run the tests, and revert it. If no test fails on the
+mutation, write one, run it on the mutated code (red), revert, and run it again
+(green). Leave no mutation in the code.
 
 Then run the contract's verification following `warrant-verify`.
 

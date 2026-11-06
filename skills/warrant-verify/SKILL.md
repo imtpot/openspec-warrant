@@ -16,8 +16,8 @@ your last change, with their output read.
 Open the root `AGENTS.md` and find the `## Warrant contract` section.
 
 - No such section: tell the user that the project has no warrant contract and
-  that `warrant-setup` creates one. Run no command as verification evidence.
-  Report your work as unverified.
+  that `warrant-setup` creates one. Run no test, lint, type-check or build
+  command, not even a narrowed or diagnostic one. Report your work as unverified.
 - The `### Verification` list is empty: report "no verification declared" and
   report your work as unverified.
 
@@ -26,16 +26,18 @@ text, build files or other projects suggest different ones.
 
 ## 2. Check for destructive commands
 
-Compare each verification command with the entries under
-`### Destructive actions`. If a command starts with a listed entry, ask the user
-for approval before you run it. Without approval, do not run it and report it
-as not run, with the reason "needs approval".
+Compare every command you run in this project, including narrowed and
+diagnostic runs, with the entries under `### Destructive actions`. If a command
+starts with a listed entry, ask the user for approval before you run it.
+Without approval, do not run it and report it as not run, with the reason
+"needs approval".
 
 ## 3. Run every command
 
 Run each command in the Verification list, exactly as written, after your last
-change to the files under verification. If you change a file after a run, run
-the commands again. Earlier output is no longer evidence.
+change. If you change a file the commands read (code, tests, configuration)
+after a run, run the commands again. Recording results in OpenSpec artifacts
+or in your report is not such a change. Earlier output is no longer evidence.
 
 You may make a narrowed or diagnostic run (one test, one file, extra flags)
 while you work. Only the Verification commands, run exactly as written after

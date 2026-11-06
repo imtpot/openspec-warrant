@@ -104,7 +104,7 @@ Report as blocking:
 - a requirement with more than one `SHALL`, or one not written in an EARS
   pattern (the `[warrant]` rules for specs in `openspec/config.yaml` list the
   patterns),
-- a requirement for which `tasks.md` has no test task,
+- a requirement that no task names,
 - a task list without a verification group,
 - a design decision that contradicts a decision in the `design.md` of an
   archived change, with both decisions quoted,
@@ -124,9 +124,10 @@ Artifact review: PASS
 
 Use this mode when the user gives you review comments to address.
 
-1. **Classify every comment before you edit anything.** For each comment, read
-   the code it refers to and the requirements of the OpenSpec change, then mark
-   it accepted or rejected with a reason:
+1. **Classify every comment before you edit anything.** Choose the OpenSpec
+   change as in Review mode step 2. For each comment, read the code it refers
+   to and the requirements of that change, then mark it accepted or rejected
+   with a reason:
    - It asks for behavior that conflicts with a requirement: reject it and quote
      the requirement.
    - It states something about the code that the code contradicts: reject it
