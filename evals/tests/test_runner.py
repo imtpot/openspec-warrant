@@ -126,8 +126,8 @@ def test_report_lists_every_entry_with_transcript(tmp_path, fixture_dir, writer)
 
     report = write_report(results, tmp_path / 'out' / 'report.md').read_text()
 
-    assert '| demo | writer | pass | 1/1 |' in report
-    assert '| demo | idle | fail | 0/1 | demo: no out.txt |' in report
+    assert '| demo | regression | writer | pass | 1/1 |' in report
+    assert '| demo | regression | idle | fail | 0/1 | demo: no out.txt |' in report
     assert all(str(t) in report for r in results for t in r.transcripts)
 
 
@@ -344,3 +344,14 @@ def test_report_shows_runs_count_and_every_transcript(tmp_path):
 
     assert '| fail | 2/3 |' in report
     assert all(str(p) in report for p in paths)
+
+
+# Scenario suite: results carry the suite of their scenario
+def test_entries_carry_the_suite_of_their_scenario(tmp_path, fixture_dir, writer):
+    missing = Agent('missing', ['/nonexistent/agent-cli'])
+    scenario = _scenario(fixture_dir)
+    scenario.suite = 'capability'
+
+    results = _run(tmp_path, [scenario], [writer, missing], runs=2)
+
+    assert [r.suite for r in results] == ['capability', 'capability']

@@ -39,7 +39,7 @@ def main(argv: Sequence[str] | None = None, checkers: Mapping[str, CheckerFactor
         prepare=lambda workspace: prepare_workspace(workspace, REPO, extra=[openspec_skills()]),
     )
     print(write_report(results, args.out / 'report.md').read_text())
-    return 1 if any(r.status == 'fail' for r in results) else 0
+    return 1 if any(r.suite == 'regression' and r.status == 'fail' for r in results) else 0
 
 
 if __name__ == '__main__':

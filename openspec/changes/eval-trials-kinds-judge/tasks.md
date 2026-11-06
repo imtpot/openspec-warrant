@@ -11,10 +11,10 @@
 
 ## 2. Scenario suite and exit code
 
-- [ ] 2.1 Add tests to `evals/tests/test_cli.py`: a scenario file without `suite` loads as `regression` (Scenario suite: No suite field); `suite = "regresion"` raises `ValueError` naming the file and `regresion` (Unknown scenario suite: Misspelled suite)
-- [ ] 2.2 Add `suite` to `Scenario` and `Result`, read and validate it in `evals/warrant_evals/scenarios.py`, and copy it into each `Result` in `runner.py`; verify 2.1 passes
-- [ ] 2.3 Add tests: `main` returns 0 when only a capability entry fails (Capability entries and the exit code: Failed capability scenario) and 1 when a regression entry fails (Exit code by suite: Failed regression scenario); the report has a Suite column and ends with `regression: 2/3` and `capability: 1/1` for that mix (Result report: Totals per suite); the existing Mixed results test still passes
-- [ ] 2.4 Implement the Suite column and totals in `write_report` and the exit rule in `__main__.main`; verify 2.3 passes
+- [x] 2.1 Add tests to `evals/tests/test_cli.py`: a scenario file without `suite` loads as `regression` (Scenario suite: No suite field); `suite = "regresion"` raises `ValueError` naming the file and `regresion` (Unknown scenario suite: Misspelled suite)
+- [x] 2.2 Add `suite` to `Scenario` and `Result`, read and validate it in `evals/warrant_evals/scenarios.py`, and copy it into each `Result` in `runner.py`; verify 2.1 passes
+- [x] 2.3 Add tests: `main` returns 0 when only a capability entry fails (Capability entries and the exit code: Failed capability scenario) and 1 when a regression entry fails (Exit code by suite: Failed regression scenario); the report has a Suite column and ends with `regression: 2/3` and `capability: 1/1` for that mix (Result report: Totals per suite); the existing Mixed results test still passes
+- [x] 2.4 Implement the Suite column and totals in `write_report` and the exit rule in `__main__.main`; verify 2.3 passes
 
 ## 3. Judge
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from warrant_evals.runner import Check, Scenario
 
 CheckerFactory = Callable[[dict], Check]
+SUITES = ('regression', 'capability')
 
 
 def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> list[Scenario]:
@@ -16,6 +17,8 @@ def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> l
         data = tomllib.loads(path.read_text())
         if data['checker'] not in checkers:
             raise ValueError(f'{path.name}: unknown checker {data["checker"]}')
+        if (suite := data.get('suite', 'regression')) not in SUITES:
+            raise ValueError(f'{path.name}: unknown suite {suite}')
         scenarios.append(Scenario(
             name=path.stem,
             fixture=directory.parent / 'fixtures' / data['fixture'],
@@ -25,5 +28,6 @@ def load_scenarios(directory: Path, checkers: Mapping[str, CheckerFactory]) -> l
             setup=data.get('setup'),
             loaded=data.get('loaded', []),
             record=data.get('record', []),
+            suite=suite,
         ))
     return scenarios

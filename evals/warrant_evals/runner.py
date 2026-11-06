@@ -65,6 +65,8 @@ class Scenario:
     loaded: list[str] = field(default_factory=list)
     # Tools whose runs are logged through shims on PATH, e.g. a test runner.
     record: list[str] = field(default_factory=list)
+    # `regression` entries set the exit code; `capability` entries only report.
+    suite: str = 'regression'
 
 
 @dataclass
@@ -82,6 +84,7 @@ class Result:
     runs: int = 1
     transcripts: list[Path] = field(default_factory=list)
     workspaces: list[Path] = field(default_factory=list)
+    suite: str = 'regression'
 
 
 SKILL_FILE = re.compile(r'skills/([\w-]+)/SKILL\.md')
@@ -136,7 +139,9 @@ def _run_one(
     prepare: Callable[[Path], None], timeout: float, number: int | None = None,
 ) -> Result:
     if shutil.which(agent.command[0]) is None:
-        return Result(scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'])
+        return Result(
+            scenario.name, agent.name, 'not run', [f'{agent.command[0]} not installed'], suite=scenario.suite,
+        )
     workspace = _workspace(workspaces, scenario, agent)
     prepare(workspace)
     if scenario.setup:
@@ -154,11 +159,13 @@ def _run_one(
         )
     except subprocess.TimeoutExpired as expired:
         transcript.write_text(f'{expired.stdout or ""}{expired.stderr or ""}')
-        return Result(scenario.name, agent.name, 'fail', ['timeout'], transcript, workspace)
+        return Result(scenario.name, agent.name, 'fail', ['timeout'], transcript, workspace, suite=scenario.suite)
     output = done.stdout + done.stderr
     transcript.write_text(output)
     if done.returncode != 0 and NOT_AUTHENTICATED.search(output):
-        return Result(scenario.name, agent.name, 'not run', ['not authenticated'], transcript, workspace)
+        return Result(
+            scenario.name, agent.name, 'not run', ['not authenticated'], transcript, workspace, suite=scenario.suite,
+        )
     report, tools = parse_output(agent.name, done.stdout)
     if agent.name == 'codex':
         # Codex prints the commands it runs on stderr.
@@ -168,7 +175,7 @@ def _run_one(
         messages.append(f'agent exited {done.returncode}')
     messages += [f'skills: skill not loaded: {name}' for name in scenario.loaded if f'skill:{name}' not in tools]
     status = 'fail' if messages else 'pass'
-    return Result(scenario.name, agent.name, status, messages, transcript, workspace, tools)
+    return Result(scenario.name, agent.name, status, messages, transcript, workspace, tools, suite=scenario.suite)
 
 
 def combine(results: Sequence[Result]) -> Result:
@@ -178,11 +185,11 @@ def combine(results: Sequence[Result]) -> Result:
     prefix = (lambda n: f'run {n}: ') if len(results) > 1 else (lambda n: '')
     return Result(
         first.scenario, first.agent, status,
-        [prefix(n) + m for n, r in enumerate(results, 1) if r.status != 'pass' for m in r.messages],
+        [prefix(n) + m for n, r in enumerate(results, 1) for m in r.messages],
         tools=list(dict.fromkeys(t for r in results for t in r.tools)),
         passed=sum(r.status == 'pass' for r in results), runs=len(results),
         transcripts=[r.transcript for r in results if r.transcript],
-        workspaces=[r.workspace for r in results if r.workspace],
+        workspaces=[r.workspace for r in results if r.workspace], suite=first.suite,
     )
 
 
@@ -212,13 +219,16 @@ def run_evals(
 
 
 def write_report(results: Sequence[Result], path: Path) -> Path:
-    lines = ['| Scenario | Agent | Status | Runs | Messages | Loaded | Transcripts | Workspaces |', '|---|---|---|---|---|---|---|---|']
+    lines = ['| Scenario | Suite | Agent | Status | Runs | Messages | Loaded | Transcripts | Workspaces |', '|---|---|---|---|---|---|---|---|---|']
     lines += [
-        f'| {r.scenario} | {r.agent} | {r.status} | {r.passed}/{r.runs} | {"; ".join(r.messages)} '
+        f'| {r.scenario} | {r.suite} | {r.agent} | {r.status} | {r.passed}/{r.runs} | {"; ".join(r.messages)} '
         f'| {", ".join(r.tools)} | {", ".join(map(str, r.transcripts))} '
         f'| {", ".join(str(w) for w in r.workspaces if w.exists())} |'
         for r in results
     ]
+    for suite in dict.fromkeys(r.suite for r in results):
+        entries = [r for r in results if r.suite == suite]
+        lines.append(f'{suite}: {sum(r.status == "pass" for r in entries)}/{len(entries)}')
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text('\n'.join(lines) + '\n')
     return path

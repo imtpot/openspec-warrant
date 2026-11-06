@@ -6,6 +6,7 @@ import pytest
 from warrant_evals.__main__ import main
 from warrant_evals.checks import CHECKERS as CHECKERS_REAL
 from warrant_evals.requirements import Finding
+from warrant_evals.runner import Result
 from warrant_evals.scenarios import load_scenarios
 
 
@@ -60,7 +61,7 @@ def test_main_filters_agents_writes_report_and_sets_exit_code(scenario_dir, tmp_
 
     assert calls == [['codex']]
     assert code == 1
-    assert '| echo | codex | fail |' in (out / 'report.md').read_text()
+    assert '| echo | regression | codex | fail |' in (out / 'report.md').read_text()
 
 
 def test_loader_reads_setup_script(scenario_dir):
@@ -124,3 +125,65 @@ def test_zero_runs_is_a_usage_error_before_any_run(scenario_dir, tmp_path, monke
 
     assert stop.value.code == 2
     assert calls == []
+
+
+# Scenario suite: No suite field
+def test_scenario_without_suite_is_regression(scenario_dir):
+    [scenario] = load_scenarios(scenario_dir, CHECKERS)
+
+    assert scenario.suite == 'regression'
+
+
+# Scenario suite
+def test_scenario_reads_its_suite(scenario_dir):
+    (scenario_dir / 'echo.toml').write_text('fixture = "demo"\nprompt = "x"\nchecker = "fail-when"\nsuite = "capability"\n\n[params]\nword = "boom"\n')
+
+    [scenario] = load_scenarios(scenario_dir, CHECKERS)
+
+    assert scenario.suite == 'capability'
+
+
+# Unknown scenario suite: Misspelled suite
+def test_misspelled_suite_is_rejected(scenario_dir):
+    (scenario_dir / 'echo.toml').write_text('fixture = "demo"\nprompt = "x"\nchecker = "fail-when"\nsuite = "regresion"\n\n[params]\nword = "boom"\n')
+
+    with pytest.raises(ValueError, match='echo.toml: unknown suite regresion'):
+        load_scenarios(scenario_dir, CHECKERS)
+
+
+def _main_with(scenario_dir, tmp_path, monkeypatch, results):
+    monkeypatch.setattr('warrant_evals.__main__.run_evals', lambda *a, **k: results)
+    out = tmp_path / 'out'
+    code = main(['--scenarios', str(scenario_dir), '--out', str(out)], CHECKERS)
+    return code, (out / 'report.md').read_text()
+
+
+# Capability entries and the exit code: Failed capability scenario
+def test_failed_capability_entry_does_not_set_the_exit_code(scenario_dir, tmp_path, monkeypatch):
+    results = [Result('a', 'codex', 'fail', ['x'], suite='capability'), Result('b', 'codex', 'pass')]
+
+    code, _ = _main_with(scenario_dir, tmp_path, monkeypatch, results)
+
+    assert code == 0
+
+
+# Exit code by suite: Failed regression scenario
+def test_failed_regression_entry_sets_the_exit_code(scenario_dir, tmp_path, monkeypatch):
+    results = [Result('a', 'codex', 'fail', ['x'], suite='regression'), Result('b', 'codex', 'pass', suite='capability')]
+
+    code, _ = _main_with(scenario_dir, tmp_path, monkeypatch, results)
+
+    assert code == 1
+
+
+# Result report: Totals per suite
+def test_report_ends_with_totals_per_suite(scenario_dir, tmp_path, monkeypatch):
+    results = [
+        Result('a', 'claude', 'pass'), Result('b', 'claude', 'pass'), Result('c', 'claude', 'fail', ['x']),
+        Result('d', 'claude', 'pass', suite='capability'),
+    ]
+
+    _, report = _main_with(scenario_dir, tmp_path, monkeypatch, results)
+
+    assert report.splitlines()[-2:] == ['regression: 2/3', 'capability: 1/1']
+    assert '| d | capability | claude | pass |' in report
