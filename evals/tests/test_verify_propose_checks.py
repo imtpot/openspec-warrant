@@ -127,6 +127,13 @@ def test_full_run_never_made_fails(repo):
     assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
 
 
+# Recorded full verification: Narrowed run with the full command as a prefix
+def test_narrowed_run_with_full_command_as_prefix_fails(repo):
+    _run(repo, 'test -k foo', 1, tool='make')
+
+    assert _messages('verify', {'full': 'make test'}, repo, FAILURE_REPORT) == [FULL_MESSAGE]
+
+
 def test_empty_log_fails(repo):
     run_log(repo).parent.mkdir()
     run_log(repo).write_text('')

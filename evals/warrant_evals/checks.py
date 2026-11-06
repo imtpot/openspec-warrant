@@ -1,12 +1,13 @@
 """Checker factories that scenario files refer to by name."""
 
 import re
+import shlex
 import subprocess
 import tempfile
 from pathlib import Path
 
 from warrant_evals import openspec_rules
-from warrant_evals.behavior import check_duplicate_helper, check_success_claim
+from warrant_evals.behavior import SENTENCE, check_duplicate_helper, check_success_claim
 from warrant_evals.contract import ContractError, parse_contract
 from warrant_evals.record import recorded_runs, run_log, workspace_state
 from warrant_evals.requirements import Finding, check_proposal, check_spec
@@ -148,12 +149,14 @@ def ledger_check(params: dict):
     return check
 
 
-def _full_findings(workspace: Path, full: str) -> list[Finding]:
-    """The last run of the full command started on the files as they are now."""
-    runs = [run for run in recorded_runs(workspace) if full in f'{run["tool"]} {" ".join(run["args"])}']
-    if runs and runs[-1]['state'] == workspace_state(workspace):
-        return []
-    return [Finding('verify', 'full verification not run on the final files')]
+def _full_findings(workspace: Path, full: str, exit_zero: bool) -> list[Finding]:
+    """The last run of exactly the full command started on the files as they are now, and exited 0 when asked."""
+    runs = [run for run in recorded_runs(workspace) if [run['tool'], *run['args']] == shlex.split(full)]
+    if not runs or runs[-1]['state'] != workspace_state(workspace):
+        return [Finding('verify', 'full verification not run on the final files')]
+    if exit_zero and runs[-1]['exit'] != 0:
+        return [Finding('verify', f'full verification exited {runs[-1]["exit"]}')]
+    return []
 
 
 def _slug(text: str) -> str:
@@ -211,7 +214,7 @@ def verify_check(params: dict):
         if 'marker' in params and (workspace / params['marker']).exists():
             findings.append(Finding('verify', 'verification ran although the project has no contract'))
         if 'full' in params and run_log(workspace).is_file():
-            findings += _full_findings(workspace, params['full'])
+            findings += _full_findings(workspace, params['full'], False)
         return findings
     return check
 
@@ -250,9 +253,19 @@ def _missing(text: str, expected: list[list[str]]) -> list[str]:
     return [group[0] for group in expected if not any(term.lower() in lower for term in group)]
 
 
+def _cited(line: str, path: str, number: int) -> bool:
+    """The line cites a range after `path:` that covers the line number."""
+    for match in re.finditer(rf'{re.escape(path)}:(\d+(?:\s*[-–]\s*\d+)?(?:[,\s]+\d+(?:\s*[-–]\s*\d+)?)*)', line):
+        for low, high in re.findall(r'(\d+)(?:\s*[-–]\s*(\d+))?', match[1]):
+            if int(low) <= number <= int(high or low):
+                return True
+    return False
+
+
 def review_check(params: dict):
-    """Each expected finding must appear under its own axis heading, no `untraced_absent` term may be a
-    blocking untraced finding of the Spec section, and no file may change."""
+    """Each expected finding must appear under its own axis heading, no blocking untraced finding of the Spec
+    section may name an `untraced_absent` term in its sentence that says blocking and untraced or cite a range
+    that covers an `untraced_lines` line, and no file may change."""
     def check(workspace: Path, transcript: str) -> list[Finding]:
         findings = [
             Finding('transcript', f'transcript lacks: {term}')
@@ -269,13 +282,22 @@ def review_check(params: dict):
                     Finding('report', f'{axis} section lacks: {term}')
                     for axis in AXES for term in _missing(sections[axis], axes[axis])
                 ]
+                finding_lines = [
+                    line for line in sections['Spec'].splitlines()
+                    if 'untraced' in line.lower() and 'blocking' in line.lower()
+                ]
                 findings += [
                     Finding('report', f'Spec section reports untraced: {term}')
                     for term in absent if any(
-                        term.lower() in line.lower() and 'untraced' in line.lower() and 'blocking' in line.lower()
-                        for line in sections['Spec'].splitlines()
+                        term.lower() in sentence.lower()
+                        for line in finding_lines for sentence in SENTENCE.split(line)
+                        if 'untraced' in sentence.lower() and 'blocking' in sentence.lower()
                     )
                 ]
+                for path, numbers in params.get('untraced_lines', {}).items():
+                    cited = [n for n in numbers if any(_cited(line, path, n) for line in finding_lines)]
+                    if cited:
+                        findings.append(Finding('report', f'Spec section reports untraced: {path}:{cited[0]}'))
         return findings + _status_findings(workspace)
     return check
 
@@ -352,7 +374,7 @@ def tdd_check(params: dict):
             for scenario in params.get('red_green', []):
                 findings += _red_green_findings(workspace, scenario)
             if 'full' in params:
-                findings += _full_findings(workspace, params['full'])
+                findings += _full_findings(workspace, params['full'], True)
         findings += [
             Finding('tasks', f'tasks.md changed: {path}')
             for path in _git(workspace, 'diff', '--cached', '--name-only').splitlines()

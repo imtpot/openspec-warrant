@@ -84,6 +84,7 @@ def test_review_protected_scenario_loads_with_the_review_checker(tmp_path):
     assert [f.message for f in scenario.check(tmp_path, report)] == [
         'Spec section lacks: --json',
         'Spec section reports untraced: free < 0',
+        'Spec section reports untraced: app/cli.py:13',
     ]
 
 

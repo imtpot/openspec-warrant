@@ -122,3 +122,34 @@ def test_untraced_absent_ignores_the_term_under_standards(repo):
     report = REPORT.replace('- tests:', PROTECTED_LINE + '- tests:')
 
     assert _messages(ABSENT, repo, report) == []
+
+
+LINES = {'spec': [['--json']], 'untraced_absent': ['free < 0'], 'untraced_lines': {'app/cli.py': [13, 14]}}
+
+
+# Protected line review scenario: Check excluded in a later sentence
+def test_untraced_finding_that_excludes_the_check_in_a_later_sentence_passes(repo):
+    line = (
+        '- **blocking: untraced**, `app/cli.py:1-12, 15-16`: the whole command-line entry point. '
+        'No requirement or task covers a command line. The `free < 0` check at lines 13–14 counts as '
+        'input validation, but it only exists to serve this untraced CLI.\n'
+    )
+    report = REPORT.replace('## Standards', line + '\n## Standards')
+
+    assert _messages(LINES, repo, report) == []
+
+
+# Protected line review scenario: Check covered by a cited range
+def test_untraced_finding_whose_range_covers_the_check_fails(repo):
+    line = '- blocking, untraced: `app/cli.py:1-16`: CLI entry point.\n'
+    report = REPORT.replace('## Standards', line + '\n## Standards')
+
+    assert _messages(LINES, repo, report) == ['Spec section reports untraced: app/cli.py:13']
+
+
+# Protected line review scenario: Protected check reported as untraced
+def test_untraced_finding_that_names_the_check_in_the_same_sentence_fails(repo):
+    line = '- blocking: untraced, the `free < 0` check serves no requirement. Remove it.\n'
+    report = REPORT.replace('## Standards', line + '\n## Standards')
+
+    assert _messages(LINES, repo, report) == ['Spec section reports untraced: free < 0']

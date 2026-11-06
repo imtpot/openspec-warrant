@@ -15,7 +15,7 @@ PARAMS = {
     'already': ['Negative request'],
     'count': {'app/quota.py': {'must not be negative': 1}},
     'narrowed': r'python3 -m unittest (?!discover)\S*test',
-    'full': 'python3 -m unittest discover',
+    'full': 'python3 -m unittest discover -s tests -t .',
 }
 REPORT = """Not enough free: `python3 -m unittest tests.test_quota.QuotaTest.test_not_enough_free`
 failed (AssertionError: None != 'short'), then passed after adding the branch (OK).
@@ -94,7 +94,7 @@ def test_missing_commands_and_checked_task_fail(repo):
     report = 'Not enough free failed, then passed. Negative request already exists.'
 
     assert _messages(repo, report) == [
-        'no narrowed test command', 'transcript lacks: python3 -m unittest discover',
+        'no narrowed test command', 'transcript lacks: python3 -m unittest discover -s tests -t .',
         'tasks.md changed: openspec/changes/add-quota-verdicts/tasks.md',
     ]
 
@@ -243,3 +243,11 @@ def test_empty_log_fails_with_both_findings(repo):
     run_log(repo).write_text('')
 
     assert _messages(repo) == [RED_GREEN, FULL_MESSAGE]
+
+
+# Recorded full verification: Failing full run in a TDD scenario
+def test_failing_full_run_fails_naming_the_exit_code(repo):
+    _log_runs(repo, _named, ID, full=None)
+    _run(repo, FULL, 1)
+
+    assert _messages(repo) == ['full verification exited 1']

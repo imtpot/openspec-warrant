@@ -8,4 +8,4 @@ record = ["python3"]
 new_tests = true
 transcript = [["scenario", "Scenario"]]
 narrowed = 'python3 -m unittest (?!discover)\S*test|tests\.\w+\.\w+\.test_\w+'
-full = "python3 -m unittest discover"
+full = "python3 -m unittest discover -s tests -t ."

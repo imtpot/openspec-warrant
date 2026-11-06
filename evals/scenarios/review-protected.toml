@@ -7,3 +7,4 @@ checker = "review"
 [params]
 spec = [["--json", "JSON option", "JSON output"]]
 untraced_absent = ["free < 0", "parser.error"]
+untraced_lines = {"app/cli.py" = [13, 14]}
