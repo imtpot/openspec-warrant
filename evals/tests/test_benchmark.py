@@ -5,7 +5,7 @@ import subprocess
 
 import pytest
 
-from warrant_evals import benchmark
+from warrant_evals import benchmark, judge
 from warrant_evals.benchmark import Run
 from warrant_evals.requirements import check_proposal, check_spec
 
@@ -117,6 +117,30 @@ def test_review_score_counts_named_problems():
     problems = [['formatReport'], ['retries'], ['swap', 'args.free']]
 
     assert benchmark.review_score('formatReport is camelCase; RETRIES is unused.', problems) == (pytest.approx(2 / 3), ['swap'])
+
+
+DESCRIBED = [{'terms': ['formatReport'], 'description': 'formatReport is camelCase'}]
+
+
+def _judge(monkeypatch, verdict, reason='because'):
+    monkeypatch.setattr(judge, 'ask', lambda description, text: (verdict, reason))
+
+
+# Judged review problems: Problem named in other words
+def test_review_score_counts_a_described_problem_the_judge_confirms(monkeypatch):
+    _judge(monkeypatch, 'yes')
+
+    assert benchmark.review_score('the report function is camel-cased', DESCRIBED) == (1.0, [])
+
+
+# Judged review problems: Judge unsure
+def test_review_score_marks_an_unsure_judge_in_missed_and_the_run_list(monkeypatch):
+    _judge(monkeypatch, 'unknown', 'claude not installed')
+
+    score, missed = benchmark.review_score('nothing relevant', DESCRIBED)
+
+    assert (score, missed) == (0.0, ['formatReport (judge: unknown, claude not installed)'])
+    assert 'formatReport (judge: unknown, claude not installed)' in benchmark.run_list([Run('review', 'claude', 'warrant', missed=missed)])
 
 
 REFERENCE = 'def double(x):\n    return 2 * x\n'

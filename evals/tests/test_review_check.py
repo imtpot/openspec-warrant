@@ -2,6 +2,7 @@ import subprocess
 
 import pytest
 
+from warrant_evals import judge
 from warrant_evals.checks import CHECKERS
 
 REPORT = """Review of feature against origin/main.
@@ -153,3 +154,58 @@ def test_untraced_finding_that_names_the_check_in_the_same_sentence_fails(repo):
     report = REPORT.replace('## Standards', line + '\n## Standards')
 
     assert _messages(LINES, repo, report) == ['Spec section reports untraced: free < 0']
+
+
+def _judge(monkeypatch, verdict, reason='because'):
+    calls = []
+
+    def ask(description, text):
+        calls.append((description, text))
+        return verdict, reason
+
+    monkeypatch.setattr(judge, 'ask', ask)
+    return calls
+
+
+DESCRIBED = {'spec': [{'terms': ['--json'], 'description': 'the --json flag serves no requirement'}]}
+NO_TERM = REPORT.replace('`--json`', 'the JSON flag')
+
+
+# Judged review findings: Synonym the terms miss
+def test_described_finding_the_judge_confirms_is_not_missing(repo, monkeypatch):
+    calls = _judge(monkeypatch, 'yes')
+
+    assert _messages(DESCRIBED, repo, NO_TERM) == []
+    assert calls == [('the --json flag serves no requirement', NO_TERM.split('## Spec')[1].split('## Standards')[0])]
+
+
+# Judged review findings: Term found
+def test_described_finding_with_a_matching_term_makes_no_judge_call(repo, monkeypatch):
+    calls = _judge(monkeypatch, 'no')
+
+    assert _messages({'spec': [{'terms': ['--JSON'], 'description': 'd'}]}, repo, REPORT) == []
+    assert calls == []
+
+
+# Judged review findings: Finding without description
+def test_plain_group_without_a_match_is_missing_with_no_judge_call(repo, monkeypatch):
+    calls = _judge(monkeypatch, 'yes')
+
+    assert _messages({'spec': [['--json']]}, repo, NO_TERM) == ['Spec section lacks: --json']
+    assert calls == []
+
+
+# Judged review findings: Judge says no
+def test_described_finding_the_judge_denies_is_missing_by_its_first_term(repo, monkeypatch):
+    _judge(monkeypatch, 'no')
+    params = {'spec': [{'terms': ['--json', 'JSON flag'], 'description': 'd'}]}
+
+    assert _messages(params, repo, NO_TERM.replace('JSON flag', 'flag')) == ['Spec section lacks: --json']
+
+
+# Judged review findings: Unknown verdict
+def test_unknown_verdict_marks_the_finding_missing_with_the_reason(repo, monkeypatch):
+    _judge(monkeypatch, 'unknown', 'claude not installed')
+    params = {'spec': [{'terms': ['--json', 'flag option'], 'description': 'd'}]}
+
+    assert _messages(params, repo, NO_TERM) == ['Spec section lacks: --json (judge: unknown, claude not installed)']

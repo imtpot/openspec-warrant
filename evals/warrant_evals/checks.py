@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from warrant_evals import openspec_rules
+from warrant_evals import judge, openspec_rules
 from warrant_evals.behavior import SENTENCE, check_duplicate_helper, check_success_claim
 from warrant_evals.contract import ContractError, parse_contract
 from warrant_evals.record import recorded_runs, run_log, workspace_state
@@ -247,10 +247,25 @@ def _sections(transcript: str) -> dict[str, str] | None:
     return {axis: transcript[m.end():end] for axis, m, end in zip(AXES, marks, ends, strict=True)}
 
 
-def _missing(text: str, expected: list[list[str]]) -> list[str]:
-    """First term of each alternative group that has no term in the text."""
+def _missing(text: str, expected: list[list[str | dict]]) -> list[str]:
+    """First term of each alternative group that has no term in the text.
+
+    A `{terms, description}` item without a term in the text is put to the judge."""
     lower = text.lower()
-    return [group[0] for group in expected if not any(term.lower() in lower for term in group)]
+    missing = []
+    for group in expected:
+        terms = group['terms'] if isinstance(group, dict) else group
+        if any(term.lower() in lower for term in terms):
+            continue
+        if not isinstance(group, dict):
+            missing.append(terms[0])
+            continue
+        verdict, reason = judge.ask(group['description'], text)
+        if verdict == 'unknown':
+            missing.append(f'{terms[0]} (judge: unknown, {reason})')
+        elif verdict != 'yes':
+            missing.append(terms[0])
+    return missing
 
 
 def _cited(line: str, path: str, number: int) -> bool:

@@ -26,10 +26,10 @@
 
 ## 4. Described items in the checks
 
-- [ ] 4.1 Create `evals/tests/conftest.py` with an autouse fixture that sets `warrant_evals.judge.ask` to a fake returning `('no', 'judge off in tests')` (Checker tests: Offline test run); verify the whole suite passes, including `test_judge.py`
-- [ ] 4.2 Add tests to `evals/tests/test_review_check.py`, overriding the fake per test: a described Spec finding whose terms miss and whose judge answers `yes` gives no missing finding, and the judge received only the Spec section's text (Judged review findings: Synonym the terms miss); a term match makes no judge call (Term found); a plain list group with no match gives the missing finding with no judge call (Finding without description); an `unknown` verdict gives `Spec section lacks: <first term> (judge: unknown, <reason>)` (Unknown verdict)
-- [ ] 4.3 Add tests to `evals/tests/test_benchmark.py`: `review_score` counts a described problem as named on `yes` (Judged review problems: Problem named in other words), as missed with `(judge: unknown, ...)` in `missed` and in the `run_list` output on `unknown` (Judged review problems: Judge unsure), and the existing two-of-three test still passes
-- [ ] 4.4 Extend `_missing` in `evals/warrant_evals/checks.py` to accept `{ terms, description }` items and call `judge.ask` through the module at call time; verify 4.2 and 4.3 pass
+- [x] 4.1 Create `evals/tests/conftest.py` with an autouse fixture that sets `warrant_evals.judge.ask` to a fake returning `('no', 'judge off in tests')` (Checker tests: Offline test run); verify the whole suite passes, including `test_judge.py`
+- [x] 4.2 Add tests to `evals/tests/test_review_check.py`, overriding the fake per test: a described Spec finding whose terms miss and whose judge answers `yes` gives no missing finding, and the judge received only the Spec section's text (Judged review findings: Synonym the terms miss); a term match makes no judge call (Term found); a plain list group with no match gives the missing finding with no judge call (Finding without description); an `unknown` verdict gives `Spec section lacks: <first term> (judge: unknown, <reason>)` (Unknown verdict)
+- [x] 4.3 Add tests to `evals/tests/test_benchmark.py`: `review_score` counts a described problem as named on `yes` (Judged review problems: Problem named in other words), as missed with `(judge: unknown, ...)` in `missed` and in the `run_list` output on `unknown` (Judged review problems: Judge unsure), and the existing two-of-three test still passes
+- [x] 4.4 Extend `_missing` in `evals/warrant_evals/checks.py` to accept `{ terms, description }` items and call `judge.ask` through the module at call time; verify 4.2 and 4.3 pass
 
 ## 5. Descriptions
 
