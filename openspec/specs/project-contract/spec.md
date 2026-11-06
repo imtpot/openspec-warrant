@@ -70,6 +70,10 @@ THEN the skill SHALL run no command that the contract would declare.
 - **WHEN** `warrant-verify` runs in a project without the contract
 - **THEN** it runs no verification command
 
+#### Scenario: No diagnostic run without contract
+- **WHEN** the project has no warrant contract
+- **THEN** the agent runs no narrowed or diagnostic test, lint, type-check or build command
+
 ### Requirement: Empty verification list
 
 IF the Verification subsection lists no command, THEN warrant skills SHALL
