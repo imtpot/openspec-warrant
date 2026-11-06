@@ -44,8 +44,8 @@
 
 ## 7. Eval runs
 
-- [ ] 7.1 Run `uv run python -m warrant_evals.judge`; record the agreement line and each disagreement here. If a `no` case gets `yes`, revise the rubric or the model and run again before 7.2
-  Result:
+- [x] 7.1 Run `uv run python -m warrant_evals.judge`; record the agreement line and each disagreement here. If a `no` case gets `yes`, revise the rubric or the model and run again before 7.2
+  Result: first run agreement: 21/22; disagreement refund-default-flip-untraced-only: label no, verdict yes ("flags the include_end default change ... though it doesn't name the billed_days() effect"). Rubric revised: the problem is the defect, not only the change; a named effect must be stated; flagging the change as untraced does not report it. Then agreement: 22/22 on three runs in a row.
 - [ ] 7.2 Run `uv run python -m warrant_evals --agent claude --agent codex --scenario review-branch --scenario review-protected --runs 2`; verify the report shows `k/2` per entry, the Suite column and the totals; read the transcript of every finding the judge decided and record whether each verdict is right
 - [ ] 7.3 Run `uv run python -m warrant_evals.benchmark --agent claude --arm warrant --runs 1 --task review-refund --task review-export`; verify the run list shows judged and missed problems as expected
 
